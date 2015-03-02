@@ -1,7 +1,6 @@
-# fuel restore
-
 def restore(parser):
-    print "fuel restore"
+    print 'Not implemented'
+
 
 def make(parser):
     '''Fuel Restore'''
