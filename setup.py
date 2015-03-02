@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+
 setup(
     name="eayunstack-tools",
     version="0.0.1",
@@ -9,9 +10,9 @@ setup(
     license='GPLv3',
     keywords='EayunStack',
 
-    entry_points = {
+    entry_points={
         'console_scripts': [
-            'eayunstack-tools = eayunstack_tools.main:main',
+            'eayunstack = eayunstack_tools.main:main',
         ],
         'command': [
             'doctor = eayunstack_tools.doctor:make',
