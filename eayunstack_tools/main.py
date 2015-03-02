@@ -1,7 +1,7 @@
-
 import argparse
 import sys
 import pkg_resources
+
 
 def create_parser():
     parser = argparse.ArgumentParser(
@@ -13,14 +13,13 @@ def create_parser():
     sub = parser.add_subparsers(
         title='Commands',
         metavar='COMMAND',
-        help='description',
+        help='DESCRIPTION',
         )
 
     entry_points = [
         (e.name, e.load()) for e in pkg_resources.iter_entry_points('command')
     ]
     for (name, fn) in entry_points:
-        # add subparser
         p = sub.add_parser(
             name,
             description=fn.__doc__,
@@ -28,6 +27,7 @@ def create_parser():
         )
         fn(p)
     return parser
+
 
 def main():
     parser = create_parser()
@@ -38,6 +38,3 @@ def main():
         args = parser.parse_args()
 
     return args.func(args)
-
-if __name__ == '__main__':
-    sys.exit(main())
