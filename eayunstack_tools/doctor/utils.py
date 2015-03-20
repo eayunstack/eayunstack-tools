@@ -10,7 +10,7 @@ BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 COLORS = {
     'WARNING': YELLOW,
     'INFO': GREEN,
-    'DEBUG': BLUE,
+    'DEBUG': WHITE,
     'CRITICAL': RED,
     'ERROR': RED
 }
@@ -120,4 +120,4 @@ def fmt_excep_msg(exc):
         return '%s\n' % (exc.__class__.__name__)
 
 def userful_msg(logger, name):
-    logger.info('%s start running %s %s', '=' * 10, name, '=' * 10)
+    logger.debug('%s start running %s %s', '=' * 10, name, '=' * 10)
