@@ -1,14 +1,11 @@
 #check ntp
 import commands
-from utils import set_logger, register_decorater, userful_msg
 from utils import check_service
+from utils import set_logger, userful_msg
 import re
 
-logger = set_logger()
-
-@userful_msg(logger)
-@register_decorater()
-def check_ntp():
+def check_ntp(logger):
+    userful_msg(logger, 'check_ntp')
     check_service('ntpd')
     (s, out) = commands.getstatusoutput(
         'ntpstat | grep "synchronised to NTP server"')
