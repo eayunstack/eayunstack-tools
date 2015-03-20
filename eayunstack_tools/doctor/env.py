@@ -1,10 +1,13 @@
 #check environment
 from eayunstack_tools.doctor import common
+from eayunstack_tools.doctor import ntp
 
 def env(parser):
-    print "check environment module"
     if parser.CHECK_ALL:
         check_all()
+    if parser.OBJECT_NAME == 'ntp':
+        ntp.check_ntp()
+        
 
 def make(parser):
     '''Check Environment Object'''
@@ -19,4 +22,4 @@ def make(parser):
 
 def check_all():
     '''Check All Environement Object'''
-    print "Check All Environment Object"
+    ntp.check_ntp()
