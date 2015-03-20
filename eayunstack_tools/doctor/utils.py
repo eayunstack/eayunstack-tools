@@ -8,8 +8,8 @@ LOG = logging.getLogger(__name__)
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
 COLORS = {
-    'WARNING': WHITE,
-    'INFO': YELLOW,
+    'WARNING': YELLOW,
+    'INFO': GREEN,
     'DEBUG': BLUE,
     'CRITICAL': RED,
     'ERROR': RED
