@@ -119,23 +119,5 @@ def fmt_excep_msg(exc):
     else:
         return '%s\n' % (exc.__class__.__name__)
 
-def register_decorater():
-    reg = []
-
-    def decorater(f):
-        reg.append(f.__name__)
-        return f
-
-    decorater.all = reg
-    return decorater
-
-def userful_msg(logger):
-    def decorate(f):
-        @wraps(f)
-        def newfunc(*a, **kw):
-            logger.info('%s start running %s %s', '=' * 10, f.__name__, '=' * 10)
-            ret = f(*a, **kw)
-            return ret
-        return newfunc
-
-    return decorate
+def userful_msg(logger, name):
+    logger.info('%s start running %s %s', '=' * 10, name, '=' * 10)
