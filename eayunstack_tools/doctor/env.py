@@ -1,12 +1,25 @@
 #check environment
+import logging
 from eayunstack_tools.doctor import common
-from eayunstack_tools.doctor import ntp
+from eayunstack_tools.doctor import ntp, selinux, disk, network
+from eayunstack_tools.doctor.utils import set_logger, register_decorater, userful_msg, fmt_print
+
+LOG = logging.getLogger(__name__)
+
+register = register_decorater()
 
 def env(parser):
+    set_logger()
     if parser.CHECK_ALL:
         check_all()
     if parser.OBJECT_NAME == 'ntp':
-        ntp.check_ntp()
+        check_ntp()
+    if parser.OBJECT_NAME == 'selinux':
+        check_selinux()
+    if parser.OBJECT_NAME == 'disk':
+        check_disk()
+    if parser.OBJECT_NAME == 'network':
+        check_network()
         
 
 def make(parser):
@@ -22,4 +35,29 @@ def make(parser):
 
 def check_all():
     '''Check All Environement Object'''
-    ntp.check_ntp()
+    LOG.debug('This option will do following things:')
+    for i in register.all:
+        fmt_print('--' + i)
+    for i in register.all:
+        eval(i)()
+
+@userful_msg()
+@register
+def check_ntp():
+    ntp.check_ntp(LOG)
+
+
+@userful_msg()
+@register
+def check_selinux():
+    selinux.check_selinux(LOG)
+
+@userful_msg()
+@register
+def check_disk():
+    disk.check_disk(LOG)
+
+@userful_msg()
+@register
+def check_network():
+    network.check_network(LOG)
