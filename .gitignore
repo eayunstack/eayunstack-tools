@@ -1,3 +1,6 @@
 # ignore pyc/pyo files
 *.pyc
 *.pyo
+build/
+dist/
+eayunstack_tools.egg-info/
