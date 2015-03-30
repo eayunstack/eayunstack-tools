@@ -1,6 +1,6 @@
 #check ntp
 import commands
-from utils import check_service, set_logger
+from utils import check_service
 import re
 
 def check_ntp(LOG):

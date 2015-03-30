@@ -1,7 +1,9 @@
-#check ceilometer
+# check ceilometer
+
 
 def ceilometer(parser):
     print "check ceilometer module"
+
 
 def make(parser):
     '''Check Ceilometer'''

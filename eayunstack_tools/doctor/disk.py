@@ -2,7 +2,6 @@
 import os
 import math
 import logging
-from eayunstack_tools.doctor.utils import set_logger
 
 limit = 85
 

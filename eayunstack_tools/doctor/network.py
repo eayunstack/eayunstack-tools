@@ -2,7 +2,7 @@
 import logging
 import glob
 import commands
-from eayunstack_tools.doctor.utils import valid_print, set_logger
+from eayunstack_tools.logger import valid_print
 
 def check_network(LOG):
     # 1) find all network and their link status

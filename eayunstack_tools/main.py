@@ -1,6 +1,7 @@
 import argparse
 import sys
 import pkg_resources
+from eayunstack_tools.logger import set_logger
 
 
 def create_parser():
@@ -30,6 +31,7 @@ def create_parser():
 
 
 def main():
+    set_logger()
     parser = create_parser()
     if len(sys.argv) < 2:
         parser.print_help()
