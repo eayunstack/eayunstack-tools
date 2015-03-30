@@ -7,7 +7,7 @@ import math
 import glob
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import register_decorater, userful_msg
-from eayunstack_tools.logger import set_logger, fmt_print, valid_print
+from eayunstack_tools.logger import fmt_print, valid_print
 from utils import check_service
 
 LOG = logging.getLogger(__name__)
@@ -15,25 +15,24 @@ register = register_decorater()
 
 
 def env(parser):
-    set_logger()
     if parser.CHECK_ALL:
         check_all()
-    if parser.OBJECT_NAME == 'ntp':
-        check_ntp()
-    if parser.OBJECT_NAME == 'selinux':
-        check_selinux()
-    if parser.OBJECT_NAME == 'disk':
-        check_disk()
-    if parser.OBJECT_NAME == 'network':
-        check_network()
+    elif parser.OBJECT_NAME:
+        object_func = 'check_%s' % (parser.OBJECT_NAME)
+        eval(object_func)()
+    else:
+        # TODO: print usage
+        pass
 
 
 def make(parser):
     '''Check Environment Object'''
+    # choices is something like ['ntp', 'selinux', 'disk', 'network'],
+    # which depends on the functions you define below
     parser.add_argument(
         '-n',
         dest='OBJECT_NAME',
-        choices=['ntp', 'network', 'selinux', 'disk'],
+        choices=[i.split('_')[1] for i in register.all],
         help='Object Name',
     )
     common.add_common_opt(parser)
