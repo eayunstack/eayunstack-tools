@@ -1,3 +1,8 @@
+import commands
+import logging
+
+LOG = logging.getLogger(__name__)
+
 def search_service(service):
     (s, out) = commands.getstatusoutput('systemctl list-unit-files | grep "%s"' %(service))
     return s

@@ -4,6 +4,7 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+
 def make_subcommand(parser, command):
     subp = parser.add_subparsers(
         title='Commands',
