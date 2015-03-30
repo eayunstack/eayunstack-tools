@@ -2,7 +2,8 @@
 import logging
 from eayunstack_tools.doctor import common
 from eayunstack_tools.doctor import ntp, selinux, disk, network
-from eayunstack_tools.utils import set_logger, register_decorater, userful_msg, fmt_print
+from eayunstack_tools.utils import register_decorater, userful_msg
+from eayunstack_tools.logger import set_logger, fmt_print
 
 LOG = logging.getLogger(__name__)
 

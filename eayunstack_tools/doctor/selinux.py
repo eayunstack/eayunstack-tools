@@ -2,7 +2,6 @@
 import logging
 import commands
 import re
-from eayunstack_tools.doctor.utils import set_logger
 
 # Correct state [enforcing, permissive, disabled]
 correct_state = correct_conf = "disabled"

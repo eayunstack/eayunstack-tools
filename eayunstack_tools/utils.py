@@ -1,6 +1,8 @@
 import pkg_resources
 from functools import wraps
+import logging
 
+LOG = logging.getLogger(__name__)
 
 def make_subcommand(parser, command):
     subp = parser.add_subparsers(
@@ -34,11 +36,11 @@ def register_decorater():
     return decorater
 
 
-def userful_msg(logger):
+def userful_msg():
     def decorate(f):
         @wraps(f)
         def newfunc(*a, **kw):
-            logger.info('%s start running %s %s', '='*10, f.__name__, '='*10)
+            LOG.info('%s start running %s %s', '='*10, f.__name__, '='*10)
             ret = f(*a, **kw)
             return ret
         return newfunc
