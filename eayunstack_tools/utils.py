@@ -1,6 +1,7 @@
 import pkg_resources
 from functools import wraps
 import logging
+import logger
 
 LOG = logging.getLogger(__name__)
 
@@ -47,3 +48,39 @@ def userful_msg():
         return newfunc
 
     return decorate
+
+
+def enum(*sequential, **named):
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    return type('Enum', (), enums)
+
+
+def get_roles():
+    """Get roles which node represents"""
+    role_file_path = '/.node-role'
+    roles = []
+    try:
+        with open(role_file_path, 'r') as f:
+            for i in f:
+                r = i.strip().split('\n')
+                if r[0].lower() == 'fuel':
+                    roles.append(ROLES.FUEL)
+                elif r[0].lower() == 'controller':
+                    roles.append(ROLES.CONTROLLER)
+                elif r[0].lower() == 'compute':
+                    roles.append(ROLES.CONTROLLER)
+                elif r[0].lower() == 'ceph-osd':
+                    roles.append(ROLES.CEPH_OSD)
+                elif r[0].lower() == 'mongo':
+                    roles.append(ROLES.MONGO)
+                else:
+                    roles.append(ROLES.UNKNOWN)
+    except Exception as e:
+        # If the file not exists, or something wrong happens, we consume
+        # the node is unknow, and fire a warn message
+        LOG.warn('Unknow node, please fix the issue: %s', logger.fmt_excep_msg(e))
+        roles.append(ROLES.UNKNOWN)
+    return roles
+
+ROLES = enum('FUEL', 'CONTROLLER', 'COMPUTE', 'CEPH_OSD', 'MONGO', 'UNKNOWN')
+NODE_ROLE = get_roles()
