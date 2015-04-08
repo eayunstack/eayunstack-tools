@@ -35,6 +35,7 @@ setup(
             'image = eayunstack_tools.manage.image:make',
             'ceilometer = eayunstack_tools.manage.ceilometer:make',
             'evacuation = eayunstack_tools.manage.evacuation:make',
+            'list = eayunstack_tools.manage.list:make',
         ],
     },
 )
