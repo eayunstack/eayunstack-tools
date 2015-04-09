@@ -26,8 +26,8 @@ def backup_list():
         # Get the backup time from filename
         c_date = file_split[2]
         c_time = file_split[3].split('.', 1)[0][:2] \
-                 + ':' + \ 
-                 file_split[3].split('.', 1)[0][2:]
+                 + ':' \
+                 + file_split[3].split('.', 1)[0][2:]
         t.add_row([i, c_date + ' ' + c_time, backup_file])
         i += 1
     return t
