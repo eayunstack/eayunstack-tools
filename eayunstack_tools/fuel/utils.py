@@ -1,6 +1,5 @@
 # @file utils.py
 import os
-import commands
 from prettytable import PrettyTable
 import logging
 
@@ -8,23 +7,26 @@ LOG = logging.getLogger(__name__)
 
 BACKUP_DIR = '/var/backup/fuel'
 
-dir_list = {}
-file_list = {}
 
-
-def backup_list():
+def list_backup():
     """List all the backup file"""
     lines = read_db()
     i = 1
     t = PrettyTable(['ID', 'Backup Time', 'Backup File'])
     for line in lines:
         # Delete the '\n' at the end of the line
+        # line = 'id backup_file_name\n'
+        # e.g. '1 fuel_backup_2015-04-09_0831.tar.lrz'
         line = line.strip('\n')
-        id = line.split(' ')[0]
+        backup_id = line.split(' ')[0]
+        # backup_file = fuel_backup_2015-04-09_0831.tar.lrz
         backup_file = line.split(' ')[1]
+        # file_split = ['fuel', 'backup', '2015-04-09', '0831.tar.lrz']
         file_split = backup_file.split('_', 4)
         # Get the backup time from filename
+        # c_date = '2015=04-09'
         c_date = file_split[2]
+        # c_time = '08:31'
         c_time = file_split[3].split('.', 1)[0][:2] \
                  + ':' \
                  + file_split[3].split('.', 1)[0][2:]
@@ -35,12 +37,17 @@ def backup_list():
 
 def read_db():
     """Get Lines as List"""
-    if not os.path.exists('/tmp/tools.db'):
+    try:
+        with open('/tmp/tools.db', 'r') as db:
+            lines = db.readlines()
+            return lines
+    except Exception as e:
         os.mknod('/tmp/tools.db')
-    db = open('/tmp/tools.db')
-    lines = db.readlines()
-    db.close()
-    return lines
+    finally:
+        with open('/tmp/tools.db', 'r') as db:
+            lines = db.readlines()
+            return lines
+
 
 def latest_backup():
     """Get The Latest Backup File"""
@@ -57,16 +64,17 @@ def latest_backup():
                 # FIXME: Did not consider isfile
                 i += 1
             else:
-                latest_backup = os.listdir(BACKUP_DIR + '/' + backup_dirs[-i] + '/')[0]
+                latest_backup = os.listdir(BACKUP_DIR + '/' \
+                                + backup_dirs[-i] + '/')[0]
                 return latest_backup
                 break
 
 
-def write_db():
+def write_db(backup_id):
     # append
     db = open('/tmp/tools.db', 'a')
     backup_file = latest_backup()
-    db.writelines('%s' % id + ' ' + '%s\n' % backup_file)
+    db.writelines('%s' % backup_id + ' ' + '%s\n' % backup_file)
     db.close()
 
 
