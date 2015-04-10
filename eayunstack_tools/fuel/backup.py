@@ -1,5 +1,5 @@
 # @file backup.py
-from eayunstack_tools.fuel.utils import list_backup
+from eayunstack_tools.fuel.utils import list_backup, latest_backup
 from eayunstack_tools.fuel.utils import read_db, write_db
 import commands
 import logging
@@ -50,14 +50,15 @@ def new_backup():
         # 1) read db to get last_id
         lines = read_db()
         backup_id = 1
+        backup_file = latest_backup()
         if len(lines) == 0:
-            write_db(backup_id)
+            write_db(backup_id, backup_file)
         else:
             # 2) create new id
             backup_id = int(lines[-1].split(' ')[0])
             backup_id += 1
             # 3) write to db
-            write_db(backup_id)
+            write_db(backup_id, backup_file)
 
 def list_bck():
     t = list_backup()
