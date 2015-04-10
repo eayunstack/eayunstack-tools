@@ -75,7 +75,7 @@ class NodeRole(object):
                     elif r[0].lower() == 'controller':
                         roles.append(ROLES.CONTROLLER)
                     elif r[0].lower() == 'compute':
-                        roles.append(ROLES.CONTROLLER)
+                        roles.append(ROLES.COMPUTE)
                     elif r[0].lower() == 'ceph-osd':
                         roles.append(ROLES.CEPH_OSD)
                     elif r[0].lower() == 'mongo':
@@ -108,6 +108,9 @@ class NodeRole(object):
 
     def is_mongo(self):
         return ROLES.MONGO in self.node_role
+
+    def is_unknown(self):
+        ROLES.UNKNOWN == self.node_role[0]
 
     def _node_list(self):
         from fuelclient.client import APIClient
