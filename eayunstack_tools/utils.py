@@ -109,6 +109,9 @@ class NodeRole(object):
     def is_mongo(self):
         return ROLES.MONGO in self.node_role
 
+    def is_unknown(self):
+        ROLES.UNKNOWN == self.node_role[0]
+
     def _node_list(self):
         from fuelclient.client import APIClient
         LOG.setLevel(logging.CRITICAL)
