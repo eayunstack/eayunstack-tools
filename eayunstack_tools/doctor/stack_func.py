@@ -222,28 +222,3 @@ def check_nodes(node_role, check_obj, multi_role=False):
         # ssh to node and run command
         result_out,result_err = ssh_connect(node, check_cmd)
         print result_out
-
-#def ssh_connect(hostname, commands, key_file='/root/.ssh/id_rsa', timeout=2):
-#    # Temporarily disable INFO level logging
-#    logging.disable(logging.INFO)
-#    # need use rsa key, if use dsa key replace 'RSA' to 'DSS'
-#    key = paramiko.RSAKey.from_private_key_file(key_file)
-#    s = paramiko.SSHClient()
-#    s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-#    try:
-#        s.connect(hostname, 22, pkey=key, timeout=timeout)
-#        stdin, stdout, stderr = s.exec_command(commands)
-#        result_out = stdout.read()
-#        result_err = stderr.read()
-#    except paramiko.ssh_exception.AuthenticationException:
-#        result_out = result_err = ''
-#        LOG.error('Can not connect to this node !')
-#        LOG.error('Authentication (publickey) failed !')
-#    except socket.timeout:
-#        result_out = result_err = ''
-#        LOG.error('Can not connect to this node !')
-#        LOG.error('Connect time out !')
-#    finally:
-#        s.close()
-#        logging.disable(logging.NOTSET)
-#    return result_out, result_err
