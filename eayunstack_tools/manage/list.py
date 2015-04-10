@@ -20,7 +20,6 @@ def node_list(parser):
         host = node['fqdn']
         ip = node['ip']
         mac = node['mac']
-        print roles, host, ip, mac
         t.add_row([roles, host, ip, mac])
     print t
 
