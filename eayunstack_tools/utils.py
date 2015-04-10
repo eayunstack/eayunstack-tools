@@ -75,7 +75,7 @@ class NodeRole(object):
                     elif r[0].lower() == 'controller':
                         roles.append(ROLES.CONTROLLER)
                     elif r[0].lower() == 'compute':
-                        roles.append(ROLES.CONTROLLER)
+                        roles.append(ROLES.COMPUTE)
                     elif r[0].lower() == 'ceph-osd':
                         roles.append(ROLES.CEPH_OSD)
                     elif r[0].lower() == 'mongo':
