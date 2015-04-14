@@ -1,4 +1,5 @@
 import logging
+import sys
 
 LOG = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ def color_format():
 def set_logger():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
+    ch = logging.StreamHandler(sys.stdout)
     ch.setFormatter(color_format())
     logger.addHandler(ch)
     return logger
