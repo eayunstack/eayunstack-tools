@@ -17,6 +17,7 @@ def backup(parser):
     else:
         list_bck()
 
+
 def make(parser):
     '''Fuel Backup'''
     parser.add_argument(
@@ -46,7 +47,8 @@ def new_backup():
         LOG.error('%s', out)
     else:
         LOG.info('Backup successfully completed!\n')
-        print 'You can use "eayunstack fuel backup [ -l | --list ]" to list your backups\n'
+        print 'You can use "eayunstack fuel backup [ -l | --list ]" to '\
+            'list your backups\n'
         # 1) read db to get last_id
         lines = read_db()
         backup_id = 1
@@ -60,8 +62,7 @@ def new_backup():
             # 3) write to db
             write_db(backup_id, backup_file)
 
+
 def list_bck():
     t = list_backup()
     print t.get_string(sortby='ID')
-
-

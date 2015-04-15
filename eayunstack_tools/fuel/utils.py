@@ -16,10 +16,11 @@ def list_backup():
         pass
     else:
         try:
+            # TODO: db is not used?
             with open('/tmp/tools.db', 'w') as db:
                 for backup_id in check_list.keys():
                     write_db(backup_id, check_list[backup_id])
-        except Exception as e:
+        except Exception:
             LOG.error('Write to db error!')
     lines = read_db()
     i = 1
@@ -38,9 +39,8 @@ def list_backup():
         # c_date = '2015=04-09'
         c_date = file_split[2]
         # c_time = '08:31'
-        c_time = file_split[3].split('.', 1)[0][:2] \
-                 + ':' \
-                 + file_split[3].split('.', 1)[0][2:]
+        c_time = file_split[3].split('.', 1)[0][:2] + ':' + \
+            file_split[3].split('.', 1)[0][2:]
         t.add_row([backup_id, c_date + ' ' + c_time, backup_file])
         i += 1
     return t
@@ -52,7 +52,7 @@ def read_db():
         with open('/tmp/tools.db', 'r') as db:
             lines = db.readlines()
             return lines
-    except Exception as e:
+    except Exception:
         os.mknod('/tmp/tools.db')
     finally:
         with open('/tmp/tools.db', 'r') as db:
@@ -75,17 +75,19 @@ def latest_backup():
                 # FIXME: Did not consider isfile
                 i += 1
             else:
-                latest_backup = os.listdir(BACKUP_DIR + '/' \
-                                + backup_dirs[-i] + '/')[0]
+                latest_backup = os.listdir(BACKUP_DIR + '/' +
+                                           backup_dirs[-i] + '/')[0]
                 return latest_backup
+
 
 def write_db(backup_id, backup_file):
     # append
     try:
         with open('/tmp/tools.db', 'a') as db:
             db.writelines('%s' % backup_id + ' ' + '%s\n' % backup_file)
-    except Exception as e:
+    except Exception:
         LOG.error('Write to db error!')
+
 
 def check_db():
     """Check if db sync with /var/backup/fuel"""
@@ -97,11 +99,13 @@ def check_db():
         if os.path.isfile(BACKUP_DIR + '/' + backup_dir):
             backup_files.append(backup_dir)
         else:
-            # if delete the backup file but didn't delete backup dir, won't write to backup_files
+            # if delete the backup file but didn't delete backup dir,
+            # won't write to backup_files
             if os.listdir(BACKUP_DIR + '/' + backup_dir) == []:
                 pass
             else:
-                backup_files.append(os.listdir(BACKUP_DIR + '/' + backup_dir)[0])
+                backup_files.append(os.listdir(BACKUP_DIR + '/' +
+                                               backup_dir)[0])
     list_old = read_db()
     backup_list = read_db()
     print backup_files
@@ -115,14 +119,15 @@ def check_db():
             # if backup_list sync with backup_files, do nothing
             elif backup_list[i].split(' ')[1].strip('\n') in backup_files:
                 i += 1
-            # if not, means backup_file has been deleted, deleted from backup_list
+            # if not, means backup_file has been deleted, deleted
+            # from backup_list
             else:
                 backup_list.remove(backup_list[i])
     except Exception:
         pass
     finally:
         if list_old == backup_list:
-            return 1 # true
+            return 1  # true
         else:
             # Output the new backup_list as a dict
             for line in backup_list:
