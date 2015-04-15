@@ -11,11 +11,11 @@ LOG = logging.getLogger(__name__)
 
 def backup(parser):
     if parser.NEW_BACKUP:
-        new_backup()
+        backup_new()
     elif parser.LIST_BACKUP:
-        list_bck()
+        backup_list()
     else:
-        list_bck()
+        backup_list()
 
 
 def make(parser):
@@ -39,7 +39,7 @@ def make(parser):
     parser.set_defaults(func=backup)
 
 
-def new_backup():
+def backup_new():
     LOG.info('Starting backup ...')
     LOG.info('It will take about 30 minutes, Please wait ...')
     (stat, out) = commands.getstatusoutput('dockerctl backup')
@@ -63,6 +63,6 @@ def new_backup():
             write_db(backup_id, backup_file)
 
 
-def list_bck():
+def backup_list():
     t = list_backup()
     print t.get_string(sortby='ID')
