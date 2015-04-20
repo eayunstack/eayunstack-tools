@@ -20,3 +20,6 @@ def make(parser):
 def check_all():
     '''Check All Cluster'''
     print "Check All Cluster"
+
+def check_rabbitmq():
+    print 'check rabbitmq'
