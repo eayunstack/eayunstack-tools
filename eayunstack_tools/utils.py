@@ -4,6 +4,7 @@ import logging
 import logger
 import paramiko
 import os
+import socket
 
 LOG = logging.getLogger()
 
