@@ -8,6 +8,8 @@ def cls(parser):
     print "check cluster module"
     if parser.CHECK_ALL:
         check_all()
+    if parser.CLUSTER_NAME == 'rabbitmq':
+        check_rabbitmq()
 
 def make(parser):
     '''Check cluster'''
