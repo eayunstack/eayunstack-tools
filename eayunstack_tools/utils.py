@@ -146,7 +146,7 @@ class NodeRole(object):
 NODE_ROLE = NodeRole()
 
 
-def ssh_connect(hostname, commands, key_file=os.environ['HOME'] + '/.ssh/id_rsa', ssh_port=22, timeout=2):
+def ssh_connect(hostname, commands, key_file=os.environ['HOME'] + '/.ssh/id_rsa', ssh_port=22, username='root', timeout=2):
     # Temporarily disable INFO level logging
     logging.disable(logging.INFO)
     # need use rsa key, if use dsa key replace 'RSA' to 'DSS'
@@ -154,7 +154,7 @@ def ssh_connect(hostname, commands, key_file=os.environ['HOME'] + '/.ssh/id_rsa'
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
-        s.connect(hostname, ssh_port, pkey=key, timeout=timeout)
+        s.connect(hostname, ssh_port, username=username, pkey=key, timeout=timeout)
         stdin, stdout, stderr = s.exec_command(commands)
         result_out = stdout.read()
         result_err = stderr.read()
