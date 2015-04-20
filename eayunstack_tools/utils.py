@@ -3,6 +3,8 @@ from functools import wraps
 import logging
 import logger
 import paramiko
+import os
+import socket
 
 LOG = logging.getLogger()
 
@@ -144,7 +146,7 @@ class NodeRole(object):
 NODE_ROLE = NodeRole()
 
 
-def ssh_connect(hostname, commands, key_file='/root/.ssh/id_rsa', timeout=2):
+def ssh_connect(hostname, commands, key_file=os.environ['HOME'] + '/.ssh/id_rsa', timeout=2):
     # Temporarily disable INFO level logging
     logging.disable(logging.INFO)
     # need use rsa key, if use dsa key replace 'RSA' to 'DSS'

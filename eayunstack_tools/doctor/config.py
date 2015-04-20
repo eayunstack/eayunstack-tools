@@ -9,8 +9,6 @@ keystone_p = [
 glance_p = [
         '/etc/glance/glance-api.conf',
         '/etc/glance/glance-registry.conf',
-        '/usr/share/glance/glance-api-dist-paste.ini',
-        '/usr/share/glance/glance-registry-dist-paste.ini'
         ]
 
 neutron_p = [
