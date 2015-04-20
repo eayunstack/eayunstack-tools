@@ -1,5 +1,8 @@
 #check cluster status
 from eayunstack_tools.doctor import common
+import logging
+
+LOG = logging.getLogger(__name__)
 
 def cls(parser):
     print "check cluster module"
