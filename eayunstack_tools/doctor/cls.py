@@ -11,7 +11,7 @@ def make(parser):
     parser.add_argument(
         '-n',
         dest='CLUSTER_NAME',
-        choices=['mysql','rabbit','ceph','pacemaker'],
+        choices=['mysql','rabbitmq','ceph','pacemaker'],
         help='Cluster Name',
     )
     common.add_common_opt(parser)
