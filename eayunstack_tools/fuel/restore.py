@@ -1,8 +1,8 @@
 import logging
 import os
 import commands
-from eayunstack_tools.fuel.utils import BACKUP_DIR
-from eayunstack_tools.fuel.utils import read_db
+from eayunstack_tools.fuel.db import BACKUP_DIR
+from eayunstack_tools.fuel.db import read_db
 
 
 LOG = logging.getLogger(__name__)

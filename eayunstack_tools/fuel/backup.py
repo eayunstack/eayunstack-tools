@@ -1,6 +1,6 @@
 # @file backup.py
-from eayunstack_tools.fuel.utils import latest_backup
-from eayunstack_tools.fuel.utils import read_db, write_db, check_db
+from eayunstack_tools.fuel.db import latest_backup
+from eayunstack_tools.fuel.db import read_db, write_db, check_db
 from prettytable import PrettyTable
 import commands
 import logging
