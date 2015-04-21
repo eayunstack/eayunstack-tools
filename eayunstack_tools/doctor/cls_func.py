@@ -13,7 +13,6 @@ def get_rabbitmq_nodes(role):
         m = p.match(o).groups()
         return m[0].split()
 
-#print get_rabbitmq_nodes('slaves')
 
 # get running node list for mysql cluster
 def get_mysql_nodes():

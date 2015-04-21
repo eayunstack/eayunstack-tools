@@ -7,7 +7,6 @@ import logging
 LOG = logging.getLogger(__name__)
 
 def cls(parser):
-    print "check cluster module"
     if parser.CHECK_ALL:
         check_all()
     if parser.CLUSTER_NAME == 'rabbitmq':
@@ -32,7 +31,6 @@ def make(parser):
 
 def check_all():
     '''Check All Cluster'''
-    print "Check All Cluster"
 
 def check_rabbitmq():
     # node role check
@@ -65,7 +63,6 @@ def check_rabbitmq():
         LOG.info('Rabbitmq cluster check successfully !')
 
 def check_mysql():
-    print 'check mysql'
     # node role check
     if not NODE_ROLE.is_fuel():
         if not NODE_ROLE.is_controller():
@@ -94,7 +91,6 @@ def check_mysql():
         LOG.info('Mysql cluster check successfully !')
 
 def check_haproxy():
-    print 'check haproxy'
     # node role check
     if not NODE_ROLE.is_fuel():
         if not NODE_ROLE.is_controller():
@@ -123,7 +119,6 @@ def check_haproxy():
         LOG.info('Haproxy cluster check successfully !')
 
 def check_ceph():
-    print 'check ceph'
     # node role check
     if not NODE_ROLE.is_fuel():
         if not NODE_ROLE.is_controller():
