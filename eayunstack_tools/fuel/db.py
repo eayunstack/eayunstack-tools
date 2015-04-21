@@ -94,9 +94,13 @@ class BackupDB(object):
             for k, v in db_item.iteritems():
                 f.write('%s %s\n' % (k, v))
 
-    def write(self):
-        # 插入或者更新一个表项
-        pass
+    def write(self, f, db_id=None):
+        db_item = self.read_all()
+        if db_id is None:
+            db_id = self.max_id()
+        db_item[db_id] = f
+        # Just write all item to file, no need to write with append flag
+        self.write_all(db_item)
 
     def latest_backupfile(self):
         f = self._read_from_dir()
