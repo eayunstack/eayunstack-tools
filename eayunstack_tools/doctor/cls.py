@@ -38,6 +38,7 @@ def check_rabbitmq():
         if not NODE_ROLE.is_controller():
             LOG.warn('This command can only run on fuel or controller node !')
             return
+    LOG.info('%s Checking rabbitmq cluster status %s' %('='*10, '='*10))
     # get all controller node hostname
     controllers = get_controllers_hostname()
     if controllers is None:
@@ -68,6 +69,7 @@ def check_mysql():
         if not NODE_ROLE.is_controller():
             LOG.warn('This command can only run on fuel or controller node !')
             return
+    LOG.info('%s Checking mysql cluster status %s' %('='*10, '='*10))
     # get running node list for mysql cluster
     running_nodes = get_mysql_nodes()
     if running_nodes is None:
@@ -96,6 +98,7 @@ def check_haproxy():
         if not NODE_ROLE.is_controller():
             LOG.warn('This command can only run on fuel or controller node !')
             return
+    LOG.info('%s Checking haproxy cluster status %s' %('='*10, '='*10))
     # get running node list for mysql cluster
     running_nodes = get_haproxy_nodes()
     if running_nodes is None:
