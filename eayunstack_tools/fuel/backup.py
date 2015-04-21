@@ -52,18 +52,9 @@ def backup_new():
         LOG.info('Backup successfully completed!\n')
         print 'You can use "eayunstack fuel backup [ -l | --list ]" to '\
             'list your backups\n'
-        # 1) read db to get last_id
-        lines = read_db()
-        backup_id = 1
-        backup_file = latest_backup()
-        if len(lines) == 0:
-            write_db(backup_id, backup_file)
-        else:
-            # 2) create new id
-            backup_id = int(lines[-1].split(' ')[0])
-            backup_id += 1
-            # 3) write to db
-            write_db(backup_id, backup_file)
+        db = BackupDB()
+        f = db.latest_backupfile()
+        db.write(f)
 
 
 def backup_list():

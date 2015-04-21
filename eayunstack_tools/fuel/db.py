@@ -98,6 +98,10 @@ class BackupDB(object):
         # 插入或者更新一个表项
         pass
 
+    def latest_backupfile(self):
+        f = self._read_from_dir()
+        return f[-1]
+
 
 def latest_backup():
     """Get The Latest Backup File"""
