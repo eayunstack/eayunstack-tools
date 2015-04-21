@@ -15,11 +15,11 @@ class BackupDB(object):
         self.f_item = self._read_from_dir()
         self._init_db()
 
-    @property
-    def max_id(self):
+    def max_id(self, d=None):
         '''find the max id stored in db'''
-        d = self.read_all()
         max = 0
+        if d is None:
+            d = self.read_all()
         for i in d.keys():
             if max <= i:
                 max = i
@@ -40,7 +40,7 @@ class BackupDB(object):
         # The file exists, but not found in db, add to db
         r = set(self.f_item) - set(db_item.values())
         for d in r:
-            db_item[self.max_id + 1] = d
+            db_item[self.max_id(db_item) + 1] = d
 
         # write to db
         with open(self.db, 'w') as f:
