@@ -36,3 +36,22 @@ def get_haproxy_nodes():
         for entry in o.split('\n'):
             running_nodes.append(entry.split()[5])
     return running_nodes
+
+# get ceph cluster status
+def get_ceph_health():
+    (s, o) = commands.getstatusoutput('ceph health')
+    if s != 0:
+        return False
+    else:
+        if o == 'HEALTH_OK':
+            return True
+        else:
+            return False
+
+# get ceph osd status
+def get_ceph_osd_status():
+    (s, o) = commands.getstatusoutput('ceph osd tree')
+    if s != 0 or o is None:
+        return
+    else:
+        return o

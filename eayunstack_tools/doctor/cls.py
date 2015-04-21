@@ -1,7 +1,7 @@
 #check cluster status
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import NODE_ROLE, get_controllers_hostname
-from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes
+from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, get_ceph_health, get_ceph_osd_status
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -16,6 +16,8 @@ def cls(parser):
         check_mysql()
     if parser.CLUSTER_NAME == 'haproxy':
         check_haproxy()
+    if parser.CLUSTER_NAME == 'ceph':
+        check_ceph()
 
 def make(parser):
     '''Check cluster'''
@@ -119,3 +121,34 @@ def check_haproxy():
         LOG.error('Haproxy cluster check faild !')
     else:
         LOG.info('Haproxy cluster check successfully !')
+
+def check_ceph():
+    print 'check ceph'
+    # node role check
+    if not NODE_ROLE.is_fuel():
+        if not NODE_ROLE.is_controller():
+            if not NODE_ROLE.is_ceph_osd():
+                LOG.warn('This command can only run on fuel or controller or ceph-osd node !')
+                return
+    # get cluster status
+    LOG.info('%s Checking ceph cluster status %s' %('='*10, '='*10))
+    if get_ceph_health():
+        LOG.info('Ceph cluster check successfully !')    
+    else:
+        LOG.error('Ceph cluster check faild !')
+    # check osd status
+    LOG.info('%s Checking ceph osd status %s' %('='*10, '='*10))
+    check_success = True
+    osd_status = get_ceph_osd_status()
+    if not osd_status:
+        LOG.error('Can not get ceph osd status !')
+    else:
+        for l in osd_status.split('\n'):
+            if 'id' not in l and 'weigh' not in l and 'osd.' in l:
+                osd = l.split()[2]
+                status = l.split()[3]
+                if status != 'up':
+                    LOG.error('%s status is not correct, please check it !', osd)
+                    check_success = False
+    if check_success:
+        LOG.info('Ceph osd status check successfully !')
