@@ -25,3 +25,14 @@ def get_mysql_nodes():
         for entry in o.split('\n'):
             running_nodes.append(entry.split()[5])
     return running_nodes
+
+# get running node list for haproxy cluster
+def get_haproxy_nodes():
+    running_nodes = []
+    (s, o) = commands.getstatusoutput('crm_resource --locate --resource clone_p_haproxy 2> /dev/null | grep "running on"')
+    if s != 0 or o is None:
+        return
+    else:
+        for entry in o.split('\n'):
+            running_nodes.append(entry.split()[5])
+    return running_nodes
