@@ -91,7 +91,7 @@ def check_mysql():
     # get running node list for mysql cluster
     running_nodes = get_mysql_nodes()
     if running_nodes is None:
-        LOG.error('Can not get the running node list for rabbitmq cluster !')
+        LOG.error('Can not get the running node list for mysql cluster !')
         return
     # get all controller node hostname
     controllers = get_controllers_hostname()
@@ -120,7 +120,7 @@ def check_haproxy():
         check_all_nodes('haproxy')
         return
     LOG.info('%s Checking haproxy cluster status %s' %('='*10, '='*10))
-    # get running node list for mysql cluster
+    # get running node list for haproxy cluster
     running_nodes = get_haproxy_nodes()
     if running_nodes is None:
         LOG.error('Can not get the running node list for haproxy cluster !')
@@ -130,7 +130,7 @@ def check_haproxy():
     if controllers is None:
         LOG.error('Can not get the controllers node list !')
         return
-    # check all controller node in mysql cluster
+    # check all controller node in haproxy cluster
     error_nodes = []
     for node in controllers:
         if node not in running_nodes:
