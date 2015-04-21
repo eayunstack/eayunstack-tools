@@ -14,3 +14,14 @@ def get_rabbitmq_nodes(role):
         return m[0].split()
 
 #print get_rabbitmq_nodes('slaves')
+
+# get running node list for mysql cluster
+def get_mysql_nodes():
+    running_nodes = []
+    (s, o) = commands.getstatusoutput('crm_resource --locate --resource clone_p_mysql 2> /dev/null | grep "running on"')
+    if s != 0 or o is None:
+        return
+    else:
+        for entry in o.split('\n'):
+            running_nodes.append(entry.split()[5])
+    return running_nodes

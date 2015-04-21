@@ -1,7 +1,7 @@
 #check cluster status
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import NODE_ROLE, get_controllers_hostname
-from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes
+from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -62,3 +62,29 @@ def check_rabbitmq():
 
 def check_mysql():
     print 'check mysql'
+    # node role check
+    if not NODE_ROLE.is_fuel():
+        if not NODE_ROLE.is_controller():
+            LOG.warn('This command can only run on fuel or controller node !')
+            return
+    # get running node list for mysql cluster
+    running_nodes = get_mysql_nodes()
+    if running_nodes is None:
+        LOG.error('Can not get the running node list for rabbitmq cluster !')
+        return
+    # get all controller node hostname
+    controllers = get_controllers_hostname()
+    if controllers is None:
+        LOG.error('Can not get the controllers node list !')
+        return
+    # check all controller node in mysql cluster
+    error_nodes = []
+    for node in controllers:
+        if node not in running_nodes:
+            error_nodes.append(node)
+
+    if error_nodes:
+        LOG.error('Node %s is not running in mysql cluster !' % error_nodes)
+        LOG.error('Mysql cluster check faild !')
+    else:
+        LOG.info('Mysql cluster check successfully !')
