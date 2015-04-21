@@ -44,6 +44,12 @@ def make(parser):
 def backup_new():
     LOG.info('Starting backup ...')
     LOG.info('It will take about 30 minutes, Please wait ...')
+    # for test
+    # import time
+    # sec = int(time.time() - 1429595568)
+    # os.system('mkdir /var/backup/fuel/backup_2015-04-23_%d' % sec)
+    # os.system('touch /var/backup/fuel/backup_2015-04-23_%d/fuel_backup_2015-04-19_%d.tar.lrz' % (sec, sec))
+    # (stat, out) = (0, '_')
     (stat, out) = commands.getstatusoutput('dockerctl backup')
     if stat != 0:
         LOG.error('%s', out)
