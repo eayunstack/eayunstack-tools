@@ -67,6 +67,10 @@ class BackupDB(object):
             ret.sort(cmp)
         return ret
 
+    def read(self, backup_id):
+        db_item = self.read_all()
+        return db_item[backup_id]
+
     def read_all(self):
         ret = collections.OrderedDict()
         try:
