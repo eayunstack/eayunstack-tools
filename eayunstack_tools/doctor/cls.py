@@ -31,6 +31,10 @@ def make(parser):
 
 def check_all():
     '''Check All Cluster'''
+    check_rabbitmq()
+    check_mysql()
+    check_haproxy()
+    check_ceph()
 
 def check_rabbitmq():
     # node role check
