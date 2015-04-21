@@ -12,6 +12,8 @@ def cls(parser):
         check_all()
     if parser.CLUSTER_NAME == 'rabbitmq':
         check_rabbitmq()
+    if parser.CLUSTER_NAME == 'mysql':
+        check_mysql()
 
 def make(parser):
     '''Check cluster'''
@@ -58,3 +60,5 @@ def check_rabbitmq():
     else:
         LOG.info('Rabbitmq cluster check successfully !')
 
+def check_mysql():
+    print 'check mysql'
