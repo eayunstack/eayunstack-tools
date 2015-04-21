@@ -160,6 +160,16 @@ def get_controllers_hostname():
         node_list_file.close()
     return controllers
 
+def get_node_list(role):
+    node_list = []
+    try:
+        for node in NODE_ROLE.nodes:
+            if node['roles'] == role:
+                node_list.append(node['ip'])
+    except:
+        node_list = []
+    return node_list
+
 def ssh_connect(hostname, commands, key_file=os.environ['HOME'] + '/.ssh/id_rsa', timeout=2):
     # Temporarily disable INFO level logging
     logging.disable(logging.INFO)
