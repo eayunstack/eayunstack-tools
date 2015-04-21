@@ -1,5 +1,7 @@
 #check cluster status
 from eayunstack_tools.doctor import common
+from eayunstack_tools.utils import NODE_ROLE, get_controllers_hostname
+from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -27,4 +29,32 @@ def check_all():
     print "Check All Cluster"
 
 def check_rabbitmq():
-    print 'check rabbitmq'
+    # node role check
+    if not NODE_ROLE.is_fuel():
+        if not NODE_ROLE.is_controller():
+            LOG.warn('This command can only run on fuel or controller node !')
+            return
+    # get all controller node hostname
+    controllers = get_controllers_hostname()
+    if controllers is None:
+        LOG.error('Can not get the controllers node list !')
+        return
+    # get masters & slaves node list
+    masters = get_rabbitmq_nodes('masters')
+    slaves = get_rabbitmq_nodes('slaves')
+    running_nodes = masters + slaves
+    if running_nodes is None:
+        LOG.error('Can not get the running node list for rabbitmq cluster !')
+        return
+    # check all controller nodes in masters + slaves node list
+    error_nodes = []
+    for node in controllers:
+        if node not in running_nodes:
+            error_nodes.append(node)
+
+    if error_nodes:
+        LOG.error('Node %s not in rabbitmq cluster !' % error_nodes)
+        LOG.error('Rabbitmq cluster check faild !')
+    else:
+        LOG.info('Rabbitmq cluster check successfully !')
+
