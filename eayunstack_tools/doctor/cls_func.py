@@ -1,5 +1,9 @@
+from eayunstack_tools.utils import get_node_list, ssh_connect
 import commands
 import re
+import logging
+
+LOG = logging.getLogger(__name__)
 
 # get masters or slaves node list for rabbitmq cluster
 def get_rabbitmq_nodes(role):
@@ -54,3 +58,21 @@ def get_ceph_osd_status():
         return
     else:
         return o
+
+# check all nodes
+def check_all_nodes(check_obj):
+    if check_obj is 'all':
+        check_cmd = 'eayunstack doctor cls --all'
+    else:
+        check_cmd = 'eayunstack doctor cls -n %s' % check_obj
+    # get controller node list
+    node_list = get_node_list('controller')
+    # ssh to all controller node to check obj
+    if len(node_list) == 0:
+        LOG.warn('Node list is null !')
+        return
+    else:
+        for node in node_list:
+            LOG.info('%s Node: %-13s %s' % ('*'*20, node, '*'*20))
+            result_out,result_err = ssh_connect(node, check_cmd)
+            print result_out

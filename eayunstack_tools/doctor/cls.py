@@ -1,7 +1,7 @@
 #check cluster status
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import NODE_ROLE, get_controllers_hostname
-from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, get_ceph_health, get_ceph_osd_status
+from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, get_ceph_health, get_ceph_osd_status, check_all_nodes
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -31,10 +31,18 @@ def make(parser):
 
 def check_all():
     '''Check All Cluster'''
-    check_rabbitmq()
-    check_mysql()
-    check_haproxy()
-    check_ceph()
+    # node role check
+    if not NODE_ROLE.is_fuel():
+        if not NODE_ROLE.is_controller():
+            LOG.warn('This command can only run on fuel or controller node !')
+            return
+    if NODE_ROLE.is_fuel():
+        check_all_nodes('all')
+    else:
+        check_rabbitmq()
+        check_mysql()
+        check_haproxy()
+        check_ceph()
 
 def check_rabbitmq():
     # node role check
