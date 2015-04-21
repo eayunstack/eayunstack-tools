@@ -38,22 +38,33 @@ class BackupDB(object):
             db_item.pop(_find_k(db_item, f))
 
         # The file exists, but not found in db, add to db
-        r = set(self.f_item) - set(db_item.values())
-        for d in r:
-            db_item[self.max_id(db_item) + 1] = d
+        for d in self.f_item:
+            if d not in db_item.values():
+                db_item[self.max_id(db_item) + 1] = d
 
         # write to db
         with open(self.db, 'w') as f:
             self.write_all(db_item)
 
-    def _read_from_dir(self):
+    def _read_from_dir(self, order=True):
         """Read from backup directory"""
+        def cmp(x, y):
+            stat_x = os.stat(x)
+            stat_y = os.stat(y)
+            if stat_x.st_ctime < stat_y.st_ctime:
+                return 1
+            elif stat_x.st_ctime > stat_y.st_ctime:
+                return -1
+            else:
+                return 0
         ret = []
         for root, dirs, files in os.walk(BACKUP_DIR):
             for f in files:
                 if f.endswith('.tar.lrz'):
                     f = os.path.join(root, f)
                     ret.append(f)
+        if order:
+            ret.sort(cmp)
         return ret
 
     def read_all(self):
