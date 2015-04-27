@@ -373,4 +373,14 @@ def update_snapshot_quota(snapshot_id):
 def update_db():
     LOG.info('   Updating database ...')
     print 'update volume table'
+    update_volume_table()
     print 'update volume quota'
+
+def update_volume_table():
+    LOG.info('   [%s]Updating volumes table ...' % volume_id)
+    sql_update = 'UPDATE volumes SET deleted=1,status=\'deleted\' WHERE id=\'%s\';' % volume_id
+    db_connect(sql_update)
+    sql_select = 'SELECT deleted,status FROM volumes WHERE id =\'%s\';' % volume_id
+    rest = db_connect(sql_select)
+    if rest[0] != 1 or rest[1] != 'deleted':
+        LOG.error('   Database update faild !')
