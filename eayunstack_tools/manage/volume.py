@@ -253,5 +253,30 @@ def update_snapshots_db(snapshots_id):
         if rest[0] == 1 and rest[1] == 'deleted' and rest[2] == '100%':
             LOG.info('   [%s]Updating snapshot quota ...' % snapshot_id)
             print 'update snapshot quota'
+            update_snapshot_quota(snapshot_id)
         else:
             LOG.error('   Database update faild !')
+
+def update_snapshot_quota(snapshot_id):
+    # get snapshot size & project id
+    sql_get_size_project_id = 'SELECT volume_size,project_id FROM snapshots WHERE id=\'%s\';' % snapshot_id
+    get_size_project_id = db_connect(sql_get_size_project_id)
+    size = get_size_project_id[0]
+    project_id = get_size_project_id[1]
+    backend_type = get_backend_type()
+    sql_update_gigabytes = 'UPDATE quota_usages SET in_use=in_use-%s where project_id=\'%s\' and resource=\'gigabytes\';' % (size, project_id)
+    sql_update_snapshots = 'UPDATE quota_usages SET in_use=in_use-1 where project_id=\'%s\' and resource=\'snapshots\';' %  project_id
+    db_connect(sql_update_gigabytes)
+    db_connect(sql_update_snapshots)
+    if backend_type == 'eqlx':
+        sql_update_snapshots_eqlx = 'UPDATE quota_usages SET in_use=in_use-1 where project_id=\'%s\' and resource=\'snapshots_eqlx\';' % (project_id)
+        sql_update_gigabytes_eqlx = 'UPDATE quota_usages SET in_use=in_use-%s where project_id=\'%s\' and resource=\'gigabytes_eqlx\';' % (size, project_id)
+        db_connect(sql_update_snapshots_eqlx)
+        db_connect(sql_update_gigabytes_eqlx)
+    if backend_type == 'rbd':
+        sql_update_snapshots_rbd = 'UPDATE quota_usages SET in_use=in_use-1 where project_id=\'%s\' and resource=\'snapshots_rbd\';' % (project_id)
+        sql_update_gigabytes_rbd = 'UPDATE quota_usages SET in_use=in_use-%s where project_id=\'%s\' and resource=\'gigabytes_rbd\';' % (size, project_id)
+        db_connect(sql_update_snapshots_rbd)
+        db_connect(sql_update_gigabytes_rbd)
+    
+
