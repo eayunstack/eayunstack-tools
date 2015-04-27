@@ -82,8 +82,10 @@ def destroy_volume():
                     print 'delete snapshots and volume'
                     if delete_snapshots(snapshots_id):
                         print 'delete volume'
+                        delete_volume()
             else:
                 print 'delete volume'
+                delete_volume()
 
 def determine_volume_status(status):
     if status in ['available','creating','deleting','error_deleting','attaching','detaching']:
@@ -240,6 +242,21 @@ def delete_backend_snapshots_rbd(snapshots_id):
         else:
             success = False
     return success
+
+def delete_volume():
+    LOG.info('Deleting volume %s ...' % volume_id)
+    if delete_backend_volume():
+        print 'update db'
+
+def delete_backend_volume():
+    # get backend store type
+    backend_type = get_backend_type()
+    if backend_type == 'eqlx':
+        print 'delete backend volume eqlx'
+    elif backend_type == 'rbd':
+        print 'delete backend volume rbd'
+    else:
+        LOG.error('Do not support to delete "%s" type volume.' % backend_type)
 
 def update_snapshots_db(snapshots_id):
    # (host, pwd) = get_db_host_pwd()
