@@ -2,6 +2,9 @@
 import logging
 import os
 import commands
+import MySQLdb
+import ConfigParser
+import re
 
 LOG = logging.getLogger(__name__)
 
@@ -130,3 +133,36 @@ def get_volume_value(info, key):
         if len(entry.split('|')) > 1:
             if entry.split('|')[1].strip() == key:
                 return entry.split('|')[2].strip()
+
+def get_backend_type():
+    sql_select_type_id = 'SELECT volume_type_id FROM volumes WHERE id =\'%s\';' % volume_id
+    volume_type_id = db_connect(sql_select_type_id)[0]
+    sql_select_type_name = 'SELECT name FROM volume_types WHERE id =\'%s\';' % volume_type_id
+    backend_type = db_connect(sql_select_type_name)[0]
+    return backend_type
+
+def db_connect(sql, user='cinder', dbname='cinder'):
+    (host, pwd) = get_db_host_pwd()
+    try:
+        db = MySQLdb.connect(host, user, pwd, dbname)
+        cursor = db.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        db.commit()
+        db.close()
+        return result
+    except:
+        LOG.error('Can not connect to database !')
+
+def get_db_host_pwd():
+    profile_path = '/etc/cinder/cinder.conf'
+    try:
+        cp = ConfigParser.ConfigParser()
+        cp.read(profile_path)
+        value = cp.get('database', 'connection')
+        p = re.compile(r'mysql://(.+):(.+)@(.+)/(.+)\?(.+)')
+        m = p.match(value).groups()
+        # m[2] ==> host m[1] ==> pwd
+        return m[2], m[1]
+    except:
+        LOG.error('Can not get the host address and password for cinder database !')
