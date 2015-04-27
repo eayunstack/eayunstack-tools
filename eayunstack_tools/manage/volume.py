@@ -170,6 +170,16 @@ def get_db_host_pwd():
     except:
         LOG.error('Can not get the host address and password for cinder database !')
 
+def get_config(section, key):
+    profile = '/etc/cinder/cinder.conf'
+    try:
+        cp = ConfigParser.ConfigParser()
+        cp.read(profile)
+        value = cp.get(section, key)
+        return value
+    except:
+        LOG.error('   Can not get %s\'s value !' % key)
+
 def delete_snapshots(snapshots_id):
     LOG.info('Deleting snapshot %s ...' % snapshots_id)
     if delete_backend_snapshots(snapshots_id):
@@ -188,6 +198,10 @@ def delete_backend_snapshots(snapshots_id):
             return False
     elif backend_type == 'rbd':
         print 'delete backend snapshots rbd'
+        if delete_backend_snapshots_rbd(snapshots_id):
+            return True
+        else:
+            return False
     else:
         LOG.error('Do not support to delete "%s" type snapshot.' % backend_type)
         return False
@@ -203,3 +217,25 @@ def delete_backend_snapshots_eqlx(snapshots_id):
             return False
         else:
             return True
+
+def delete_backend_snapshots_rbd(snapshots_id):
+    success = True
+    rbd_pool = get_config('cinder_ceph', 'rbd_pool')
+    LOG.info('   Deleting backend(rbd) snapshots ...')
+    for snapshot_id in snapshots_id:
+        LOG.info('   [%s]Deleting backend snapshot ...' % snapshot_id)
+        (s, o) = commands.getstatusoutput('rbd -p volumes snap unprotect --image volume-%s --snap snapshot-%s' % (volume_id, snapshot_id))
+        if s == 0:
+            (ss, oo) = commands.getstatusoutput('rbd -p volumes snap rm --image volume-%s --snap snapshot-%s' % (volume_id, snapshot_id))
+            if ss != 0:
+                LOG.error('Can not delete backend snapshot "snapshot-%s" !' % snapshot_id)
+                success = False
+        elif o.find('No such file or directory') > 0:
+            LOG.error('   This snapshot does not exist !')
+            success = False
+        elif o.find('Device or resource busy') > 0:
+            LOG.error('   Unprotecting snapshot failed. Device or resource busy !')
+            success = False
+        else:
+            success = False
+    return success
