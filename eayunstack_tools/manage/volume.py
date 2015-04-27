@@ -5,6 +5,7 @@ import commands
 import MySQLdb
 import ConfigParser
 import re
+from eayunstack_tools.manage.eqlx_ssh_conn import ssh_execute as eqlx_ssh_execute
 
 LOG = logging.getLogger(__name__)
 
@@ -181,9 +182,24 @@ def delete_backend_snapshots(snapshots_id):
     backend_type = get_backend_type()
     if backend_type == 'eqlx':
         print 'delete backend snapshots eqlx'
+        if delete_backend_snapshots_eqlx(snapshots_id):
+            return True
+        else:
+            return False
     elif backend_type == 'rbd':
         print 'delete backend snapshots rbd'
     else:
         LOG.error('Do not support to delete "%s" type snapshot.' % backend_type)
         return False
 
+def delete_backend_snapshots_eqlx(snapshots_id):
+    LOG.info('   Deleting backend(eqlx) snapshots ...')
+    for snapshot_id in snapshots_id:
+        LOG.info('   [%s]Deleting backend snapshot ...' % snapshot_id)
+        cmd_delete_snapshot = 'volume select volume-%s snapshot delete snapshot-%s' % (volume_id, snapshot_id)
+        result = eqlx_ssh_execute(cmd_delete_snapshot)
+        if 'Snapshot deletion succeeded.' not in result:
+            LOG.error('   Can not delete snapshot "%s" !' % snapshot_id)
+            return False
+        else:
+            return True
