@@ -263,6 +263,7 @@ def delete_volume():
     LOG.info('Deleting volume %s ...' % volume_id)
     if delete_backend_volume():
         print 'update db'
+        update_db()
 
 def delete_backend_volume():
     # get backend store type
@@ -369,4 +370,7 @@ def update_snapshot_quota(snapshot_id):
         db_connect(sql_update_snapshots_rbd)
         db_connect(sql_update_gigabytes_rbd)
     
-
+def update_db():
+    LOG.info('   Updating database ...')
+    print 'update volume table'
+    print 'update volume quota'
