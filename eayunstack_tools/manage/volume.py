@@ -184,6 +184,7 @@ def delete_snapshots(snapshots_id):
     LOG.info('Deleting snapshot %s ...' % snapshots_id)
     if delete_backend_snapshots(snapshots_id):
         print 'update snapshots db'
+        update_snapshots_db(snapshots_id)
         return True
     else:
         return False
@@ -239,3 +240,18 @@ def delete_backend_snapshots_rbd(snapshots_id):
         else:
             success = False
     return success
+
+def update_snapshots_db(snapshots_id):
+   # (host, pwd) = get_db_host_pwd()
+    LOG.info('   Updating database ...')
+    for snapshot_id in snapshots_id:
+        LOG.info('   [%s]Updating snapshots table ...' % snapshot_id)
+        sql_update = 'UPDATE snapshots SET deleted=1,status=\'deleted\',progress=\'100%%\' WHERE id=\'%s\';' % snapshot_id
+        db_connect(sql_update)
+        sql_select = 'SELECT deleted,status,progress from snapshots where id =\'%s\';' % snapshot_id
+        rest = db_connect(sql_select)
+        if rest[0] == 1 and rest[1] == 'deleted' and rest[2] == '100%':
+            LOG.info('   [%s]Updating snapshot quota ...' % snapshot_id)
+            print 'update snapshot quota'
+        else:
+            LOG.error('   Database update faild !')
