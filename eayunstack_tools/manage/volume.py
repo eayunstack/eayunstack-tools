@@ -67,6 +67,11 @@ def destroy_volume():
             return
         else:
             print 'determine snapshots status'
+            snapshots_id = get_volume_snapshots()
+            if snapshots_id:
+                print 'exit or delete all snapshots & volume'
+            else:
+                print 'delete volume'
 
 def determine_volume_status(status):
     if status in ['available','creating','deleting','error_deleting','attaching','detaching']:
@@ -86,6 +91,23 @@ def determine_detach_status(attachments):
         return True
     else:
         return False
+
+def get_volume_snapshots():
+    (s, o) = commands.getstatusoutput('source %s && cinder snapshot-list --volume-id %s' % (env_path, volume_id))
+    if s != 0 or o is None:
+        LOG.error('Can not get the snapshot info for this volume !')
+        return
+    else:
+        snapshots_id = get_snapshots_list(o, volume_id)
+    return snapshots_id
+
+def get_snapshots_list(info, key):
+    values = []
+    for entry in info.split('\n'):
+        if len(entry.split('|')) > 1:
+            if entry.split('|')[2].strip() == key:
+                values.append(entry.split('|')[1].strip())
+    return values
 
 def get_volume_value(info, key):
     for entry in info.split('\n'):
