@@ -1,4 +1,7 @@
 #volume management
+import logging
+
+LOG = logging.getLogger(__name__)
 
 def volume(parser):
     print "reference module"
