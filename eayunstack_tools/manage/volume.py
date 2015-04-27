@@ -70,6 +70,12 @@ def destroy_volume():
             snapshots_id = get_volume_snapshots()
             if snapshots_id:
                 print 'exit or delete all snapshots & volume'
+                if not determine_delete_snapshot():
+                    LOG.warn('User give up to destroy this volume.')
+                    return
+                else:
+                    # delete all snapshots & volume
+                    print 'delete snapshots and volume'
             else:
                 print 'delete volume'
 
@@ -88,6 +94,16 @@ def determine_volume_status(status):
 
 def determine_detach_status(attachments):
     if attachments == '[]':
+        return True
+    else:
+        return False
+
+def determine_delete_snapshot():
+    while True:
+        delete_snapshot = raw_input('This volume has some snapshots , if you want to continue, you must delete the snapshots! Delete the snapshots? [yes/no]: ')
+        if delete_snapshot in ['yes','no']:
+            break
+    if delete_snapshot == 'yes':
         return True
     else:
         return False
