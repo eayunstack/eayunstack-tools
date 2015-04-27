@@ -375,6 +375,7 @@ def update_db():
     print 'update volume table'
     update_volume_table()
     print 'update volume quota'
+    update_volume_quota()
 
 def update_volume_table():
     LOG.info('   [%s]Updating volumes table ...' % volume_id)
@@ -384,3 +385,28 @@ def update_volume_table():
     rest = db_connect(sql_select)
     if rest[0] != 1 or rest[1] != 'deleted':
         LOG.error('   Database update faild !')
+
+def update_volume_quota():
+    LOG.info('   [%s]Updating volume quota ...' % volume_id)
+    # get volume size & project id
+    sql_get_size_project_id = 'SELECT size,project_id FROM volumes WHERE id=\'%s\';' % volume_id
+    get_size_project_id = db_connect(sql_get_size_project_id)
+    size = get_size_project_id[0]
+    project_id = get_size_project_id[1]
+    # get backend type
+    backend_type = get_backend_type()
+    sql_update_gigabytes = 'UPDATE quota_usages SET in_use=in_use-%s where project_id=\'%s\' and resource=\'gigabytes\';' % (size, project_id)
+    sql_update_volumes = 'UPDATE quota_usages SET in_use=in_use-1 where project_id=\'%s\' and resource=\'volumes\';' %  project_id
+    db_connect(sql_update_gigabytes)
+    db_connect(sql_update_volumes)
+    if backend_type == 'eqlx':
+        sql_update_gigabytes_eqlx = 'UPDATE quota_usages SET in_use=in_use-%s where project_id=\'%s\' and resource=\'gigabytes_eqlx\';' % (size, project_id)
+        sql_update_volumes_eqlx = 'UPDATE quota_usages SET in_use=in_use-1 where project_id=\'%s\' and resource=\'volumes_eqlx\';' %  project_id
+        db_connect(sql_update_gigabytes_eqlx)
+        db_connect(sql_update_volumes_eqlx)
+    elif backend_type == 'rbd':
+        sql_update_gigabytes_rbd = 'UPDATE quota_usages SET in_use=in_use-%s where project_id=\'%s\' and resource=\'gigabytes_rbd\';' % (size, project_id)
+        sql_update_volumes_rbd = 'UPDATE quota_usages SET in_use=in_use-1 where project_id=\'%s\' and resource=\'volumes_rbd\';' %  project_id
+        db_connect(sql_update_gigabytes_rbd)
+        db_connect(sql_update_volumes_rbd)
+
