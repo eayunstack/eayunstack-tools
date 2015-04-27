@@ -62,6 +62,11 @@ def destroy_volume():
         return
     else:
         print 'destroy volume %s' % volume_id
+        if not determine_detach_status(attachments):
+            LOG.warn('This volume was attached to instance, please delete the instance.')
+            return
+        else:
+            print 'determine snapshots status'
 
 def determine_volume_status(status):
     if status in ['available','creating','deleting','error_deleting','attaching','detaching']:
@@ -75,6 +80,12 @@ def determine_volume_status(status):
             return False
     else:
         return True
+
+def determine_detach_status(attachments):
+    if attachments == '[]':
+        return True
+    else:
+        return False
 
 def get_volume_value(info, key):
     for entry in info.split('\n'):
