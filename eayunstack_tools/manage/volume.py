@@ -6,6 +6,7 @@ import MySQLdb
 import ConfigParser
 import re
 from eayunstack_tools.manage.eqlx_ssh_conn import ssh_execute as eqlx_ssh_execute
+from eayunstack_tools.utils import ssh_connect
 
 LOG = logging.getLogger(__name__)
 
@@ -182,6 +183,21 @@ def get_config(section, key):
     except:
         LOG.error('   Can not get %s\'s value !' % key)
 
+def get_node_list(role):
+    profile = '/.eayunstack/node-list'
+    node_list = []
+    if not os.path.exists(profile):
+        return
+    node_list_file = open(profile)
+    try:
+        for line in node_list_file:
+            if role in line:
+                line = line.split(':')[2]
+                node_list.append(line)
+    finally:
+        node_list_file.close()
+    return node_list
+
 def delete_snapshots(snapshots_id):
     LOG.info('Deleting snapshot %s ...' % snapshots_id)
     if delete_backend_snapshots(snapshots_id):
@@ -253,10 +269,49 @@ def delete_backend_volume():
     backend_type = get_backend_type()
     if backend_type == 'eqlx':
         print 'delete backend volume eqlx'
+        if delete_backend_volume_eqlx():
+            return True
+        else:
+            return False
     elif backend_type == 'rbd':
         print 'delete backend volume rbd'
     else:
         LOG.error('Do not support to delete "%s" type volume.' % backend_type)
+
+def delete_backend_volume_eqlx():
+    # get provider_location
+    sql_get_provider_location = 'SELECT provider_location FROM volumes WHERE id =\'%s\';' % volume_id
+    provider_location = str(db_connect(sql_get_provider_location)).split()[1]
+    # ssh to controller and compute node to delete the iscsi connection
+    LOG.info('   Deleting iscsi connection ...')
+    controller_list = get_node_list('controller')
+    compute_list = get_node_list('compute')
+    node_list = controller_list + compute_list
+    for node in node_list:
+        cmd_show = 'iscsiadm -m session -o show'
+        (out, err) = ssh_connect(node, cmd_show)
+        if out.find(provider_location) > 0:
+            cmd_delete = 'iscsiadm -m node -u -T %s' % provider_location
+            (o, e) = ssh_connect(node, cmd_delete)
+            if o.find('successful') < 0:
+                LOG.error('   Can not delete the iscsi connection "%s" at host %s.' % (provider_location, node))
+    # ssh to eqlx to delete the volume
+    LOG.info('   Deleting backend(eqlx) volume ...')
+    ## set eqlx volume status to offline
+    cmd_set_eqlx_volume_offline = 'volume select volume-%s offline' % volume_id
+    out = eqlx_ssh_execute(cmd_set_eqlx_volume_offline)
+    if len(out) == 3:
+        LOG.error('   ' + out[1])
+        return False
+    ## delete the eqlx volume
+    cmd_delete_eqlx_volume = 'volume delete volume-%s' % volume_id
+    result = eqlx_ssh_execute(cmd_delete_eqlx_volume)
+    if not result or result[1] != 'Volume deletion succeeded.':
+        LOG.error('   Delete backend volume faild !')
+        return False
+    else:
+        return True
+
 
 def update_snapshots_db(snapshots_id):
    # (host, pwd) = get_db_host_pwd()
