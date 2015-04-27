@@ -57,6 +57,25 @@ def destroy_volume():
         volume_type = get_volume_value(o, 'volume_type')
         attachments = get_volume_value(o, 'attachments')
 
+    if not determine_volume_status(status):
+        LOG.warn('User give up to destroy this volume.')
+        return
+    else:
+        print 'destroy volume %s' % volume_id
+
+def determine_volume_status(status):
+    if status in ['available','creating','deleting','error_deleting','attaching','detaching']:
+        while True:
+            status_determine = raw_input('This volume in "%s" status, do you really want to destroy it? [yes/no]: ' % status)
+            if status_determine in ['yes','no']:
+                break
+        if status_determine == 'yes':
+            return True
+        else:
+            return False
+    else:
+        return True
+
 def get_volume_value(info, key):
     for entry in info.split('\n'):
         if len(entry.split('|')) > 1:
