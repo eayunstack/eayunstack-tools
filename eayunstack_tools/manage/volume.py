@@ -13,7 +13,6 @@ LOG = logging.getLogger(__name__)
 env_path = os.environ['HOME'] + '/openrc'
 
 def volume(parser):
-    print "reference module"
     if parser.DESTROY_VOLUME:
         if not parser.ID:
             LOG.error('Please use [--id ID] to specify the volume ID !')
@@ -51,7 +50,6 @@ def list_errors():
     print "List Error Volume"
 
 def destroy_volume():
-    print "Destroy Error Volume: %s" % volume_id
     # get volume's info
     (s, o) = commands.getstatusoutput('source %s && cinder show %s' % (env_path, volume_id))
     if s != 0 or o is None:
@@ -66,26 +64,20 @@ def destroy_volume():
         LOG.warn('User give up to destroy this volume.')
         return
     else:
-        print 'destroy volume %s' % volume_id
         if not determine_detach_status(attachments):
             LOG.warn('This volume was attached to instance, please delete the instance.')
             return
         else:
-            print 'determine snapshots status'
             snapshots_id = get_volume_snapshots()
             if snapshots_id:
-                print 'exit or delete all snapshots & volume'
                 if not determine_delete_snapshot():
                     LOG.warn('User give up to destroy this volume.')
                     return
                 else:
                     # delete all snapshots & volume
-                    print 'delete snapshots and volume'
                     if delete_snapshots(snapshots_id):
-                        print 'delete volume'
                         delete_volume()
             else:
-                print 'delete volume'
                 delete_volume()
 
 def determine_volume_status(status):
@@ -201,7 +193,6 @@ def get_node_list(role):
 def delete_snapshots(snapshots_id):
     LOG.info('Deleting snapshot %s ...' % snapshots_id)
     if delete_backend_snapshots(snapshots_id):
-        print 'update snapshots db'
         update_snapshots_db(snapshots_id)
         return True
     else:
@@ -210,13 +201,11 @@ def delete_snapshots(snapshots_id):
 def delete_backend_snapshots(snapshots_id):
     backend_type = get_backend_type()
     if backend_type == 'eqlx':
-        print 'delete backend snapshots eqlx'
         if delete_backend_snapshots_eqlx(snapshots_id):
             return True
         else:
             return False
     elif backend_type == 'rbd':
-        print 'delete backend snapshots rbd'
         if delete_backend_snapshots_rbd(snapshots_id):
             return True
         else:
@@ -262,20 +251,17 @@ def delete_backend_snapshots_rbd(snapshots_id):
 def delete_volume():
     LOG.info('Deleting volume %s ...' % volume_id)
     if delete_backend_volume():
-        print 'update db'
         update_db()
 
 def delete_backend_volume():
     # get backend store type
     backend_type = get_backend_type()
     if backend_type == 'eqlx':
-        print 'delete backend volume eqlx'
         if delete_backend_volume_eqlx():
             return True
         else:
             return False
     elif backend_type == 'rbd':
-        print 'delete backend volume rbd'
         if delete_backend_volume_rbd():
             return True
         else:
@@ -343,7 +329,6 @@ def update_snapshots_db(snapshots_id):
         rest = db_connect(sql_select)
         if rest[0] == 1 and rest[1] == 'deleted' and rest[2] == '100%':
             LOG.info('   [%s]Updating snapshot quota ...' % snapshot_id)
-            print 'update snapshot quota'
             update_snapshot_quota(snapshot_id)
         else:
             LOG.error('   Database update faild !')
@@ -372,9 +357,7 @@ def update_snapshot_quota(snapshot_id):
     
 def update_db():
     LOG.info('   Updating database ...')
-    print 'update volume table'
     update_volume_table()
-    print 'update volume quota'
     update_volume_quota()
 
 def update_volume_table():
