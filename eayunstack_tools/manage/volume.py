@@ -275,6 +275,10 @@ def delete_backend_volume():
             return False
     elif backend_type == 'rbd':
         print 'delete backend volume rbd'
+        if delete_backend_volume_rbd():
+            return True
+        else:
+            return False
     else:
         LOG.error('Do not support to delete "%s" type volume.' % backend_type)
 
@@ -312,6 +316,20 @@ def delete_backend_volume_eqlx():
     else:
         return True
 
+def delete_backend_volume_rbd():
+    LOG.info('   Deleting backend(rbd) volume ...')
+    rbd_pool = get_config('cinder_ceph', 'rbd_pool')
+    (s, o) = commands.getstatusoutput('rbd -p %s info volume-%s' % (rbd_pool, volume_id))
+    if s != 0:
+        LOG.error('   Can not get rbd info for volume "%s" !' % volume_id)
+        return False
+    else:
+        (ss, oo) = commands.getstatusoutput('rbd -p %s rm volume-%s' % (rbd_pool, volume_id))
+        if ss != 0:
+            LOG.error('   Can not delete rbd volume "%s" !' % volume_id)
+            return False
+        else:
+            return True
 
 def update_snapshots_db(snapshots_id):
    # (host, pwd) = get_db_host_pwd()
