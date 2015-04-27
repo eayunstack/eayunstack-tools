@@ -79,6 +79,8 @@ def destroy_volume():
                 else:
                     # delete all snapshots & volume
                     print 'delete snapshots and volume'
+                    if delete_snapshots(snapshots_id):
+                        print 'delete volume'
             else:
                 print 'delete volume'
 
@@ -166,3 +168,22 @@ def get_db_host_pwd():
         return m[2], m[1]
     except:
         LOG.error('Can not get the host address and password for cinder database !')
+
+def delete_snapshots(snapshots_id):
+    LOG.info('Deleting snapshot %s ...' % snapshots_id)
+    if delete_backend_snapshots(snapshots_id):
+        print 'update snapshots db'
+        return True
+    else:
+        return False
+
+def delete_backend_snapshots(snapshots_id):
+    backend_type = get_backend_type()
+    if backend_type == 'eqlx':
+        print 'delete backend snapshots eqlx'
+    elif backend_type == 'rbd':
+        print 'delete backend snapshots rbd'
+    else:
+        LOG.error('Do not support to delete "%s" type snapshot.' % backend_type)
+        return False
+
