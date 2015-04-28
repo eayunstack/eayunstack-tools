@@ -145,6 +145,30 @@ class NodeRole(object):
 
 NODE_ROLE = NodeRole()
 
+def get_controllers_hostname():
+    file_path = '/.node-list'
+    controllers = []
+    if not os.path.exists(file_path):
+        return
+    node_list_file = open(file_path)
+    try:
+        for line in node_list_file:
+            if 'controller' in line:
+                line = line.split(':')[0]
+                controllers.append(line)
+    finally:
+        node_list_file.close()
+    return controllers
+
+def get_node_list(role):
+    node_list = []
+    try:
+        for node in NODE_ROLE.nodes:
+            if node['roles'] == role:
+                node_list.append(node['ip'])
+    except:
+        node_list = []
+    return node_list
 
 def ssh_connect(hostname, commands, key_file=os.environ['HOME'] + '/.ssh/id_rsa', ssh_port=22, username='root', timeout=2):
     # Temporarily disable INFO level logging
