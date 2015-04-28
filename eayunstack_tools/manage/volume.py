@@ -7,12 +7,16 @@ import ConfigParser
 import re
 from eayunstack_tools.manage.eqlx_ssh_conn import ssh_execute as eqlx_ssh_execute
 from eayunstack_tools.utils import ssh_connect
+from eayunstack_tools.utils import NODE_ROLE
 
 LOG = logging.getLogger(__name__)
 
 env_path = os.environ['HOME'] + '/openrc'
 
 def volume(parser):
+    if not NODE_ROLE.is_controller():
+        LOG.warn('This command can only run on controller node !')
+        return
     if parser.DESTROY_VOLUME:
         if not parser.ID:
             LOG.error('Please use [--id ID] to specify the volume ID !')
