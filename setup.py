@@ -18,6 +18,7 @@ setup(
             'doctor = eayunstack_tools.doctor:make',
             'fuel = eayunstack_tools.fuel:make',
             'manage = eayunstack_tools.manage:make',
+            'init = eayunstack_tools.init:make',
         ],
         'fuel_command': [
             'backup = eayunstack_tools.fuel.backup:make',

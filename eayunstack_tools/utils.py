@@ -195,3 +195,28 @@ def ssh_connect(hostname, commands, key_file=os.environ['HOME'] + '/.ssh/id_rsa'
         logging.disable(logging.NOTSET)
     return result_out, result_err
 
+def scp_connect(hostname, local_path, remote_path, key_file=os.environ['HOME'] + '/.ssh/id_rsa',username='root', port=22, timeout=2):
+    logging.disable(logging.INFO)
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        key = paramiko.RSAKey.from_private_key_file(key_file)
+        ssh.connect(hostname=hostname, username=username, port=port, pkey=key, timeout=timeout)
+        sftp = ssh.open_sftp()
+        try:
+            sftp.chdir(os.path.dirname(remote_path))
+        except IOError:
+            sftp.mkdir(os.path.dirname(remote_path))
+        sftp.put(local_path,remote_path)
+        sftp.close()
+    except socket.timeout:
+        LOG.error('Can not connect to %s, connection timeout !' % hostname)
+    except socket.error:
+        LOG.error('Can not connect to %s !' % hostname)
+    except paramiko.ssh_exception.AuthenticationException:
+        LOG.error('SSH Authentication failed for user %s !' % username)
+    except IOError as msg:
+        LOG.error('IOError: %s' % msg)
+    finally:
+        ssh.close()
+        logging.disable(logging.NOTSET)

@@ -39,4 +39,5 @@ def main():
     else:
         args = parser.parse_args()
 
-    return args.func(args)
+    if sys.argv[1] != 'init':
+        return args.func(args)
