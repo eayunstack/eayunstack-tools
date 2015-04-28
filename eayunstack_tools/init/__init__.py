@@ -8,7 +8,7 @@ LOG = logging.getLogger(__name__)
 
 def make(parser):
     '''EayunStack Environment Initialization'''
-    if len(sys.argv) == 2:
+    if len(sys.argv) == 2 and sys.argv[1] == 'init':
         init_node_list_file()
         init_node_role_file()
 
