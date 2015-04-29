@@ -47,7 +47,6 @@ def check_all():
     '''Check All Environement Object'''
     if NODE_ROLE.is_fuel():
         node_list = get_node_list('all')
-        print node_list
         for node in node_list:
             LOG.info('%s Node: %-13s %s' % ('*'*15, node, '*'*15))
             out,err = ssh_connect(node, 'eayunstack doctor env -a')
