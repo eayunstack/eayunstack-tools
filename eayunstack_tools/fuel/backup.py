@@ -28,7 +28,7 @@ def make(parser):
         action='store_true',
         dest='NEW_BACKUP',
         default=False,
-        help='Start A New Backup'
+        help='Create A New Backup'
     )
     parser.add_argument(
         '-l',
