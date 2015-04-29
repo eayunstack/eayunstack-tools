@@ -20,7 +20,10 @@ def env(parser):
         LOG.error('Can not confirm the node role!')
         return
     if parser.CHECK_ALL:
-        check_all()
+        if not parser.OBJECT_NAME:
+            check_all()
+        else:
+            check_nodes(parser.OBJECT_NAME)
     elif parser.OBJECT_NAME:
         object_func = 'check_%s' % (parser.OBJECT_NAME)
         eval(object_func)()
@@ -155,3 +158,15 @@ def check_network():
     # 2) check all NIC network connectivity
 
     # how to check ???
+
+def check_nodes(obj_name):
+    node_list = get_node_list('all')
+    for node in node_list:
+        LOG.info('%s Node: %-13s %s' % ('*'*15, node, '*'*15))
+        out,err = ssh_connect(node, 'eayunstack doctor env -n %s' % obj_name)
+        if out:
+            print out
+        else:
+            LOG.error('Check failed !')
+            print err
+
