@@ -49,15 +49,16 @@ def make(parser):
 def check_all():
     '''Check All Environement Object'''
     if NODE_ROLE.is_fuel():
-        node_list = get_node_list('all')
-        for node in node_list:
-            LOG.info('%s Node: %-13s %s' % ('*'*15, node, '*'*15))
-            out,err = ssh_connect(node, 'eayunstack doctor env -a')
-            if out:
-                print out
-            else:
-                LOG.error('Check failed !')
-                print err
+        for role in ['controller','compute','mongo','ceph-osd']:
+            node_list = get_node_list(role)
+            for node in node_list:
+                LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
+                out,err = ssh_connect(node, 'eayunstack doctor env -a')
+                if out:
+                    print out
+                else:
+                    LOG.error('Check failed !')
+                    print err
     else:
         LOG.debug('This option will do following things:')
         for i in register.all:
@@ -160,13 +161,14 @@ def check_network():
     # how to check ???
 
 def check_nodes(obj_name):
-    node_list = get_node_list('all')
-    for node in node_list:
-        LOG.info('%s Node: %-13s %s' % ('*'*15, node, '*'*15))
-        out,err = ssh_connect(node, 'eayunstack doctor env -n %s' % obj_name)
-        if out:
-            print out
-        else:
-            LOG.error('Check failed !')
-            print err
-
+   # node_list = get_node_list('all')
+    for role in ['controller','compute','mongo','ceph-osd']:
+        node_list = get_node_list(role)
+        for node in node_list:
+            LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
+            out,err = ssh_connect(node, 'eayunstack doctor env -n %s' % obj_name)
+            if out:
+                print out
+            else:
+                LOG.error('Check failed !')
+                print err
