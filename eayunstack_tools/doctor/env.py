@@ -6,17 +6,24 @@ import os
 import math
 import glob
 from eayunstack_tools.doctor import common
-from eayunstack_tools.utils import register_decorater, userful_msg
+from eayunstack_tools.utils import register_decorater, userful_msg, get_node_list, ssh_connect
 from eayunstack_tools.logger import fmt_print, valid_print
 from utils import check_service
+from eayunstack_tools.utils import NODE_ROLE
 
 LOG = logging.getLogger(__name__)
 register = register_decorater()
 
 
 def env(parser):
+    if NODE_ROLE.is_unknown():
+        LOG.error('Can not confirm the node role!')
+        return
     if parser.CHECK_ALL:
-        check_all()
+        if not parser.OBJECT_NAME:
+            check_all()
+        else:
+            check_nodes(parser.OBJECT_NAME)
     elif parser.OBJECT_NAME:
         object_func = 'check_%s' % (parser.OBJECT_NAME)
         eval(object_func)()
@@ -41,11 +48,23 @@ def make(parser):
 
 def check_all():
     '''Check All Environement Object'''
-    LOG.debug('This option will do following things:')
-    for i in register.all:
-        fmt_print('--' + i)
-    for i in register.all:
-        eval(i)()
+    if NODE_ROLE.is_fuel():
+        for role in ['controller','compute','mongo','ceph-osd']:
+            node_list = get_node_list(role)
+            for node in node_list:
+                LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
+                out,err = ssh_connect(node, 'eayunstack doctor env -a')
+                if out:
+                    print out
+                else:
+                    LOG.error('Check failed !')
+                    print err
+    else:
+        LOG.debug('This option will do following things:')
+        for i in register.all:
+            fmt_print('--' + i)
+        for i in register.all:
+            eval(i)()
 
 
 @userful_msg()
@@ -117,6 +136,7 @@ def check_network():
     # 1) find all network and their link status
     tmp = glob.glob('/sys/class/net/*/device')
     nics = dict()
+    warn = False
     for i in tmp:
         name = i.split('/')[4]
         (status, out) = commands.getstatusoutput(
@@ -125,13 +145,30 @@ def check_network():
             status = 'yes'
         else:
             status = 'no'
+            warn = True
         nics[name] = status
 
     # TODO: print the function of nics, e.g. for managerment or storage
-    LOG.info('Network card information:')
+    if warn:
+        LOG.warn('Network card information:')
+    else:
+        LOG.info('Network card information:')
     for i in nics.keys():
         valid_print(i, nics[i])
 
     # 2) check all NIC network connectivity
 
     # how to check ???
+
+def check_nodes(obj_name):
+   # node_list = get_node_list('all')
+    for role in ['controller','compute','mongo','ceph-osd']:
+        node_list = get_node_list(role)
+        for node in node_list:
+            LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
+            out,err = ssh_connect(node, 'eayunstack doctor env -n %s' % obj_name)
+            if out:
+                print out
+            else:
+                LOG.error('Check failed !')
+                print err
