@@ -20,7 +20,7 @@ nova_p = [
         ]
 
 cinder_p = [
-
+        '/etc/cinder/cinder.conf'
     ]
 
 ceilometer_p = [
@@ -56,7 +56,10 @@ compute_nova_s = [
         ]
 
 cinder_s = [
-
+        'openstack-cinder-api',
+        'openstack-cinder-backup',
+        'openstack-cinder-scheduler',
+        'openstack-cinder-volume'
     ]
 
 ceilometer_s = [
