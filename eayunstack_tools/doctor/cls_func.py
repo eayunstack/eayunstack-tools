@@ -73,6 +73,6 @@ def check_all_nodes(check_obj):
         return
     else:
         for node in node_list:
-            LOG.info('%s Node: %-13s %s' % ('*'*20, node, '*'*20))
+            LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, 'controller', node, '*'*15))
             result_out,result_err = ssh_connect(node, check_cmd)
             print result_out
