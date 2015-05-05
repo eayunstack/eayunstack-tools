@@ -18,7 +18,7 @@ node_role = get_node_role()
 def check_profile(profile, role):
     # if the profile file is not exists, go back
     if not os.path.exists(profile):
-        LOG.error('   Can not find this profile. Abort this check!')
+        LOG.error('Can not find this profile. Abort this check!')
         return
 
     # get template path
@@ -26,7 +26,7 @@ def check_profile(profile, role):
 
     # if the template file is not exists, go back
     if not os.path.exists(template):
-        LOG.error('   Template file is missing, Please check it by yourself.')
+        LOG.error('Template file is missing, Please check it by yourself.')
         return
 
     # check file resolvability, if not resolvability, go back
@@ -87,23 +87,23 @@ def check_key(section, key, profile, template):
         correct_value = dict(pt.items(section))[key]
     # there is no this section in the template file
     except ConfigParser.NoSectionError:
-        LOG.warn('   Can not check following option, please check it by yourself. ')
-        LOG.warn('   [%s] ' % section)
-        fmt_print('   %s=%s' % (key, current_value))
+        LOG.warn('Can not check following option, please check it by yourself. ')
+        fmt_print('[%s] ' % section)
+        fmt_print('%s=%s' % (key, current_value))
         correct_value = current_value
     # there is no this key in the section
     except KeyError:
-        LOG.warn('   Can not check following option, please check it by yourself. ')
-        LOG.warn('   [%s] ' % section)
-        fmt_print('   %s=%s' % (key, current_value))
+        LOG.warn('Can not check following option, please check it by yourself. ')
+        fmt_print('[%s] ' % section)
+        fmt_print('%s=%s' % (key, current_value))
         correct_value = current_value
 
     # if the key in profile and template didn't matched, check faild
     if current_value != correct_value:
-        LOG.error('   [%s] ' % section)
-        LOG.error('   "%s" option check faild' % key)
-        fmt_print('   Current is "%s=%s"' % (key, current_value))
-        fmt_print('   Correct is "%s=%s"' % (key, correct_value))
+        LOG.error('[%s] ' % section)
+        LOG.error('"%s" option check faild' % key)
+        fmt_print('Current is "%s=%s"' % (key, current_value))
+        fmt_print('Correct is "%s=%s"' % (key, correct_value))
 
 # if the section or key not in the profile, warnning
 def check_lost_key(section, key, profile):
@@ -112,9 +112,9 @@ def check_lost_key(section, key, profile):
     try:
         dict(p.items(section))[key]
     except ConfigParser.NoSectionError:
-        LOG.warn('   Lost section [%s] in this profile.' % section)
+        LOG.warn('Lost section [%s] in this profile.' % section)
     except KeyError:
-        LOG.warn('   Lost [%s] ==> %s option in this profile. Please check it.' % (section, key))
+        LOG.warn('Lost [%s] ==> %s option in this profile. Please check it.' % (section, key))
 
 def check_file_resolvability(filepath):
     tp = ConfigParser.ConfigParser()
@@ -122,7 +122,7 @@ def check_file_resolvability(filepath):
         tp.read(filepath)
     except ConfigParser.ParsingError, msg:
         LOG.error(msg)
-        LOG.error('   Abort this check!')
+        LOG.error('Abort this check!')
         return False
     return True
 
@@ -140,7 +140,7 @@ def check_db_connect(component):
         m = p.match(value).groups()
         check_mysql_connect(m[2], m[0], m[1], m[3])
     except:
-        LOG.error('   Load DB Configuration Faild.')
+        LOG.error('Load DB Configuration Faild.')
     
 def check_mysql_connect(server, user, pwd, dbname):
     try:
@@ -149,21 +149,21 @@ def check_mysql_connect(server, user, pwd, dbname):
         cursor.execute('SELECT VERSION()')
         cursor.fetchone()
         db.close()
-        LOG.info('   Check Sucessfully.')
+        fmt_print('Check Sucessfully.')
     except:
-        LOG.error('   Check Faild.')
+        LOG.error('Check Faild.')
 
 def check_component_availability(component, check_cmd):
     ENV_FILE_PATH = '/root/openrc'
     if os.path.exists(ENV_FILE_PATH):
         (s, o) = commands.getstatusoutput('source %s;' % ENV_FILE_PATH + check_cmd)
         if s == 0:
-            LOG.info('   Check Successfully.')
+            fmt_print('Check Successfully.')
         else:
-            LOG.error('   Check Faild.')
-            LOG.error('   ' + o)
+            LOG.error('Check Faild.')
+            LOG.error(o)
     else:
-        LOG.error('   Can not load environment variables from "%s".' % ENV_FILE_PATH)
+        LOG.error('Can not load environment variables from "%s".' % ENV_FILE_PATH)
 
 def check_node_profiles(role):
     component_list = eval('get_%s_component' % role)()
@@ -171,7 +171,7 @@ def check_node_profiles(role):
         LOG.info('Checking "%s" Component' % c.capitalize())
         profile_list = eval('get_%s_profiles' % c)()
         for p in profile_list:
-            LOG.info(' -Profile: ' + p)
+            fmt_print('Profile: ' + p)
             check_profile(p, role)
 
 def check_node_services(node):
@@ -179,7 +179,7 @@ def check_node_services(node):
     check_cmd = get_component_check_cmd()
     for c in component_list:
         LOG.info('Checking "%s" Component' % c.capitalize())
-        LOG.info(' -Service Status')
+        LOG.info('-Service Status')
         if c == 'nova':
             service_list = eval('get_%s_%s_services' % (node, c))()
         else:
@@ -189,9 +189,9 @@ def check_node_services(node):
             check_service(s)
         if node != 'controller':
             continue
-        LOG.info(' -DB Connectivity')
+        LOG.info('-DB Connectivity')
         check_db_connect(c)
-        LOG.info(' -Service Availability')
+        LOG.info('-Service Availability')
         check_component_availability(c, check_cmd[c])
 
 # get all nodes list
