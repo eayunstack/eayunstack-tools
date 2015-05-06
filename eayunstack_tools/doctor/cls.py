@@ -168,7 +168,7 @@ def check_ceph():
                 osd = l.split()[2]
                 status = l.split()[3]
                 if status != 'up':
-                    LOG.error('%s status is not correct, please check it !', osd)
+                    LOG.error('%s status is not correct, please check it !' % osd)
                     check_success = False
     if check_success:
         LOG.info('Ceph osd status check successfully !')

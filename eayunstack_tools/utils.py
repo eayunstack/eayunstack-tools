@@ -88,8 +88,8 @@ class NodeRole(object):
         except Exception as e:
             # If the file not exists, or something wrong happens, we consume
             # the node is unknow, and fire a warn message
-            LOG.warn('Unknow node, please fix the issue: %s',
-                     logger.fmt_excep_msg(e))
+            LOG.warn('Unknow node, please fix the issue: %s'
+                     % logger.fmt_excep_msg(e))
             roles.append(ROLES.UNKNOWN)
         return roles
 

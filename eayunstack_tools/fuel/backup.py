@@ -52,7 +52,7 @@ def backup_new():
     # (stat, out) = (0, '_')
     (stat, out) = commands.getstatusoutput('dockerctl backup')
     if stat != 0:
-        LOG.error('%s', out)
+        LOG.error('%s' % out)
     else:
         LOG.info('Backup successfully completed!\n')
         print 'You can use "eayunstack fuel backup [ -l | --list ]" to '\
