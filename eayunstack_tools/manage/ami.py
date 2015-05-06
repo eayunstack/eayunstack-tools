@@ -12,26 +12,31 @@ LOG = logging.getLogger(__name__)
 env_path = os.environ['HOME'] + '/openrc'
 
 def ami(parser):
-    # "if controller leave to last"
-    if not parser.KERNEL_FILE and not parser.INITRD_FILE and not parser.IMAGE_FILE:
-        LOG.error('Lack of arguments, you can use --help to get help infomation\n')
-    elif not parser.KERNEL_FILE:
-        LOG.error('Please specify the kernel file\n')
-    elif not parser.INITRD_FILE:
-        LOG.error('Please specify the initrd file\n')
-    elif not parser.IMAGE_FILE:
-        LOG.error('Please specify the image file\n')
+    if not NODE_ROLE.is_controller():
+        LOG.warn('This command can only run on controller node !')
     else:
-        if parser.NAME:
-            kernel_file_name = os.path.basename(r'%s' % parser.KERNEL_FILE)
-            initrd_file_name = os.path.basename(r'%s' % parser.INITRD_FILE)
-            AMI_image_upload(parser.KERNEL_FILE, kernel_file_name, parser.INITRD_FILE, initrd_file_name, parser.IMAGE_FILE, parser.NAME)
+        # "if controller leave to last"
+        if not parser.KERNEL_FILE and not parser.INITRD_FILE and not parser.IMAGE_FILE:
+            LOG.error('Lack of arguments, you can use --help to get help infomation\n')
+        elif not parser.KERNEL_FILE:
+            LOG.error('Please specify the kernel file\n')
+        elif not parser.INITRD_FILE:
+            LOG.error('Please specify the initrd file\n')
+        elif not parser.IMAGE_FILE:
+            LOG.error('Please specify the image file\n')
         else:
-            # if not specify image name, use IMAGE_FILE as AMI name
-            kernel_file_name = os.path.basename(r'%s' % parser.KERNEL_FILE)
-            initrd_file_name = os.path.basename(r'%s' % parser.INITRD_FILE)
-            AMI_image_name = os.path.basename(r'%s' % parser.IMAGE_FILE)
-            AMI_image_upload(parser.KERNEL_FILE, kernel_file_name, parser.INITRD_FILE, initrd_file_name, parser.IMAGE_FILE, AMI_image_name)
+            if parser.NAME:
+                # split the path and filename
+                kernel_file_name = os.path.basename(r'%s' % parser.KERNEL_FILE)
+                initrd_file_name = os.path.basename(r'%s' % parser.INITRD_FILE)
+                AMI_image_upload(parser.KERNEL_FILE, kernel_file_name, parser.INITRD_FILE, initrd_file_name, parser.IMAGE_FILE, parser.NAME)
+            else:
+                # if not specify image name, use IMAGE_FILE as AMI name
+                # split the path and filename
+                kernel_file_name = os.path.basename(r'%s' % parser.KERNEL_FILE)
+                initrd_file_name = os.path.basename(r'%s' % parser.INITRD_FILE)
+                AMI_image_name = os.path.basename(r'%s' % parser.IMAGE_FILE)
+                AMI_image_upload(parser.KERNEL_FILE, kernel_file_name, parser.INITRD_FILE, initrd_file_name, parser.IMAGE_FILE, AMI_image_name)
 
 def make(parser):
     '''AMI Image Management'''
