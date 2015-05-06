@@ -197,6 +197,17 @@ def ssh_connect(hostname, commands, key_file=os.environ['HOME'] + '/.ssh/id_rsa'
         logging.disable(logging.NOTSET)
     return result_out, result_err
 
+
+def ssh_connect2(hostname, commands):
+    """exec ssh command and print the result """
+    out, err = ssh_connect(hostname, commands)
+    if out:
+        print out
+    elif err:
+        print err
+    return out, err
+
+
 def scp_connect(hostname, local_path, remote_path, key_file=os.environ['HOME'] + '/.ssh/id_rsa',username='root', port=22, timeout=2):
     logging.disable(logging.INFO)
     ssh = paramiko.SSHClient()

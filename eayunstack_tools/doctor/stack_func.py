@@ -9,7 +9,7 @@ from eayunstack_tools.logger import fmt_print
 from eayunstack_tools.doctor.config import get_db_profile, get_component_check_cmd
 from eayunstack_tools.doctor.config import *
 from eayunstack_tools.doctor.utils import get_node_role, check_service
-from eayunstack_tools.utils import NODE_ROLE, ssh_connect
+from eayunstack_tools.utils import NODE_ROLE, ssh_connect2
 
 LOG = logging.getLogger(__name__)
 
@@ -220,5 +220,4 @@ def check_nodes(node_role, check_obj, multi_role=False):
     for node in node_list:
         LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, node_role, node, '*'*15))
         # ssh to node and run command
-        result_out,result_err = ssh_connect(node, check_cmd)
-        print result_out
+        ssh_connect2(node, check_cmd)

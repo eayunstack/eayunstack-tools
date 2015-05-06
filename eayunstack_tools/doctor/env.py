@@ -6,7 +6,7 @@ import os
 import math
 import glob
 from eayunstack_tools.doctor import common
-from eayunstack_tools.utils import register_decorater, userful_msg, get_node_list, ssh_connect
+from eayunstack_tools.utils import register_decorater, userful_msg, get_node_list, ssh_connect2
 from eayunstack_tools.logger import fmt_print, valid_print
 from utils import check_service
 from eayunstack_tools.utils import NODE_ROLE
@@ -54,12 +54,9 @@ def check_all():
             node_list = get_node_list(role)
             for node in node_list:
                 LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
-                out,err = ssh_connect(node, 'eayunstack doctor env -a')
-                if out:
-                    print out
-                else:
+                out, err = ssh_connect2(node, 'eayunstack doctor env -a')
+                if err:
                     LOG.error('Check failed !')
-                    print err
     else:
         for i in register.all:
             eval(i)()
@@ -164,9 +161,6 @@ def check_nodes(obj_name):
         node_list = get_node_list(role)
         for node in node_list:
             LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
-            out,err = ssh_connect(node, 'eayunstack doctor env -n %s' % obj_name)
-            if out:
-                print out
-            else:
+            out, err = ssh_connect2(node, 'eayunstack doctor env -n %s' % obj_name)
+            if err:
                 LOG.error('Check failed !')
-                print err

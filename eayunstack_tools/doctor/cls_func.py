@@ -1,4 +1,4 @@
-from eayunstack_tools.utils import get_node_list, ssh_connect
+from eayunstack_tools.utils import get_node_list, ssh_connect2
 import commands
 import re
 import logging
@@ -74,5 +74,4 @@ def check_all_nodes(check_obj):
     else:
         for node in node_list:
             LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, 'controller', node, '*'*15))
-            result_out,result_err = ssh_connect(node, check_cmd)
-            print result_out
+            ssh_connect2(node, check_cmd)
