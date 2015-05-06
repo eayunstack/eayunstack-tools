@@ -41,7 +41,7 @@ def restore_from_id(backup_id):
         (stat, out) = commands.getstatusoutput('dockerctl restore %s'
                                                % backup_path)
         if stat != 0:
-            LOG.error('%s', out)
+            LOG.error('%s' % out)
         else:
             LOG.info('Restore successfully completed!\n')
     except:
@@ -54,6 +54,6 @@ def restore_from_file(backup_path):
     (stat, out) = commands.getstatusoutput(
         'dockerctl restore %s' % backup_path)
     if stat != 0:
-        LOG.error('%s', out)
+        LOG.error('%s' % out)
     else:
         LOG.info('Restore successfully completed!\n')

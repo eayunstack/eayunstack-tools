@@ -88,7 +88,7 @@ class BackupDB(object):
             # been created
             return ret
         except Exception as e:
-            LOG.error('open fuel datebase error: %s', fmt_excep_msg(e))
+            LOG.error('open fuel datebase error: %s' % fmt_excep_msg(e))
         return ret
 
     def write_all(self, db_item):

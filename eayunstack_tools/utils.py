@@ -88,8 +88,8 @@ class NodeRole(object):
         except Exception as e:
             # If the file not exists, or something wrong happens, we consume
             # the node is unknow, and fire a warn message
-            LOG.warn('Unknow node, please fix the issue: %s',
-                     logger.fmt_excep_msg(e))
+            LOG.warn('Unknow node, please fix the issue: %s'
+                     % logger.fmt_excep_msg(e))
             roles.append(ROLES.UNKNOWN)
         return roles
 
@@ -202,9 +202,9 @@ def ssh_connect2(hostname, commands):
     """exec ssh command and print the result """
     out, err = ssh_connect(hostname, commands)
     if out:
-            print out
+        LOG.info(out)
     elif err:
-        print err
+        LOG.info(err)
     return out, err
 
 
