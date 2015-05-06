@@ -28,6 +28,7 @@ ceilometer_p = [
         ]
 
 mongo_p = [
+        '/etc/mongodb.conf'
         ]
 
 # 'XXX_s' for XXX's services list
