@@ -28,6 +28,11 @@ ceilometer_p = [
         ]
 
 mongo_p = [
+        '/etc/mongodb.conf'
+        ]
+
+ceph_osd_p = [
+        '/etc/ceph/ceph.conf'
         ]
 
 # 'XXX_s' for XXX's services list
@@ -70,6 +75,10 @@ mongo_s = [
         'mongod'
         ]
 
+ceph_osd_s = [
+        'ceph'
+        ]
+
 # component db profile list
 
 component_db_p = {
@@ -107,7 +116,7 @@ mongo_c = [
         ]
 
 ceph_osd_c = [
-
+       'ceph_osd'
        ]
 
 # return profile list
@@ -132,6 +141,9 @@ def get_ceilometer_profiles():
 
 def get_mongo_profiles():
     return mongo_p
+
+def get_ceph_osd_profiles():
+    return ceph_osd_p
 
 # return services list
 
@@ -158,6 +170,9 @@ def get_ceilometer_services():
 
 def get_mongo_services():
     return mongo_s
+
+def get_ceph_osd_services():
+    return ceph_osd_s
 
 # return db profile
 

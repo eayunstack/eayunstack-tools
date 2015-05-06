@@ -29,22 +29,33 @@ def check_profile(profile, role):
         LOG.error('Template file is missing, Please check it by yourself.')
         return
 
-    # check file resolvability, if not resolvability, go back
-    for filepath in (profile, template):
-        if not check_file_resolvability(filepath):
-            return
-    
-    # Check profile keys
-    check_list = get_check_list(profile)
-    for section in sorted(check_list.keys()):
-        for key in check_list[section]:
-           check_key(section, key, profile, template)
+    if role is not 'mongo':
+        # check file resolvability, if not resolvability, go back
+        for filepath in (profile, template):
+            if not check_file_resolvability(filepath):
+                return
+        
+        # Check profile keys
+        check_list = get_check_list(profile)
+        for section in sorted(check_list.keys()):
+            for key in check_list[section]:
+               check_key(section, key, profile, template)
 
-    # some keys in template but not in profile(named lost keys)
-    t_check_list = get_check_list(template)
-    for t_section in sorted(t_check_list.keys()):
-        for t_key in t_check_list[t_section]:
-            check_lost_key(t_section, t_key, profile)
+        # some keys in template but not in profile(named lost keys)
+        t_check_list = get_check_list(template)
+        for t_section in sorted(t_check_list.keys()):
+            for t_key in t_check_list[t_section]:
+                check_lost_key(t_section, t_key, profile)
+    else:
+        # Check profile keys
+        check_list = get_check_list_common(profile)
+        for key in check_list:
+            check_key_common(key, profile, template)
+
+        # some keys in template but not in profile(named lost keys)
+        t_check_list = get_check_list_common(template)
+        for t_key in t_check_list:
+            check_lost_key_common(t_key, profile)
             
 def get_template_path(profile, role):
     (path, profile_name) = os.path.split(profile)
@@ -76,6 +87,16 @@ def get_check_list(filepath):
     
     return check_list 
 
+def get_check_list_common(filepath):
+    (s, o) = commands.getstatusoutput('grep -v "^$" %s | grep -v "^#" | cut -d "=" -f 1' % filepath)
+    if s != 0:
+        LOG.error('Can not get check options list ! Please check file: %s.' % filepath)
+    else:
+        check_list_common = []
+        for key in o.split('\n'):
+            check_list_common.append(key.strip())
+        return check_list_common
+
 def check_key(section, key, profile, template):
     pp = ConfigParser.ConfigParser()
     pp.read(profile)
@@ -105,6 +126,24 @@ def check_key(section, key, profile, template):
         fmt_print('Current is "%s=%s"' % (key, current_value))
         fmt_print('Correct is "%s=%s"' % (key, correct_value))
 
+def check_key_common(key, profile, template):
+    current_value = get_value_common(key, profile)
+    correct_value = get_value_common(key, template)
+    if not correct_value:
+        LOG.warn('Can not check following option, please check it by yourself. ')
+        fmt_print('%s=%s' % (key, current_value))
+    elif current_value != correct_value:
+        LOG.error('"%s" option check faild' % key)
+        fmt_print('Current is "%s=%s"' % (key, current_value))
+        fmt_print('Correct is "%s=%s"' % (key, correct_value))
+    
+
+def get_value_common(key, filepath):
+    (s, o) = commands.getstatusoutput('grep "^%s" %s | cut -d "=" -f 2' % (key, filepath))
+    if s != 0 or o is None:
+        LOG.error('Can not get %s\'s value ! Please check file: %s.' % (key, filepath))
+    return o.strip()
+
 # if the section or key not in the profile, warnning
 def check_lost_key(section, key, profile):
     p = ConfigParser.ConfigParser()
@@ -115,6 +154,12 @@ def check_lost_key(section, key, profile):
         LOG.warn('Lost section [%s] in this profile.' % section)
     except KeyError:
         LOG.warn('Lost [%s] ==> %s option in this profile. Please check it.' % (section, key))
+
+# if the section or key not in the profile, warnning
+def check_lost_key_common(key, profile):
+    profile_keys = get_check_list_common(profile)
+    if key not in profile_keys:
+        LOG.warn('Lost "%s" option in this profile. Please check it.' % key)
 
 def check_file_resolvability(filepath):
     tp = ConfigParser.ConfigParser()
