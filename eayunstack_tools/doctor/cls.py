@@ -53,7 +53,7 @@ def check_rabbitmq():
     if NODE_ROLE.is_fuel():
         check_all_nodes('rabbitmq')
         return
-    LOG.info('%s Checking rabbitmq cluster status %s' %('='*10, '='*10))
+    LOG.info('%s%s Checking rabbitmq cluster status' %('='*5, '>'))
     # get all controller node hostname
     controllers = get_controllers_hostname()
     if controllers is None:
@@ -87,7 +87,7 @@ def check_mysql():
     if NODE_ROLE.is_fuel():
         check_all_nodes('mysql')
         return
-    LOG.info('%s Checking mysql cluster status %s' %('='*10, '='*10))
+    LOG.info('%s%s Checking mysql cluster status' %('='*5, '>'))
     # get running node list for mysql cluster
     running_nodes = get_mysql_nodes()
     if running_nodes is None:
@@ -119,7 +119,7 @@ def check_haproxy():
     if NODE_ROLE.is_fuel():
         check_all_nodes('haproxy')
         return
-    LOG.info('%s Checking haproxy cluster status %s' %('='*10, '='*10))
+    LOG.info('%s%s Checking haproxy cluster status' %('='*5, '>'))
     # get running node list for haproxy cluster
     running_nodes = get_haproxy_nodes()
     if running_nodes is None:
@@ -153,13 +153,13 @@ def check_ceph():
         check_all_nodes('ceph')
         return
     # get cluster status
-    LOG.info('%s Checking ceph cluster status %s' %('='*10, '='*10))
+    LOG.info('%s%s Checking ceph cluster status' %('='*5, '>'))
     if get_ceph_health():
         LOG.info('Ceph cluster check successfully !')    
     else:
         LOG.error('Ceph cluster check faild !')
     # check osd status
-    LOG.info('%s Checking ceph osd status %s' %('='*10, '='*10))
+    LOG.info('%s%s Checking ceph osd status' %('='*5, '>'))
     check_success = True
     osd_status = get_ceph_osd_status()
     if not osd_status:

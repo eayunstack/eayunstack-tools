@@ -10,6 +10,7 @@ from eayunstack_tools.utils import register_decorater, userful_msg, get_node_lis
 from eayunstack_tools.logger import fmt_print, valid_print
 from utils import check_service
 from eayunstack_tools.utils import NODE_ROLE
+from eayunstack_tools.logger import fmt_print
 
 LOG = logging.getLogger(__name__)
 register = register_decorater()
@@ -60,9 +61,6 @@ def check_all():
                     LOG.error('Check failed !')
                     print err
     else:
-        LOG.debug('This option will do following things:')
-        for i in register.all:
-            fmt_print('--' + i)
         for i in register.all:
             eval(i)()
 
@@ -99,7 +97,7 @@ def check_selinux():
         LOG.error('getenforce error, please check it')
     else:
         if current_state == correct_state.capitalize():
-            LOG.info('SELinux current state is: %s' % current_state)
+            fmt_print('SELinux current state is: %s' % current_state)
         else:
             LOG.warn('SELinux current state is: %s' % current_state)
             LOG.error('SELinux state need to be %s ' %
@@ -109,7 +107,7 @@ def check_selinux():
     current_conf = commands.getoutput(
         'grep "^SELINUX=" /etc/sysconfig/selinux | cut -d "=" -f 2')
     if current_conf == correct_conf:
-        LOG.info('SELinux current conf in profile is: %s' % current_conf)
+        fmt_print('SELinux current conf in profile is: %s' % current_conf)
     else:
         LOG.warn('SELinux current conf in profile is: %s' % current_conf)
         LOG.error('SELinux configuration in profile need to be %s '
@@ -125,7 +123,7 @@ def check_disk():
     used_percent = int(math.ceil((
         float(vfs.f_blocks-vfs.f_bavail)/float(vfs.f_blocks))*100))
     if used_percent >= 0 and used_percent < limit:
-        LOG.info('The "/" filesystem used %s%% space !' % used_percent)
+        fmt_print('The "/" filesystem used %s%% space !' % used_percent)
     elif used_percent >= limit:
         LOG.warn('The "/" filesystem used %s%% space !' % used_percent)
 
@@ -152,7 +150,7 @@ def check_network():
     if warn:
         LOG.warn('Network card information:')
     else:
-        LOG.info('Network card information:')
+        fmt_print('Network card information:')
     for i in nics.keys():
         valid_print(i, nics[i])
 

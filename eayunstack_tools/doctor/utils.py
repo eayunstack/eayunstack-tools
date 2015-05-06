@@ -1,6 +1,7 @@
 import commands
 import logging
 from eayunstack_tools.utils import NODE_ROLE
+from eayunstack_tools.logger import fmt_print
 
 LOG = logging.getLogger(__name__)
 
@@ -29,16 +30,16 @@ def check_service(name):
     (_, out) = commands.getstatusoutput(
         'systemctl is-active %s.service' % (name))
     if out == 'active':
-        LOG.info('   Service %s is running ...', name)
+        fmt_print('Service %s is running ...' % name)
     else:
-        LOG.error('   Service %s is not running ...', name)
+        LOG.error('Service %s is not running ...' % name)
 
     (_, out) = commands.getstatusoutput(
         'systemctl is-enabled %s.service' % (name))
     if out == 'enabled':
-        LOG.info('   Service %s is enabled ...', name)
+        fmt_print('Service %s is enabled ...' % name)
     else:
-        LOG.error('   Service %s is not enabled ...', name)
+        LOG.error('Service %s is not enabled ...' % name)
 
 def check_process(name):
     (status, out) = commands.getstatusoutput('pgrep -lf %s' % (name))
@@ -46,4 +47,4 @@ def check_process(name):
         # fmt_print('%s is running' % (name))
         pass
     else:
-        LOG.error('%s is not running', name)
+        LOG.error('%s is not running' % name)
