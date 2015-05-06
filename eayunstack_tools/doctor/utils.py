@@ -36,7 +36,8 @@ def check_service(name):
 
     (_, out) = commands.getstatusoutput(
         'systemctl is-enabled %s.service' % (name))
-    if out == 'enabled':
+   # if out == 'enabled':
+    if 'enabled' in out:
         fmt_print('Service %s is enabled ...' % name)
     else:
         LOG.error('Service %s is not enabled ...' % name)
