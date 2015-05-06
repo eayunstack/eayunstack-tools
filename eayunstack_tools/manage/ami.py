@@ -1,15 +1,21 @@
 # @filename ami.py
-#ami management
+# ami management
+
+
 import os
 import logging
 import commands
 
+
 from eayunstack_tools.manage.value_utils import get_value
 from eayunstack_tools.utils import NODE_ROLE
 
+
 LOG = logging.getLogger(__name__)
 
+
 env_path = os.environ['HOME'] + '/openrc'
+
 
 def ami(parser):
     if not NODE_ROLE.is_controller():
@@ -29,14 +35,18 @@ def ami(parser):
                 # split the path and filename
                 kernel_file_name = os.path.basename(r'%s' % parser.KERNEL_FILE)
                 initrd_file_name = os.path.basename(r'%s' % parser.INITRD_FILE)
-                AMI_image_upload(parser.KERNEL_FILE, kernel_file_name, parser.INITRD_FILE, initrd_file_name, parser.IMAGE_FILE, parser.NAME)
+                ami_image_upload(parser.KERNEL_FILE, kernel_file_name,
+                                 parser.INITRD_FILE, initrd_file_name,
+                                 parser.IMAGE_FILE, parser.NAME)
             else:
                 # if not specify image name, use IMAGE_FILE as AMI name
                 # split the path and filename
                 kernel_file_name = os.path.basename(r'%s' % parser.KERNEL_FILE)
                 initrd_file_name = os.path.basename(r'%s' % parser.INITRD_FILE)
-                AMI_image_name = os.path.basename(r'%s' % parser.IMAGE_FILE)
-                AMI_image_upload(parser.KERNEL_FILE, kernel_file_name, parser.INITRD_FILE, initrd_file_name, parser.IMAGE_FILE, AMI_image_name)
+                ami_image_name = os.path.basename(r'%s' % parser.IMAGE_FILE)
+                ami_image_upload(parser.KERNEL_FILE, kernel_file_name,
+                                 parser.INITRD_FILE, initrd_file_name,
+                                 parser.IMAGE_FILE, ami_image_name)
 
 def make(parser):
     '''AMI Image Management'''
@@ -67,7 +77,9 @@ def make(parser):
     )
     parser.set_defaults(func=ami)
 
-def AMI_image_upload(kernel_file, kernel_file_name, initrd_file, initrd_file_name, image_file, name):
+def ami_image_upload(kernel_file, kernel_file_name,
+                     initrd_file, initrd_file_name,
+                     image_file, name):
     '''AMI Image Upload'''
     kernel_id = kernel_file_upload(kernel_file, kernel_file_name)
     ramdisk_id = initrd_file_upload(initrd_file, initrd_file_name)
@@ -79,7 +91,7 @@ def AMI_image_upload(kernel_file, kernel_file_name, initrd_file, initrd_file_nam
         else:
             LOG.error('AMI image upload failed because of the failed of kernel file. Please try again.\n')
             # delete the successful initrd image
-            initrd_file_delete(ramdisk_id)
+            image_delete(ramdisk_id)
     # if initrd file upload successfully but kernel file failed:
     elif not ramdisk_id:
         # if both failed:
@@ -88,26 +100,29 @@ def AMI_image_upload(kernel_file, kernel_file_name, initrd_file, initrd_file_nam
         else:
             LOG.error('AMI image upload failed because of the failed of initrd file. Please try again.\n')
             # delete the successful kernel image
-            kernel_file_delete(kernel_id)
+            image_delete(kernel_id)
     else:
         LOG.info('AMI image uploading...\n')
-        (stat, out) = commands.getstatusoutput('source %s && glance image-create --name %s --disk-format=ami --container-format=ami --property kernel_id=%s --property ramdisk_id=%s --file %s --is-public True' % (env_path, name, kernel_id, ramdisk_id, image_file))
+        (stat, out) = commands.getstatusoutput('source %s && glance image-create --name %s --disk-format=ami --container-format=ami --property kernel_id=%s --property ramdisk_id=%s --file %s --is-public True'
+                                               % (env_path, name, kernel_id, ramdisk_id, image_file))
         if stat != 0:
             LOG.error('%s', out)
             # if AMI image upload failed, delete kernel image and initrd image:
-            kernel_file_delete(kernel_id)
-            initrd_file_delete(ramdisk_id)
+            image_delete(kernel_id)
+            image_delete(ramdisk_id)
         else:
             LOG.info('AMI image upload successfully!\n')
             print out
-            # if successfully, cannot delete, protect the kernel image and initrd image.
+            # if successfully, cannot delete,
+            # protect the kernel image and initrd image.
             protect_image(kernel_id)
             protect_image(ramdisk_id)
 
 def kernel_file_upload(kernel_file, name):
     '''Upload kernel file and get UUID'''
     LOG.info('Kernel file uploading...\n')
-    (stat, out) = commands.getstatusoutput('source %s && glance image-create --name %s --disk-format=aki --container-format=aki --file %s' % (env_path, name, kernel_file))
+    (stat, out) = commands.getstatusoutput('source %s && glance image-create --name %s --disk-format=aki --container-format=aki --file %s'
+                                           % (env_path, name, kernel_file))
     if stat != 0:
         LOG.error('Kernel file upload failed.')
         LOG.error('%s\n', out)
@@ -121,7 +136,8 @@ def kernel_file_upload(kernel_file, name):
 def initrd_file_upload(initrd_file, name):
     '''Upload initrd file and get UUID'''
     LOG.info('Initrd file uploading...\n')
-    (stat, out) = commands.getstatusoutput('source %s && glance image-create --name %s --disk-format=ari --container-format=ari --file %s' % (env_path, name, initrd_file))
+    (stat, out) = commands.getstatusoutput('source %s && glance image-create --name %s --disk-format=ari --container-format=ari --file %s'
+                                           % (env_path, name, initrd_file))
     if stat != 0:
         LOG.error('Initrd file upload failed.')
         LOG.error('%s\n', out)
@@ -132,31 +148,21 @@ def initrd_file_upload(initrd_file, name):
         ramdisk_id = get_value(out, "id")
         return ramdisk_id
 
-def kernel_file_delete(uuid):
+def image_delete(uuid):
     '''Delete tmp kernel file'''
-    LOG.info('Kernel file deleting...\n')
-    (stat, out) = commands.getstatusoutput('source %s && glance image-delete %s' % (env_path, uuid))
+    LOG.info('Image deleting...\n')
+    (stat, out) = commands.getstatusoutput('source %s && glance image-delete %s'
+                                           % (env_path, uuid))
     if stat != 0:
         LOG.error('%s', out)
         # if delete failed, tell user the uuid and let user delete manually
         LOG.error('Please use "glance image-delete" to delete it. The uuid is %s\n', uuid)
     else:
-        LOG.info('Kernel file was deleted.\n')
-
-def initrd_file_delete(uuid):
-    '''Delelte tmp initrd file'''
-    LOG.info('Initrd file deleting...\n')
-    (stat, out) = commands.getstatusoutput('source %s && glance image-delete %s' % (env_path, uuid))
-    if stat != 0:
-        LOG.error('%s', out)
-        # if delete failed, tell user the uuid and let user delete manually
-        LOG.error('Please use "glance image-delete" to delete it. The uuid is %s\n', uuid)
-    else:
-        LOG.info('Initrd file was deleted.\n')
+        LOG.info('The image was deleted.\n')
 
 def protect_image(uuid):
     '''Protect kernel image and initrd image'''
-    LOG.info('Protecting the image...')
+    LOG.info('Image protecting...')
     (stat, out) = commands.getstatusoutput('source %s && glance image-update --is-protected True %s' % (env_path, uuid))
     if stat != 0:
         LOG.error('%s', out)
