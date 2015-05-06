@@ -254,9 +254,9 @@ def get_node_list(role):
 
 def check_nodes(node_role, check_obj, multi_role=False):
     if multi_role:
-        check_cmd = 'eayunstack doctor stack --' + check_obj
+        check_cmd = 'sudo eayunstack doctor stack --' + check_obj
     else:
-        check_cmd = 'eayunstack doctor stack --' + check_obj + ' --%s' % node_role
+        check_cmd = 'sudo eayunstack doctor stack --' + check_obj + ' --%s' % node_role
     node_list = get_node_list(node_role)
     if len(node_list) == 0:
         LOG.warn('Node list is null !')

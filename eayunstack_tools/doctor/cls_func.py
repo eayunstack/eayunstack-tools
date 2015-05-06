@@ -61,9 +61,9 @@ def get_ceph_osd_status():
 # check all nodes
 def check_all_nodes(check_obj):
     if check_obj is 'all':
-        check_cmd = 'eayunstack doctor cls --all'
+        check_cmd = 'sudo eayunstack doctor cls --all'
     else:
-        check_cmd = 'eayunstack doctor cls -n %s' % check_obj
+        check_cmd = 'sudo eayunstack doctor cls -n %s' % check_obj
     # get controller node list
     node_list = get_node_list('controller')
     # ssh to all controller node to check obj
