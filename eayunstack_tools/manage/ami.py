@@ -91,7 +91,7 @@ def ami_image_upload(kernel_file, kernel_file_name,
         else:
             LOG.error('AMI image upload failed because of the failed of kernel file. Please try again.\n')
             # delete the successful initrd image
-            image_delete(ramdisk_id)
+            delete_image(ramdisk_id)
     # if initrd file upload successfully but kernel file failed:
     elif not ramdisk_id:
         # if both failed:
@@ -100,7 +100,7 @@ def ami_image_upload(kernel_file, kernel_file_name,
         else:
             LOG.error('AMI image upload failed because of the failed of initrd file. Please try again.\n')
             # delete the successful kernel image
-            image_delete(kernel_id)
+            delete_image(kernel_id)
     else:
         LOG.info('AMI image uploading...\n')
         (stat, out) = commands.getstatusoutput('source %s && glance image-create --name %s --disk-format=ami --container-format=ami --property kernel_id=%s --property ramdisk_id=%s --file %s --is-public True'
@@ -108,8 +108,8 @@ def ami_image_upload(kernel_file, kernel_file_name,
         if stat != 0:
             LOG.error('%s', out)
             # if AMI image upload failed, delete kernel image and initrd image:
-            image_delete(kernel_id)
-            image_delete(ramdisk_id)
+            delete_image(kernel_id)
+            delete_image(ramdisk_id)
         else:
             LOG.info('AMI image upload successfully!\n')
             print out
@@ -148,7 +148,7 @@ def initrd_file_upload(initrd_file, name):
         ramdisk_id = get_value(out, "id")
         return ramdisk_id
 
-def image_delete(uuid):
+def delete_image(uuid):
     '''Delete tmp kernel file'''
     LOG.info('Image deleting...\n')
     (stat, out) = commands.getstatusoutput('source %s && glance image-delete %s'
