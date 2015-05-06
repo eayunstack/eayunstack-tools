@@ -1,5 +1,6 @@
 # doctor command common options
 
+
 def add_common_opt(parser):
     parser.add_argument(
         '-a',
@@ -9,9 +10,3 @@ def add_common_opt(parser):
         default=False,
         help='Check ALL',
     )
-    parser.add_argument(
-        '-o',
-        dest='FILENAME',
-        help='Local File To Save Output Info',
-    )
-    return parser

@@ -11,6 +11,12 @@ def create_parser():
         description="""EayunStack Management Tools.\n\n""",
         )
 
+    parser.add_argument(
+        '-o', '--output',
+        dest='FILENAME',
+        help='Local File To Save Output Info',
+    )
+
     sub = parser.add_subparsers(
         title='Commands',
         metavar='COMMAND',
@@ -31,7 +37,6 @@ def create_parser():
 
 
 def main():
-    set_logger()
     parser = create_parser()
     if len(sys.argv) < 2:
         parser.print_help()
@@ -39,5 +44,6 @@ def main():
     else:
         args = parser.parse_args()
 
+    set_logger(args.FILENAME)
     if sys.argv[1] != 'init':
         return args.func(args)

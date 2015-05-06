@@ -2,6 +2,7 @@ import logging
 import sys
 
 LOG = logging.getLogger(__name__)
+LOG_FILE = None
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -56,12 +57,18 @@ def color_format():
     return ColoredFormatter(color_fmt)
 
 
-def set_logger():
+def set_logger(log_file):
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler(sys.stdout)
-    ch.setFormatter(color_format())
-    logger.addHandler(ch)
+    LOG_FILE = log_file
+
+    if LOG_FILE is not None:
+        fh = logging.FileHandler(LOG_FILE)
+        logger.addHandler(fh)
+    else:
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setFormatter(color_format())
+        logger.addHandler(ch)
     return logger
 
 
