@@ -2,7 +2,7 @@
 import logging
 from eayunstack_tools.doctor import env, cls, stack
 
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 
 def check_all(parser):
     LOG.info('%s %-27s %s' % ('+'*25, 'Check Basic Environment', '+'*25))

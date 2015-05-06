@@ -3,7 +3,7 @@ import logging
 from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.logger import fmt_print
 
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 
 def search_service(service):
     (s, out) = commands.getstatusoutput('systemctl list-unit-files | grep "%s"' %(service))

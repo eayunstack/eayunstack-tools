@@ -1,9 +1,8 @@
 from eayunstack_tools.utils import get_node_list, ssh_connect2
 import commands
 import re
-import logging
+from eayunstack_tools.logger import StackLOG as LOG
 
-LOG = logging.getLogger(__name__)
 
 # get node list for rabbitmq cluster
 def get_rabbitmq_nodes():

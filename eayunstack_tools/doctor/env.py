@@ -12,7 +12,7 @@ from utils import check_service
 from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.logger import fmt_print
 
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 register = register_decorater()
 
 

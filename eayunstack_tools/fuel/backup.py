@@ -8,7 +8,7 @@ import os
 
 # Use the default DIR to backup
 
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 
 
 def backup(parser):
