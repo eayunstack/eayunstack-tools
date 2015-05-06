@@ -202,9 +202,9 @@ def ssh_connect2(hostname, commands):
     """exec ssh command and print the result """
     out, err = ssh_connect(hostname, commands)
     if out:
-            print out
+        LOG.info(out)
     elif err:
-        print err
+        LOG.info(err)
     return out, err
 
 

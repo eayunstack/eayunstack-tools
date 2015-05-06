@@ -55,7 +55,13 @@ def color_format():
 
 
 class _StackLOG(object):
-    def __init__(self, filename=None):
+    def setLevel(self, level):
+        if self.log_file:
+            pass
+        else:
+            self.logger.setLevel(level)
+
+    def open(self, filename):
         if filename:
             self.log_file = open(filename, 'a')
         else:
@@ -65,12 +71,6 @@ class _StackLOG(object):
             ch = logging.StreamHandler(sys.stdout)
             ch.setFormatter(color_format())
             self.logger.addHandler(ch)
-
-    def setLevel(self, level):
-        if self.log_file:
-            pass
-        else:
-            self.logger.setLevel(level)
 
     def close(self):
         if self.log_file:

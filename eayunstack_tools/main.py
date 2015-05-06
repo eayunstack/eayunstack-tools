@@ -44,6 +44,7 @@ def main():
     else:
         args = parser.parse_args()
 
+    StackLOG.open(args.FILENAME)
     if sys.argv[1] != 'init':
         try:
             return args.func(args)
