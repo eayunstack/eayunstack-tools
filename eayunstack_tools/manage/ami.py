@@ -9,9 +9,7 @@ import commands
 
 from eayunstack_tools.manage.value_utils import get_value
 from eayunstack_tools.utils import NODE_ROLE
-
-
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 
 
 env_path = os.environ['HOME'] + '/openrc'
@@ -106,7 +104,7 @@ def ami_image_upload(kernel_file, kernel_file_name,
         (stat, out) = commands.getstatusoutput('source %s && glance image-create --name %s --disk-format=ami --container-format=ami --property kernel_id=%s --property ramdisk_id=%s --file %s --is-public True'
                                                % (env_path, name, kernel_id, ramdisk_id, image_file))
         if stat != 0:
-            LOG.error('%s', out)
+            LOG.error('%s' % out)
             # if AMI image upload failed, delete kernel image and initrd image:
             delete_image(kernel_id)
             delete_image(ramdisk_id)
@@ -125,7 +123,7 @@ def kernel_file_upload(kernel_file, name):
                                            % (env_path, name, kernel_file))
     if stat != 0:
         LOG.error('Kernel file upload failed.')
-        LOG.error('%s\n', out)
+        LOG.error('%s\n' % out)
         return 0
     else:
         LOG.info('Kernel file upload successfully.\n')
@@ -140,7 +138,7 @@ def initrd_file_upload(initrd_file, name):
                                            % (env_path, name, initrd_file))
     if stat != 0:
         LOG.error('Initrd file upload failed.')
-        LOG.error('%s\n', out)
+        LOG.error('%s\n' % out)
         return 0
     else:
         LOG.info('Initrd file upload successfully.\n')
@@ -154,9 +152,9 @@ def delete_image(uuid):
     (stat, out) = commands.getstatusoutput('source %s && glance image-delete %s'
                                            % (env_path, uuid))
     if stat != 0:
-        LOG.error('%s', out)
+        LOG.error('%s' % out)
         # if delete failed, tell user the uuid and let user delete manually
-        LOG.error('Please use "glance image-delete" to delete it. The uuid is %s\n', uuid)
+        LOG.error('Please use "glance image-delete" to delete it. The uuid is %s\n' % uuid)
     else:
         LOG.info('The image was deleted.\n')
 
@@ -165,7 +163,7 @@ def protect_image(uuid):
     LOG.info('Image protecting...')
     (stat, out) = commands.getstatusoutput('source %s && glance image-update --is-protected True %s' % (env_path, uuid))
     if stat != 0:
-        LOG.error('%s', out)
+        LOG.error('%s' % out)
     else:
         LOG.info('Protected successfully.\n')
 
