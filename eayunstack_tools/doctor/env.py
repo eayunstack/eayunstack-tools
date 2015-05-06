@@ -54,7 +54,7 @@ def check_all():
             node_list = get_node_list(role)
             for node in node_list:
                 LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
-                out, err = ssh_connect2(node, 'eayunstack doctor env -a')
+                out, err = ssh_connect2(node, 'sudo eayunstack doctor env -a')
                 if err:
                     LOG.error('Check failed !')
     else:
@@ -75,7 +75,7 @@ def check_ntp():
         p = re.compile(r'.+\((.+)\).+')
         try:
             server = p.match(out).groups()[0]
-            LOG.info('ntpserver is %s', server)
+            LOG.info('ntpserver is %s' % server)
         except:
             LOG.error('except ntpstate error, please check it')
             return
@@ -161,6 +161,6 @@ def check_nodes(obj_name):
         node_list = get_node_list(role)
         for node in node_list:
             LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
-            out, err = ssh_connect2(node, 'eayunstack doctor env -n %s' % obj_name)
+            out, err = ssh_connect2(node, 'sudo eayunstack doctor env -n %s' % obj_name)
             if err:
                 LOG.error('Check failed !')
