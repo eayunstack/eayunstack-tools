@@ -45,7 +45,7 @@ def userful_msg():
     def decorate(f):
         @wraps(f)
         def newfunc(*a, **kw):
-            LOG.info('%s%s start running %s ', '='*5, '>', f.__name__)
+            LOG.info('%s%s start running %s ' % ('='*5, '>', f.__name__))
             ret = f(*a, **kw)
             return ret
         return newfunc
