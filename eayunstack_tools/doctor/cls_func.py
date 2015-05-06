@@ -5,17 +5,17 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
-# get masters or slaves node list for rabbitmq cluster
-def get_rabbitmq_nodes(role):
-    if role not in ['masters', 'slaves']: return
-    role = role.capitalize()
-    (s, o) = commands.getstatusoutput('pcs status resources | grep %s' % role)
+# get node list for rabbitmq cluster
+def get_rabbitmq_nodes():
+    running_nodes = []
+    (s, o) = commands.getstatusoutput('crm_resource --locate --resource p_rabbitmq_new-clone 2> /dev/null | grep "running on"')
     if s != 0 or o is None:
         return
     else:
-        p = re.compile(r'     %s: \[ (.+) \]' % role)
-        m = p.match(o).groups()
-        return m[0].split()
+        for entry in o.split('\n'):
+            running_nodes.append(entry.split()[5])
+    return running_nodes
+
 
 
 # get running node list for mysql cluster

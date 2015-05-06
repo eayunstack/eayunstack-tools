@@ -60,9 +60,7 @@ def check_rabbitmq():
         LOG.error('Can not get the controllers node list !')
         return
     # get masters & slaves node list
-    masters = get_rabbitmq_nodes('masters')
-    slaves = get_rabbitmq_nodes('slaves')
-    running_nodes = masters + slaves
+    running_nodes = get_rabbitmq_nodes()
     if running_nodes is None:
         LOG.error('Can not get the running node list for rabbitmq cluster !')
         return
