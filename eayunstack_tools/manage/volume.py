@@ -9,7 +9,7 @@ from eayunstack_tools.manage.eqlx_ssh_conn import ssh_execute as eqlx_ssh_execut
 from eayunstack_tools.utils import ssh_connect
 from eayunstack_tools.utils import NODE_ROLE
 
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 
 env_path = os.environ['HOME'] + '/openrc'
 

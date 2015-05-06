@@ -3,8 +3,7 @@ import logging
 import os
 from fuelclient.client import APIClient
 from eayunstack_tools.utils import scp_connect
-
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 
 def make(parser):
     '''EayunStack Environment Initialization'''

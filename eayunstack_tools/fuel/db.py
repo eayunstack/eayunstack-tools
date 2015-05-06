@@ -4,7 +4,7 @@ import logging
 import collections
 from eayunstack_tools.logger import fmt_excep_msg
 
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 
 BACKUP_DIR = '/var/backup/fuel'
 

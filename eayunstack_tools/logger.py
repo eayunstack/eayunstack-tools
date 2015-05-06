@@ -1,9 +1,6 @@
 import logging
 import sys
 
-LOG = logging.getLogger(__name__)
-LOG_FILE = None
-
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
 COLORS = {
@@ -57,19 +54,47 @@ def color_format():
     return ColoredFormatter(color_fmt)
 
 
-def set_logger(log_file):
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    LOG_FILE = log_file
+class _StackLOG(object):
+    def __init__(self, filename=None):
+        if filename:
+            self.log_file = open(filename, 'a')
+        else:
+            self.log_file = None
+            self.logger = logging.getLogger()
+            self.logger.setLevel(logging.DEBUG)
+            ch = logging.StreamHandler(sys.stdout)
+            ch.setFormatter(color_format())
+            self.logger.addHandler(ch)
 
-    if LOG_FILE is not None:
-        fh = logging.FileHandler(LOG_FILE)
-        logger.addHandler(fh)
-    else:
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setFormatter(color_format())
-        logger.addHandler(ch)
-    return logger
+    def setLevel(self, level):
+        if self.log_file:
+            pass
+        else:
+            self.logger.setLevel(level)
+
+    def close(self):
+        if self.log_file:
+            self.log_file.close()
+
+    def info(self, msg):
+        if self.log_file:
+            self.log_file.write(msg)
+        else:
+            self.logger.info(msg)
+
+    def warn(self, msg):
+        if self.log_file:
+            self.log_file.write(msg)
+        else:
+            self.logger.warn(msg)
+
+    def error(self, msg):
+        if self.log_file:
+            self.log_file.write(msg)
+        else:
+            self.logger.error(msg)
+
+StackLOG = _StackLOG()
 
 
 def fmt_print(msg):

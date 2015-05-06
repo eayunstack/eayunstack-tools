@@ -1,7 +1,7 @@
 import argparse
 import sys
 import pkg_resources
-from eayunstack_tools.logger import set_logger
+from eayunstack_tools.logger import StackLOG
 
 
 def create_parser():
@@ -44,6 +44,8 @@ def main():
     else:
         args = parser.parse_args()
 
-    set_logger(args.FILENAME)
     if sys.argv[1] != 'init':
-        return args.func(args)
+        try:
+            return args.func(args)
+        finally:
+            StackLOG.close()

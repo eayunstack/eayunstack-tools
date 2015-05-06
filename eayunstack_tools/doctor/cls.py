@@ -4,7 +4,7 @@ from eayunstack_tools.utils import NODE_ROLE, get_controllers_hostname
 from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, get_ceph_health, get_ceph_osd_status, check_all_nodes
 import logging
 
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 
 def cls(parser):
     if parser.CHECK_ALL:

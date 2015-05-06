@@ -3,12 +3,11 @@ import logging
 from eayunstack_tools.doctor import common, config, utils
 from eayunstack_tools.utils import register_decorater, userful_msg
 from eayunstack_tools.logger import fmt_print
+from eayunstack_tools.logger import StackLOG as LOG
 from eayunstack_tools.doctor.config import *
 from eayunstack_tools.doctor.utils import get_node_role
 from eayunstack_tools.doctor.stack_func import *
 from eayunstack_tools.utils import NODE_ROLE
-
-LOG = logging.getLogger(__name__)
 
 register = register_decorater()
 node_roles = get_node_role()

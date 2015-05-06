@@ -2,9 +2,7 @@ import logging
 import os
 import commands
 from eayunstack_tools.fuel.db import BACKUP_DIR, BackupDB
-
-
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 
 
 def restore(parser):

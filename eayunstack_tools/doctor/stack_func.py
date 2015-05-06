@@ -10,8 +10,7 @@ from eayunstack_tools.doctor.config import get_db_profile, get_component_check_c
 from eayunstack_tools.doctor.config import *
 from eayunstack_tools.doctor.utils import get_node_role, check_service
 from eayunstack_tools.utils import NODE_ROLE, ssh_connect2
-
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 
 node_role = get_node_role()
 

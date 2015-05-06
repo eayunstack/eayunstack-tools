@@ -6,7 +6,7 @@ import paramiko
 import os
 import socket
 
-LOG = logging.getLogger()
+from eayunstack_tools.logger import StackLOG as LOG
 
 
 def make_subcommand(parser, command):
@@ -202,7 +202,7 @@ def ssh_connect2(hostname, commands):
     """exec ssh command and print the result """
     out, err = ssh_connect(hostname, commands)
     if out:
-        print out
+            print out
     elif err:
         print err
     return out, err

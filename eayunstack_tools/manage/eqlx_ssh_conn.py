@@ -4,7 +4,7 @@ import logging
 import ConfigParser
 from cinder.openstack.common import processutils
 
-LOG = logging.getLogger(__name__)
+from eayunstack_tools.logger import StackLOG as LOG
 
 def ssh_execute(command, timeout=2):
     (hostname, username, password, eqlx_group_name) = get_eqlx_host_info()
