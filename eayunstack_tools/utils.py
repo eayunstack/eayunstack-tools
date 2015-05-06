@@ -62,7 +62,7 @@ ROLES = enum('FUEL', 'CONTROLLER', 'COMPUTE', 'CEPH_OSD', 'MONGO', 'UNKNOWN')
 
 
 class NodeRole(object):
-    def __init__(self, role_file_path='/.node-role'):
+    def __init__(self, role_file_path='/.eayunstack/node-role'):
         self._role_file_path = role_file_path
         self._roles = self._get_roles()
 
@@ -146,7 +146,7 @@ class NodeRole(object):
 NODE_ROLE = NodeRole()
 
 def get_controllers_hostname():
-    file_path = '/.node-list'
+    file_path = '/.eayunstack/node-list'
     controllers = []
     if not os.path.exists(file_path):
         return
