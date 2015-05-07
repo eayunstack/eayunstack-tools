@@ -10,6 +10,8 @@ Source0:	eayunstack-tools-%{version}.tar.gz
 
 BuildRequires:	/bin/bash
 BuildRequires:	python
+BuildRequires:	python2-devel
+BuildRequires:	python-setuptools
 Requires:	python
 Requires:	MySQL-python
 Requires:	python-paramiko
