@@ -120,17 +120,11 @@ def check_key(section, key, profile, template):
         correct_value = dict(pt.items(section))[key]
     # there is no this section in the template file
     except ConfigParser.NoSectionError:
-       # LOG.warn('Can not check following option, please check it by yourself. ')
-       # fmt_print('[%s] ' % section)
-       # fmt_print('%s=%s' % (key, current_value))
-       # correct_value = current_value
+        correct_value = current_value
         return True, current_value
     # there is no this key in the section
     except KeyError:
-       # LOG.warn('Can not check following option, please check it by yourself. ')
-       # fmt_print('[%s] ' % section)
-       # fmt_print('%s=%s' % (key, current_value))
-       # correct_value = current_value
+        correct_value = current_value
         return True, current_value
 
     # if the key in profile and template didn't matched, check faild
@@ -170,7 +164,6 @@ def check_lost_key(section, key, profile):
     except ConfigParser.NoSectionError:
         LOG.warn('Lost section [%s] in this profile.' % section)
     except KeyError:
-       # LOG.warn('Lost [%s] ==> "%s" option in this profile. Please check it.' % (section, key))
         LOG.warn('Lost following option in this profile. Please check it.')
         fmt_print('[%s]' % section)
         fmt_print(key)
