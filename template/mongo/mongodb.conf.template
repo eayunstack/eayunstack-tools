@@ -1,0 +1,9 @@
+syslog = true
+logappend=true
+fork=true
+port = 27017
+dbpath=/var/lib/mongo
+pidfilepath = /var/run/mongodb/mongod.pid
+journal = true
+auth=true
+setParameter = logLevel=2
