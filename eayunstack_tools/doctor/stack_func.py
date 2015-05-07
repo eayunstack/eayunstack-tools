@@ -36,9 +36,22 @@ def check_profile(profile, role):
         
         # Check profile keys
         check_list = get_check_list(profile)
+        miss_keys = []
         for section in sorted(check_list.keys()):
             for key in check_list[section]:
-               check_key(section, key, profile, template)
+               (miss_key, current_value) = check_key(section, key, profile, template)
+               if miss_key:
+                   if '[' + section + ']' not in miss_keys:
+                       miss_keys.append('[' + section + ']')
+                       miss_keys.append(key + ' = ' + current_value)
+                   else:
+                       miss_keys.append(key + ' = ' + current_value)
+        if miss_keys:
+            LOG.warn('Can not check following option, please check it by yourself. ')
+            for entry in miss_keys:
+                fmt_print(entry)
+                   
+               
 
         # some keys in template but not in profile(named lost keys)
         t_check_list = get_check_list(template)
@@ -107,16 +120,18 @@ def check_key(section, key, profile, template):
         correct_value = dict(pt.items(section))[key]
     # there is no this section in the template file
     except ConfigParser.NoSectionError:
-        LOG.warn('Can not check following option, please check it by yourself. ')
-        fmt_print('[%s] ' % section)
-        fmt_print('%s=%s' % (key, current_value))
-        correct_value = current_value
+       # LOG.warn('Can not check following option, please check it by yourself. ')
+       # fmt_print('[%s] ' % section)
+       # fmt_print('%s=%s' % (key, current_value))
+       # correct_value = current_value
+        return True, current_value
     # there is no this key in the section
     except KeyError:
-        LOG.warn('Can not check following option, please check it by yourself. ')
-        fmt_print('[%s] ' % section)
-        fmt_print('%s=%s' % (key, current_value))
-        correct_value = current_value
+       # LOG.warn('Can not check following option, please check it by yourself. ')
+       # fmt_print('[%s] ' % section)
+       # fmt_print('%s=%s' % (key, current_value))
+       # correct_value = current_value
+        return True, current_value
 
     # if the key in profile and template didn't matched, check faild
     if current_value != correct_value:
@@ -124,6 +139,9 @@ def check_key(section, key, profile, template):
         LOG.error('"%s" option check faild' % key)
         fmt_print('Current is "%s=%s"' % (key, current_value))
         fmt_print('Correct is "%s=%s"' % (key, correct_value))
+        return False, None
+    else:
+        return False, None
 
 def check_key_common(key, profile, template):
     current_value = get_value_common(key, profile)
@@ -152,7 +170,10 @@ def check_lost_key(section, key, profile):
     except ConfigParser.NoSectionError:
         LOG.warn('Lost section [%s] in this profile.' % section)
     except KeyError:
-        LOG.warn('Lost [%s] ==> %s option in this profile. Please check it.' % (section, key))
+       # LOG.warn('Lost [%s] ==> "%s" option in this profile. Please check it.' % (section, key))
+        LOG.warn('Lost following option in this profile. Please check it.')
+        fmt_print('[%s]' % section)
+        fmt_print(key)
 
 # if the section or key not in the profile, warnning
 def check_lost_key_common(key, profile):
