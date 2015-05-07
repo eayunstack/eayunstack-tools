@@ -1,13 +1,11 @@
 # @filename ami.py
 # ami management
 
-
 import os
 import logging
 import commands
 
-
-from eayunstack_tools.manage.value_utils import get_value
+from eayunstack_tools.manage.utils import get_value
 from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.logger import StackLOG as LOG
 
