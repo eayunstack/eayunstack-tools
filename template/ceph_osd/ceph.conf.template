@@ -1,0 +1,15 @@
+[global]
+auth_cluster_required = cephx
+auth_service_required = cephx
+auth_client_required = cephx
+filestore_xattr_use_omap = true
+osd_pool_default_size = 2
+osd_pool_default_min_size = 1
+osd_pool_default_pg_num = 1024
+osd_journal_size = 2048
+auth_supported = cephx
+osd_pool_default_pgp_num = 1024
+osd_mkfs_type = xfs
+[client]
+rbd_cache_writethrough_until_flush = True
+rbd_cache = True
