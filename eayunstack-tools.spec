@@ -1,6 +1,6 @@
 Name:		eayunstack-tools
 Version:	1.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	EayunStack Management tools
 
 Group:		Application
@@ -23,6 +23,7 @@ EayunStack Management Tools
 
 
 %build
+CFLAGS="$RPM_OPT_FLAGS" %{__python2} setup.py build
 
 
 %install
@@ -49,5 +50,9 @@ sed -i -e '/^eayunadm/d' /etc/sudoers
 
 
 %changelog
+* Mon May 11 2015 blkart <blkart.org@gmail.com> 1.0-2
+- commit 8d9af51a016922967814707b540c7523a518ddcd
+- modify spec & makefile file
+
 * Thu May 7 2015 blkart <blkart.org@gmail.com> 1.0-1
 - commit ed7658fbe90d3165591a02f06bdf9af63091c907
