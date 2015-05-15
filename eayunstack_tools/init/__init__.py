@@ -5,11 +5,15 @@ from fuelclient.client import APIClient
 from eayunstack_tools.utils import scp_connect
 from eayunstack_tools.logger import StackLOG as LOG
 
+
 def make(parser):
     '''EayunStack Environment Initialization'''
-    if len(sys.argv) == 2 and sys.argv[1] == 'init':
-        init_node_list_file()
-        init_node_role_file()
+    parser.set_defaults(func=init)
+
+
+def init(parser):
+    init_node_list_file()
+    init_node_role_file()
 
 def init_node_list_file():
     # generate node-list file
