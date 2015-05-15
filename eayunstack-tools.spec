@@ -1,6 +1,6 @@
 Name:		eayunstack-tools
 Version:	1.0
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	EayunStack Management tools
 
 Group:		Application
@@ -36,14 +36,29 @@ mkdir -p %{buildroot}/.eayunstack/
 cp -r template %{buildroot}/.eayunstack/
 
 %post
+if [ "$1" = "1" ]; then
+
 useradd eayunadm &> /dev/null
 passwd -d eayunadm &> /dev/null
 passwd -e eayunadm &> /dev/null
 echo 'eayunadm	ALL=(ALL)	NOPASSWD:/bin/eayunstack' >> /etc/sudoers
 
+# modify PS1
+echo '
+# write by eayunstack-tools
+if [ -f /.eayunstack/node-role ];then
+    noderole=`cat /.eayunstack/node-role`
+    export PS1="[\u@\h \W]($noderole)\\$ "
+fi
+
+' >> /etc/bashrc
+fi
+
 %postun
-userdel -r eayunadm
-sed -i -e '/^eayunadm/d' /etc/sudoers
+if [ "$1" = "0" ]; then
+    sed -i -e '/^eayunadm/d' /etc/sudoers
+fi
+
 
 %files
 %doc
@@ -53,6 +68,9 @@ sed -i -e '/^eayunadm/d' /etc/sudoers
 
 
 %changelog
+* Fri May 15 2015 blkart <blkart.org@gmail.com> 1.0-3
+- modify spec file
+
 * Mon May 11 2015 blkart <blkart.org@gmail.com> 1.0-2
 - commit 8d9af51a016922967814707b540c7523a518ddcd
 - modify spec & makefile file
