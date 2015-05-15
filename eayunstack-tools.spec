@@ -44,15 +44,14 @@ passwd -e eayunadm &> /dev/null
 echo 'eayunadm	ALL=(ALL)	NOPASSWD:/bin/eayunstack' >> /etc/sudoers
 
 # modify PS1
-cat >> /etc/bashrc << __EOF__
-
+echo '
 # write by eayunstack-tools
 if [ -f /.eayunstack/node-role ];then
     noderole=`cat /.eayunstack/node-role`
-    export PS1="[\u@\h \W](\$noderole)\\\\$ "
+    export PS1="[\u@\h \W]($noderole)\\$ "
 fi
 
-__EOF__
+' >> /etc/bashrc
 fi
 
 %postun
