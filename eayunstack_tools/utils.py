@@ -62,7 +62,11 @@ ROLES = enum('FUEL', 'CONTROLLER', 'COMPUTE', 'CEPH_OSD', 'MONGO', 'UNKNOWN')
 
 
 class NodeRole(object):
-    def __init__(self, role_file_path='/.eayunstack/node-role'):
+    def __init__(self):
+        if os.path.exists('/.node-role'):
+            role_file_path='/.node-role'
+        else:
+            role_file_path='/.eayunstack/node-role'
         self._role_file_path = role_file_path
         self._roles = self._get_roles()
 
@@ -88,8 +92,7 @@ class NodeRole(object):
         except Exception as e:
             # If the file not exists, or something wrong happens, we consume
             # the node is unknow, and fire a warn message
-            LOG.warn('Unknow node, please fix the issue: %s'
-                     % logger.fmt_excep_msg(e))
+            print 'Unknow node, please fix the issue: %s' % logger.fmt_excep_msg(e)
             roles.append(ROLES.UNKNOWN)
         return roles
 
