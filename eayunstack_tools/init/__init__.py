@@ -4,6 +4,7 @@ import os
 from fuelclient.client import APIClient
 from eayunstack_tools.utils import scp_connect
 from eayunstack_tools.logger import StackLOG as LOG
+from eayunstack_tools.utils import NODE_ROLE
 
 
 def make(parser):
@@ -12,6 +13,11 @@ def make(parser):
 
 
 def init(parser):
+    if NODE_ROLE.is_unknown():
+        LOG.error('Can not confirm the node role!')
+    if not NODE_ROLE.is_fuel():
+        LOG.warn('This command can only run on fuel node !')
+        return
     init_node_list_file()
     init_node_role_file()
 
