@@ -33,11 +33,8 @@ setup(
             'all = eayunstack_tools.doctor.all:make',
         ],
         'manage_command': [
-            'instance = eayunstack_tools.manage.instance:make',
             'volume = eayunstack_tools.manage.volume:make',
             'ami = eayunstack_tools.manage.ami:make',
-            'ceilometer = eayunstack_tools.manage.ceilometer:make',
-            'evacuation = eayunstack_tools.manage.evacuation:make',
             'list = eayunstack_tools.manage.list:make',
         ],
     },
