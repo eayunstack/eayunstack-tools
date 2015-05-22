@@ -7,7 +7,7 @@ from eayunstack_tools.logger import StackLOG as LOG
 # get node list for rabbitmq cluster
 def get_rabbitmq_nodes():
     running_nodes = []
-    (s, o) = commands.getstatusoutput('crm_resource --locate --resource p_rabbitmq_new-clone 2> /dev/null | grep "running on"')
+    (s, o) = commands.getstatusoutput('crm_resource --locate --resource p_rabbitmq-server 2> /dev/null | grep "running on"')
     if s != 0 or o is None:
         return
     else:
