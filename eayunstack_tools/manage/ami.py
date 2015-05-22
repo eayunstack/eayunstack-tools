@@ -59,7 +59,7 @@ def make(parser):
         help='The path of initrd file you want to use'
     )
     parser.add_argument(
-        '--imange-file',
+        '--image-file',
         action='store',
         dest='IMAGE_FILE',
         help='The path of image file you want to upload'
