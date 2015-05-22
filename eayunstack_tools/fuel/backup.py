@@ -43,7 +43,7 @@ def make(parser):
 
 def backup_new():
     LOG.info('Starting backup ...')
-    LOG.info('It will take about 30 minutes, Please wait ...')
+    LOG.info('Restore is in progress, Please wait ...')
     # for test
     # import time
     # sec = int(time.time() - 1429595568)

@@ -50,7 +50,7 @@ def restore_from_id(backup_id):
 
 def restore_from_file(backup_path):
     LOG.info('Starting Restore ...')
-    LOG.info('It will take about 30 minutes, Please wait ...\n')
+    LOG.info('Backup is in progress, Please wait ...\n')
     (stat, out) = commands.getstatusoutput(
         'dockerctl restore %s' % backup_path)
     if stat != 0:
