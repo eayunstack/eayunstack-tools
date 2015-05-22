@@ -17,6 +17,14 @@ def create_parser():
         help='Local File To Save Output Info',
     )
 
+    parser.add_argument(
+        '-d', '--debug',
+        action='store_true',
+        dest='DEBUG',
+        default=False,
+        help='Log debug message or not',
+    )
+
     sub = parser.add_subparsers(
         title='Commands',
         metavar='COMMAND',
@@ -44,7 +52,7 @@ def main():
     else:
         args = parser.parse_args()
 
-    StackLOG.open(args.FILENAME)
+    StackLOG.open(args.FILENAME, args.DEBUG)
     try:
         return args.func(args)
     finally:
