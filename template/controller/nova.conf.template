@@ -93,7 +93,6 @@ workers=12
 auth_port=35357
 auth_protocol=http
 admin_user=nova
-admin_password=RC3FGmym
 admin_tenant_name=services
 signing_dir=/tmp/keystone-signing-nova
 signing_dirname=/tmp/keystone-signing-nova
