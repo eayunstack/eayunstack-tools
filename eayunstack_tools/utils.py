@@ -45,7 +45,7 @@ def userful_msg():
     def decorate(f):
         @wraps(f)
         def newfunc(*a, **kw):
-            LOG.info('%s%s start running %s ' % ('='*5, '>', f.__name__))
+            LOG.debug('%s%s start running %s ' % ('='*5, '>', f.__name__))
             ret = f(*a, **kw)
             return ret
         return newfunc
@@ -205,9 +205,9 @@ def ssh_connect2(hostname, commands):
     """exec ssh command and print the result """
     out, err = ssh_connect(hostname, commands)
     if out:
-        LOG.info(out)
+        LOG.info(out, remote=True)
     elif err:
-        LOG.info(err)
+        LOG.info(err, remote=True)
     return out, err
 
 
