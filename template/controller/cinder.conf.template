@@ -13,7 +13,6 @@ glance_num_retries=0
 glance_api_insecure=False
 glance_api_ssl_compression=False
 host=cinder
-default_volume_type=eqlx
 auth_strategy=keystone
 enabled_backends=cinder_ceph,cinder_eqlx
 debug=True

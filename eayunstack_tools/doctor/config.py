@@ -62,7 +62,6 @@ compute_nova_s = [
 
 cinder_s = [
         'openstack-cinder-api',
-        'openstack-cinder-backup',
         'openstack-cinder-scheduler',
         'openstack-cinder-volume'
     ]
