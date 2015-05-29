@@ -1,6 +1,6 @@
 [DEFAULT]
 verbose=True
-debug=True
+debug=False
 bind_port=9292
 log_file=/var/log/glance/api.log
 backlog=4096
