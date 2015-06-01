@@ -69,6 +69,7 @@ class NodeRole(object):
         else:
             role_file_path='/.eayunstack/node-role'
         self._role_file_path = role_file_path
+        self._role_list_file_path = '/.eayunstack/node-list'
         self._roles = self._get_roles()
 
     def _get_roles(self):
@@ -123,7 +124,7 @@ class NodeRole(object):
     def is_unknown(self):
         ROLES.UNKNOWN == self.node_role[0]
 
-    def _node_list(self):
+    def _node_list_on_fuel(self):
         from fuelclient.client import APIClient
         LOG.setLevel(logging.CRITICAL)
         nodes = []
@@ -143,13 +144,34 @@ class NodeRole(object):
             return s['roles']
         return sorted(nodes, key=_cmp)
 
+    def _node_list_on_other(self):
+        nodes = []
+        try:
+            with open(self._role_list_file_path, 'r') as f:
+                for i in f:
+                    # i: "node-6.eayun.com:node-6:172.16.100.10:ceph-osd"
+                    r = i.strip().split('\n')[0].split(':')
+                    if len(r) != 4:
+                        continue
+                    nodes.append({'roles': r[3], 'host': r[0],
+                                  'ip': r[2], 'mac': ""})
+        except Exception as e:
+            print 'failed to open file: %s: %s' % (self._role_list_file_path,
+                                                   logger.fmt_excep_msg(e))
+
+        def _cmp(s):
+            return s['roles']
+        return sorted(nodes, key=_cmp)
+
+    def _node_list(self):
+        if self.is_fuel():
+            return self._node_list_on_fuel()
+        else:
+            return self._node_list_on_other()
+
     @property
     def nodes(self):
-        if self.is_fuel():
-            # just fuel node need know node list
-            return self._node_list()
-        else:
-            raise RuntimeError
+        return self._node_list()
 
 NODE_ROLE = NodeRole()
 
