@@ -1,4 +1,5 @@
 import pkg_resources
+import pkg_resources
 from functools import wraps
 import logging
 import logger
@@ -88,11 +89,15 @@ class NodeRole(object):
                     elif r[0].lower() == 'mongo':
                         roles.append(ROLES.MONGO)
                     else:
+                        print 'Unknow node, please fix it'
                         roles.append(ROLES.UNKNOWN)
         except Exception as e:
             # If the file not exists, or something wrong happens, we consume
             # the node is unknow, and fire a warn message
             print 'Unknow node, please fix the issue: %s' % logger.fmt_excep_msg(e)
+            roles.append(ROLES.UNKNOWN)
+        if not roles:
+            print 'Unknow node, please fix it'
             roles.append(ROLES.UNKNOWN)
         return roles
 
