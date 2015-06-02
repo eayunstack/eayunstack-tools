@@ -5,6 +5,7 @@ import re
 import os
 import math
 import glob
+import yaml
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import register_decorater, userful_msg, get_node_list, ssh_connect2
 from eayunstack_tools.logger import fmt_print, valid_print
@@ -150,10 +151,59 @@ def _network_get_nic_status():
         valid_print(i, nics[i])
 
 
+def _network_local_network_information(cfg):
+    network_scheme = cfg['network_scheme']
+
+    def _find_phy_port(role):
+        port = None
+        try:
+            action = filter(lambda scheme: scheme['action'] == 'add-patch'
+                            and role in scheme['bridges'],
+                            network_scheme['transformations'])[0]
+            br_phy = (set(action['bridges']) - set([role])).pop()
+            action = filter(lambda scheme: scheme['action'] == 'add-port'
+                            and br_phy == scheme['bridge'],
+                            network_scheme['transformations'])[0]
+            port = action['name']
+        except:
+            port = None
+            #LOG.error('failed to find physics nic for role:%s' % role)
+        return port
+
+    def _find_role_ip(role):
+        try:
+            # IP address here is something
+            # like: {'IP': ['172.16.200.7/24'], 'other_nets': []}
+            # we need to hack it
+            return network_scheme['endpoints'][role]['IP'][0].split('/')[0]
+        except:
+            return None
+
+    def _find_role_gw(role):
+        try:
+            return network_scheme['endpoints'][role]['gateway']
+        except:
+            return None
+
+    network_roles = network_scheme['roles'].values()
+    net_inf = []
+    for r in network_roles:
+        port = _find_phy_port(r)
+        ip = _find_role_ip(r)
+        gateway = _find_role_gw(r)
+        net_inf.append({'name': r, 'phy_port': port,
+                        'ip': ip, 'gateway': gateway})
+    return net_inf
+
+
 @userful_msg()
 @register
 def check_network():
+    cfg = yaml.load(file('/etc/astute.yaml'))
     nics = _network_get_nic_status()
+    local_inf = _network_local_network_information(cfg)
+
+
 
 def check_nodes(obj_name):
    # node_list = get_node_list('all')
