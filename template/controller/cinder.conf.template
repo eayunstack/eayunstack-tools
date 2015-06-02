@@ -21,6 +21,17 @@ log_dir=/var/log/cinder
 use_syslog=True
 use_syslog_rfc_format=True
 syslog_log_facility=LOG_LOCAL3
+backup_topic = cinder-backup
+backup_ceph_chunk_size = 134217728
+backup_api_class = cinder.backup.api.API
+backup_ceph_user = volumes-backup
+backup_ceph_pool = volumes-backup
+backup_ceph_stripe_count = 0
+backup_ceph_conf = /etc/ceph/ceph.conf
+backup_ceph_stripe_unit = 0
+backup_manager = cinder.backup.manager.BackupManager
+backup_name_template = backup-%s
+backup_driver = cinder.backup.drivers.ceph
 [BRCD_FABRIC_EXAMPLE]
 [CISCO_FABRIC_EXAMPLE]
 [database]
@@ -43,6 +54,8 @@ signing_dirname=/tmp/keystone-signing-cinder
 [profiler]
 [ssl]
 [cinder_ceph]
+rbd_pool = volumes
+rbd_user = volumes
 rbd_max_clone_depth=5
 volume_backend_name=cinder_ceph
 volume_driver=cinder.volume.drivers.rbd.RBDDriver
@@ -56,4 +69,5 @@ eqlx_cli_timeout=30
 volume_backend_name=cinder_eqlx
 eqlx_group_name=eayunpublic
 san_thin_provision=True
-
+ssh_min_pool_conn = 1
+ssh_max_pool_conn = 1
