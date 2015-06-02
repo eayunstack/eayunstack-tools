@@ -1,0 +1,10 @@
+[DEFAULT]
+debug =
+base_mac =
+nova_admin_tenant_id =
+nova_admin_password =
+rabbit_password=
+[keystone_authtoken]
+admin_password =
+[database]
+connection =
