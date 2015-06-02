@@ -114,6 +114,18 @@ def check_key(section, key, profile, template):
     pp.read(profile)
     pt = ConfigParser.ConfigParser()
     pt.read(template)
+    current_value = dict(pp.items(section))[key]
+    filterfile = template + '.filter'
+    if os.path.exists(filterfile):
+        pf = ConfigParser.ConfigParser()
+        pf.read(filterfile)
+        try:
+            dict(pf.items(section))[key]
+            LOG.debug('[%s] ==> "%s = %s" option in the filter file, skip check this option.' % (section, key, current_value))
+            return False, None
+        except:
+            pass
+
 
     current_value = dict(pp.items(section))[key]
     try:

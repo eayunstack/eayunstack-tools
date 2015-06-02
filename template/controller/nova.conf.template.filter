@@ -1,0 +1,10 @@
+[DEFAULT]
+rabbit_password =
+neutron_admin_password =
+neutron_metadata_proxy_shared_secret =
+ssh_min_pool_conn =
+ssh_max_pool_conn =
+[database]
+connection = mysql://nova:VPwoEDHX@172.16.101.2/nova?read_timeout=60
+[keystone_authtoken]
+admin_password = UE1cIH37
