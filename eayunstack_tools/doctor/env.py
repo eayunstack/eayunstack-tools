@@ -215,7 +215,8 @@ def _network_remote_network_inf(cfg):
                 node_inf['public_address'] = n['public_address']
             node_inf['internal_address'] = n['internal_address']
             node_inf['host'] = n['fqdn']
-            node_inf['storage_address'] = n['storage_address']
+            if not n['role'].endswith('mongo'):
+                node_inf['storage_address'] = n['storage_address']
             all_node_inf.append(node_inf)
         except:
             #LOG.error("failed to parse node:%s" % n['fqdn'])
@@ -230,7 +231,8 @@ def _network_check_remote(remote_inf):
         ping(inf['internal_address'])
         LOG.debug('=====> start ping storage addr of %s(%s):' %
                   (inf['host'], inf['role']))
-        ping(inf['storage_address'])
+        if (not NODE_ROLE.is_mongo()) or (not inf['role'].endswith('mongo')):
+            ping(inf['storage_address'])
         if NODE_ROLE.is_controller() and inf['role'] == 'controller':
             LOG.debug('=====> start ping public addr of %s(%s):' %
                       (inf['host'], inf['role']))
