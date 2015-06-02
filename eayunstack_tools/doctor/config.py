@@ -47,7 +47,9 @@ glance_s = [
         ]
 
 neutron_s = [
-
+        'neutron-server',
+        'neutron-ovs-cleanup',
+        'openvswitch'
     ]
 
 controller_nova_s = [
@@ -84,6 +86,7 @@ component_db_p = {
         'keystone':'/etc/keystone/keystone.conf',
         'glance':'/etc/glance/glance-registry.conf',
         'nova':'/etc/nova/nova.conf',
+        'neutron':'/etc/neutron/neutron.conf',
         'cinder':'/etc/cinder/cinder.conf'
         }
 
@@ -93,6 +96,7 @@ component_check_cmd = {
         'keystone':'keystone tenant-list',
         'glance':'glance image-list',
         'nova':'nova list',
+        'neutron':'neutron net-list',
         'cinder':'cinder list',
         'ceilometer':'ceilometer list'
         }
@@ -103,6 +107,7 @@ controller_c = [
         'keystone',
         'glance',
         'nova',
+        'neutron',
         'cinder'
         ]
 

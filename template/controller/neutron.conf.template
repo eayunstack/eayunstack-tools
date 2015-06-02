@@ -1,0 +1,58 @@
+[DEFAULT]
+verbose = False
+state_path = /var/lib/neutron
+lock_path = /var/lib/neutron/lock
+use_syslog = True
+syslog_log_facility = LOG_LOCAL4
+log_dir =/var/log/neutron
+bind_host = 0.0.0.0
+bind_port = 9696
+core_plugin =neutron.plugins.ml2.plugin.Ml2Plugin
+service_plugins =neutron.services.l3_router.l3_router_plugin.L3RouterPlugin,neutron.services.metering.metering_plugin.MeteringPlugin,neutron.services.firewall.fwaas_plugin.FirewallPlugin,neutron.services.loadbalancer.plugin.LoadBalancerPlugin,neutron.services.vpn.plugin.VPNDriverPlugin,neutron.services.qos.qos_plugin.QosPlugin
+auth_strategy = keystone
+mac_generation_retries = 32
+dhcp_lease_duration = 600
+dhcp_agent_notification = True
+allow_bulk = True
+allow_pagination = False
+allow_sorting = False
+allow_overlapping_ips = True
+agent_down_time = 15
+router_scheduler_driver = neutron.scheduler.l3_agent_scheduler.ChanceScheduler
+allow_automatic_l3agent_failover = True
+dhcp_agents_per_network = 1
+api_workers = 12
+rpc_workers = 12
+use_ssl = False
+notify_nova_on_port_status_changes = True
+notify_nova_on_port_data_changes = True
+nova_region_name =RegionOne
+nova_admin_username =nova
+send_events_interval = 2
+kombu_reconnect_delay=5.0
+rabbit_use_ssl=False
+rabbit_userid=nova
+rabbit_virtual_host=/
+rabbit_ha_queues=True
+notification_driver=messaging
+rpc_backend=neutron.openstack.common.rpc.impl_kombu
+control_exchange=neutron
+use_syslog_rfc_format=True
+[matchmaker_redis]
+[matchmaker_ring]
+[quotas]
+[agent]
+root_helper = sudo neutron-rootwrap /etc/neutron/rootwrap.conf
+report_interval = 5
+[keystone_authtoken]
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = services
+admin_user = neutron
+[database]
+max_retries = -1
+retry_interval = 2
+idle_timeout = 3600
+[service_providers]
+service_provider=LOADBALANCER:Haproxy:neutron.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
+service_provider=VPN:openswan:neutron.services.vpn.service_drivers.ipsec.IPsecVPNDriver:default
