@@ -1,5 +1,4 @@
 # check environment
-import logging
 import commands
 import re
 import os
@@ -8,10 +7,9 @@ import glob
 import yaml
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import register_decorater, userful_msg, get_node_list, ssh_connect2
-from eayunstack_tools.logger import fmt_print, valid_print
+from eayunstack_tools.logger import fmt_print
 from utils import check_service
 from eayunstack_tools.utils import NODE_ROLE
-from eayunstack_tools.logger import fmt_print
 from eayunstack_tools.utils import ping
 
 from eayunstack_tools.logger import StackLOG as LOG
@@ -225,18 +223,17 @@ def _network_remote_network_inf(cfg):
 
 
 def _network_check_remote(remote_inf):
+    def _ping(peer_inf, role):
+        LOG.debug('=====> start ping %s of %s(%s):' %
+                  (role, peer_inf['host'], peer_inf['role']))
+        ping(peer_inf[role])
+
     for inf in remote_inf:
-        LOG.debug('=====> start ping openstack admin addr of %s(%s):' %
-                  (inf['host'], inf['role']))
-        ping(inf['internal_address'])
-        LOG.debug('=====> start ping storage addr of %s(%s):' %
-                  (inf['host'], inf['role']))
-        if (not NODE_ROLE.is_mongo()) or (not inf['role'].endswith('mongo')):
-            ping(inf['storage_address'])
+        _ping(inf, 'internal_address')
+        if (not NODE_ROLE.is_mongo()) and (not inf['role'].endswith('mongo')):
+            _ping(inf, 'storage_address')
         if NODE_ROLE.is_controller() and inf['role'] == 'controller':
-            LOG.debug('=====> start ping public addr of %s(%s):' %
-                      (inf['host'], inf['role']))
-            ping(inf['public_address'])
+            _ping(inf, 'public_address')
 
 
 @userful_msg()
