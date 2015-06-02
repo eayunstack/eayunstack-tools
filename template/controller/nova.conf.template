@@ -36,7 +36,6 @@ allow_resize_to_same_host=True
 resume_guests_state_on_host_boot=True
 network_api_class=nova.network.neutronv2.api.API
 default_floating_pool=net04_ext
-teardown_unused_network_gateway=True
 security_group_api=neutron
 s3_listen=0.0.0.0
 lock_path=/var/lib/nova/tmp
