@@ -125,10 +125,7 @@ def check_disk():
         LOG.warn('The "/" filesystem used %s%% space !' % used_percent)
 
 
-@userful_msg()
-@register
-def check_network():
-    # 1) find all network and their link status
+def _network_get_nic_status():
     tmp = glob.glob('/sys/class/net/*/device')
     nics = dict()
     warn = False
@@ -142,6 +139,7 @@ def check_network():
             status = 'no'
             warn = True
         nics[name] = status
+    return nics
 
     # TODO: print the function of nics, e.g. for managerment or storage
     if warn:
@@ -151,9 +149,11 @@ def check_network():
     for i in nics.keys():
         valid_print(i, nics[i])
 
-    # 2) check all NIC network connectivity
 
-    # how to check ???
+@userful_msg()
+@register
+def check_network():
+    nics = _network_get_nic_status()
 
 def check_nodes(obj_name):
    # node_list = get_node_list('all')
