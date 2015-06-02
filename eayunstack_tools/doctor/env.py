@@ -142,14 +142,6 @@ def _network_get_nic_status():
         nics[name] = status
     return nics
 
-    # TODO: print the function of nics, e.g. for managerment or storage
-    if warn:
-        LOG.warn('Network card information:')
-    else:
-        fmt_print('Network card information:')
-    for i in nics.keys():
-        valid_print(i, nics[i])
-
 
 def _network_local_network_information(cfg):
     network_scheme = cfg['network_scheme']
@@ -196,12 +188,22 @@ def _network_local_network_information(cfg):
     return net_inf
 
 
+def _network_check_local(local_inf, nic_status):
+    # 1) check if nic we need link is ok
+    nic_need = [i['phy_port'] for i in local_inf]
+    for nic in nic_need:
+        if nic_status[nic].lower() != 'yes':
+            LOG.error('Network card %s is not connected' % nic)
+        else:
+            LOG.debug('Network card %s connected' % nic)
+
 @userful_msg()
 @register
 def check_network():
     cfg = yaml.load(file('/etc/astute.yaml'))
-    nics = _network_get_nic_status()
+    nic_status = _network_get_nic_status()
     local_inf = _network_local_network_information(cfg)
+    _network_check_local(local_inf, nic_status)
 
 
 
