@@ -1,0 +1,5 @@
+[global]
+log_to_syslog_facility =
+log_to_syslog =
+log_to_syslog_level =
+fsid =

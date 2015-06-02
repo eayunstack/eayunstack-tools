@@ -1,0 +1,7 @@
+[DEFAULT]
+admin_token = 
+rabbit_password =
+[database]
+connection =
+[pipeline:public_api]
+pipeline =

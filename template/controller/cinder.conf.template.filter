@@ -1,0 +1,12 @@
+[DEFAULT]
+rabbit_password =
+ssh_min_pool_conn =
+ssh_max_pool_conn =
+[cinder_ceph]
+rbd_secret_uuid =
+[cinder_eqlx]
+san_password =
+[database]
+connection =
+[keystone_authtoken]
+admin_password = 

@@ -1,0 +1,4 @@
+[DEFAULT]
+sql_connection =
+[keystone_authtoken]
+admin_password =
