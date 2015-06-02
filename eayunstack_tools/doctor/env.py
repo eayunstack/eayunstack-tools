@@ -12,6 +12,7 @@ from eayunstack_tools.logger import fmt_print, valid_print
 from utils import check_service
 from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.logger import fmt_print
+from eayunstack_tools.utils import ping
 
 from eayunstack_tools.logger import StackLOG as LOG
 register = register_decorater()
@@ -143,7 +144,7 @@ def _network_get_nic_status():
     return nics
 
 
-def _network_local_network_information(cfg):
+def _network_local_network_inf(cfg):
     network_scheme = cfg['network_scheme']
 
     def _find_phy_port(role):
@@ -197,14 +198,58 @@ def _network_check_local(local_inf, nic_status):
         else:
             LOG.debug('Network card %s connected' % nic)
 
+
+def _network_remote_network_inf(cfg):
+    nodes = cfg['nodes']
+    all_node_inf = []
+    for n in nodes:
+        try:
+            node_inf = {}
+            if n['role'].endswith('controller'):
+                # dont care primary-controller, consider it as normal
+                # controller
+                node_inf['role'] = 'controller'
+            else:
+                node_inf['role'] = n['role']
+            if n['role'].endswith('controller'):
+                node_inf['public_address'] = n['public_address']
+            node_inf['internal_address'] = n['internal_address']
+            node_inf['host'] = n['fqdn']
+            node_inf['storage_address'] = n['storage_address']
+            all_node_inf.append(node_inf)
+        except:
+            #LOG.error("failed to parse node:%s" % n['fqdn'])
+            continue
+    return all_node_inf
+
+
+def _network_check_remote(remote_inf):
+    for inf in remote_inf:
+        LOG.debug('=====> start ping openstack admin addr of %s(%s):' %
+                  (inf['host'], inf['role']))
+        ping(inf['internal_address'])
+        LOG.debug('=====> start ping storage addr of %s(%s):' %
+                  (inf['host'], inf['role']))
+        ping(inf['storage_address'])
+        if NODE_ROLE.is_controller() and inf['role'] == 'controller':
+            LOG.debug('=====> start ping public addr of %s(%s):' %
+                      (inf['host'], inf['role']))
+            ping(inf['public_address'])
+
+
 @userful_msg()
 @register
 def check_network():
-    cfg = yaml.load(file('/etc/astute.yaml'))
     nic_status = _network_get_nic_status()
-    local_inf = _network_local_network_information(cfg)
+    cfg = yaml.load(file('/etc/astute.yaml'))
+
+    # check node's nic status
+    local_inf = _network_local_network_inf(cfg)
     _network_check_local(local_inf, nic_status)
 
+    # check if node can connect to other node
+    remote_inf = _network_remote_network_inf(cfg)
+    _network_check_remote(remote_inf)
 
 
 def check_nodes(obj_name):

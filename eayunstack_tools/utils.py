@@ -1,11 +1,11 @@
 import pkg_resources
-import pkg_resources
 from functools import wraps
 import logging
 import logger
 import paramiko
 import os
 import socket
+import commands
 
 from eayunstack_tools.logger import StackLOG as LOG
 
@@ -263,3 +263,11 @@ def scp_connect(hostname, local_path, remote_path, key_file=os.environ['HOME'] +
     finally:
         ssh.close()
         logging.disable(logging.NOTSET)
+
+
+def ping(peer):
+    (status, out) = commands.getstatusoutput('ping -c 1 %s' % (peer))
+    if status == 0:
+        LOG.debug('%s reached' % peer)
+    else:
+        LOG.error('%s can not be reached!' % peer)
