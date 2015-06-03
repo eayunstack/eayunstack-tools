@@ -190,7 +190,7 @@ def _network_local_network_inf(cfg):
 def _network_check_local(local_inf, nic_status):
     # 1) check if nic we need link is ok
     nic_need = [i['phy_port'] for i in local_inf]
-    for nic in nic_need:
+    for nic in set(nic_need):
         if nic_status[nic].lower() != 'yes':
             LOG.error('Network card %s is not connected' % nic)
         else:
