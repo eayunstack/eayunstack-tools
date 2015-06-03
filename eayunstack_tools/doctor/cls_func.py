@@ -49,9 +49,11 @@ def get_ceph_health():
     if s != 0:
         return False
     else:
-        if 'HEALTH_OK' in o or 'HEALTH_WARN' in o:
+        if o == 'HEALTH_OK':
             return True
         else:
+            (ss, oo) = commands.getstatusoutput('ceph -s')
+            print oo
             return False
 
 # get ceph osd status
