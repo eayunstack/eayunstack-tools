@@ -7,12 +7,16 @@ from eayunstack_tools.logger import StackLOG as LOG
 # get node list for rabbitmq cluster
 def get_rabbitmq_nodes():
     running_nodes = []
-    (s, o) = commands.getstatusoutput('crm_resource --locate --resource clone_p_rabbitmq-server 2> /dev/null | grep "running on"')
-    if s != 0 or o is None:
-        return
-    else:
-        for entry in o.split('\n'):
-            running_nodes.append(entry.split()[5])
+    (s, o) = commands.getstatusoutput('rabbitmqctl cluster_status | grep running_nodes')
+    if s == 0:
+        p = re.compile(r'{running_nodes,\[(.+)\]},')
+        m = p.match(o.strip()).groups()
+        running_nodes = []
+        nodes = m[0].split(',')
+        for node in nodes:
+            pp = re.compile(r'\'rabbit@(.+)\'')
+            mm = pp.match(node).groups()
+            running_nodes.append(mm[0])
     return running_nodes
 
 
