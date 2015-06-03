@@ -43,6 +43,8 @@ passwd -d eayunadm &> /dev/null
 passwd -e eayunadm &> /dev/null
 echo 'eayunadm	ALL=(ALL)	NOPASSWD:/bin/eayunstack' >> /etc/sudoers
 
+echo 'Defaults !requiretty' > /etc/sudoers.d/eayunstack-tools
+
 # modify PS1
 echo '
 # write by eayunstack-tools
@@ -57,6 +59,7 @@ fi
 %postun
 if [ "$1" = "0" ]; then
     sed -i -e '/^eayunadm/d' /etc/sudoers
+    rm -rf /etc/sudoers.d/eayunstack-tools
 fi
 
 
