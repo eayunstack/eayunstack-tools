@@ -49,7 +49,7 @@ def get_ceph_health():
     if s != 0:
         return False
     else:
-        if o == 'HEALTH_OK':
+        if 'HEALTH_OK' in o or 'HEALTH_WARN' in o:
             return True
         else:
             return False
