@@ -67,7 +67,7 @@ def check_rabbitmq():
     # check all controller nodes in masters + slaves node list
     error_nodes = []
     for node in controllers:
-        if node not in running_nodes:
+        if node.split('.')[0] not in running_nodes:
             error_nodes.append(node)
 
     if error_nodes:
