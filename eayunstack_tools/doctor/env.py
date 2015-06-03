@@ -240,6 +240,11 @@ def _network_check_remote(remote_inf):
 @register
 def check_network():
     nic_status = _network_get_nic_status()
+    if NODE_ROLE.is_fuel():
+        LOG.debug('Network card information:')
+        for i in nic_status.keys():
+            LOG.debug('%s: %s' % (i, nic_status[i]))
+        return
     cfg = yaml.load(file('/etc/astute.yaml'))
 
     # check node's nic status
