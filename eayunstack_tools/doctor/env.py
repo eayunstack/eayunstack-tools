@@ -75,7 +75,7 @@ def check_ntp():
         p = re.compile(r'.+\((.+)\).+')
         try:
             server = p.match(out).groups()[0]
-            LOG.info('ntpserver is %s' % server)
+            fmt_print('ntpserver is %s' % server)
         except:
             LOG.error('except ntpstate error, please check it')
             return
