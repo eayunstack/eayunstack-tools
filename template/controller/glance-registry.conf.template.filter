@@ -1,4 +1,8 @@
 [DEFAULT]
+bind_host =
 sql_connection =
 [keystone_authtoken]
+auth_uri =
+auth_host =
+identity_uri =
 admin_password =

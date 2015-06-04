@@ -1,5 +1,11 @@
 [DEFAULT]
+rabbit_hosts =
+registry_host =
+bind_host =
 rabbit_password =
 sql_connection =
 [keystone_authtoken]
+auth_uri =
+identity_uri =
+auth_host =
 admin_password =
