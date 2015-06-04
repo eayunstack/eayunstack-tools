@@ -1,4 +1,5 @@
 [DEFAULT]
+debug =
 bind_host =
 sql_connection =
 [keystone_authtoken]

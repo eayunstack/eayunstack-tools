@@ -2,9 +2,9 @@
 ## filter options
 bind_host =
 sql_connection =
+debug=
 ##
 verbose=True
-debug=False
 bind_port=9191
 log_file=/var/log/glance/registry.log
 use_syslog=True

@@ -7,6 +7,7 @@ rabbit_hosts =
 rabbit_password =
 ssh_min_pool_conn =
 ssh_max_pool_conn =
+debug=
 ##
 amqp_durable_queues=False
 kombu_reconnect_delay=5.0
@@ -24,7 +25,6 @@ glance_api_ssl_compression=False
 host=cinder
 auth_strategy=keystone
 enabled_backends=cinder_ceph,cinder_eqlx
-debug=False
 verbose=True
 log_dir=/var/log/cinder
 use_syslog=True
