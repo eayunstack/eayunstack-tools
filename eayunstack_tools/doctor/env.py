@@ -54,6 +54,9 @@ def check_all():
             node_list = get_node_list(role)
             for node in node_list:
                 LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
+            if LOG.enable_debug:
+                out, err = ssh_connect2(node, 'sudo eayunstack --debug doctor env -a')
+            else:
                 out, err = ssh_connect2(node, 'sudo eayunstack doctor env -a')
                 if err:
                     LOG.error('Check failed !')
@@ -271,6 +274,10 @@ def check_nodes(obj_name):
         node_list = get_node_list(role)
         for node in node_list:
             LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
-            out, err = ssh_connect2(node, 'sudo eayunstack doctor env -n %s' % obj_name)
+            if LOG.enable_debug:
+                out, err = ssh_connect2(node, 'sudo eayunstack --debug doctor env -n %s' % obj_name)
+            else:
+                out, err = ssh_connect2(node, 'sudo eayunstack doctor env -n %s' % obj_name)
+
             if err:
                 LOG.error('Check failed !')
