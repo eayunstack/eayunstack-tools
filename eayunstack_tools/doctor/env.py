@@ -128,7 +128,6 @@ def check_disk():
 def _network_get_nic_status():
     tmp = glob.glob('/sys/class/net/*/device')
     nics = dict()
-    warn = False
     for i in tmp:
         name = i.split('/')[4]
         (status, out) = commands.getstatusoutput(
@@ -137,7 +136,6 @@ def _network_get_nic_status():
             status = 'yes'
         else:
             status = 'no'
-            warn = True
         nics[name] = status
     return nics
 
@@ -158,7 +156,7 @@ def _network_local_network_inf(cfg):
             port = action['name']
         except:
             port = None
-            #LOG.error('failed to find physics nic for role:%s' % role)
+            LOG.error('failed to find physics nic for role:%s' % role)
         return port
 
     def _find_role_ip(role):
@@ -189,12 +187,23 @@ def _network_local_network_inf(cfg):
 
 def _network_check_local(local_inf, nic_status):
     # 1) check if nic we need link is ok
+    if NODE_ROLE.is_mongo():
+        local_inf = [i for i in local_inf if i['name']
+                     not in ['br-storage', 'br-prv']]
+    if NODE_ROLE.is_ceph_osd():
+        local_inf = [i for i in local_inf if i['name'] != 'br-prv']
+
     nic_need = [i['phy_port'] for i in local_inf]
     for nic in set(nic_need):
+        # if two network roles use same nic, e.g. br-mgmt and br-fw-admin
+        # use eno1, we can ignore it since we just want physic network nic
+        inf = filter(lambda inf: inf['phy_port'] == nic, local_inf)[0]
         if nic_status[nic].lower() != 'yes':
-            LOG.error('Network card %s is not connected' % nic)
+            LOG.error('Network card %s(%s) is not connected' %
+                      (nic, inf['name']))
         else:
-            LOG.debug('Network card %s connected' % nic)
+            LOG.debug('Network card %s(%s) connected' %
+                      (nic, inf['name']))
 
 
 def _network_remote_network_inf(cfg):
@@ -217,7 +226,7 @@ def _network_remote_network_inf(cfg):
                 node_inf['storage_address'] = n['storage_address']
             all_node_inf.append(node_inf)
         except:
-            #LOG.error("failed to parse node:%s" % n['fqdn'])
+            LOG.error("failed to parse node:%s" % n['fqdn'])
             continue
     return all_node_inf
 
