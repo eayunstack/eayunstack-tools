@@ -1,6 +1,13 @@
 [DEFAULT]
 admin_token = 
 rabbit_password =
+admin_bind_host =
+rabbit_hosts =
+public_bind_host =
+[cache]
+memcache_servers =
+[memcache]
+servers =
 [database]
 connection =
 [pipeline:public_api]

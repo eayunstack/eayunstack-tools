@@ -3,3 +3,7 @@ log_to_syslog_facility =
 log_to_syslog =
 log_to_syslog_level =
 fsid =
+cluster_network =
+mon_host =
+public_network =
+mon_initial_members =

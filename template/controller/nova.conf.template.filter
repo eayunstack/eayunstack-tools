@@ -1,4 +1,15 @@
 [DEFAULT]
+glance_api_servers =
+osapi_compute_listen =
+neutron_admin_auth_url =
+rabbit_hosts =
+ec2_listen =
+memcached_servers =
+osapi_volume_listen =
+neutron_url =
+keystone_ec2_url =
+novncproxy_host =
+teardown_unused_network_gateway =
 rabbit_password =
 neutron_admin_password =
 neutron_metadata_proxy_shared_secret =
@@ -7,4 +18,6 @@ ssh_max_pool_conn =
 [database]
 connection = mysql://nova:VPwoEDHX@172.16.101.2/nova?read_timeout=60
 [keystone_authtoken]
-admin_password = UE1cIH37
+auth_host =
+auth_uri =
+admin_password =

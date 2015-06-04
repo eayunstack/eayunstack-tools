@@ -1,8 +1,15 @@
 [DEFAULT]
 debug=
+glance_api_servers =
+memcached_servers =
+neutron_admin_auth_url =
+rabbit_hosts =
+neutron_url =
+novncproxy_base_url =
+vncserver_proxyclient_address =
 rabbit_password =
 neutron_admin_password =
 [database]
 connection =
 [libvirt]
-rbd_secret_uuid = a5d0dd94-57c4-ae55-ffe0-7e3732a24455
+rbd_secret_uuid = 
