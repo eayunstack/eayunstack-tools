@@ -1,4 +1,13 @@
 [DEFAULT]
+## filter options
+glance_api_servers =
+default_volume_type =
+osapi_volume_listen =
+rabbit_hosts =
+rabbit_password =
+ssh_min_pool_conn =
+ssh_max_pool_conn =
+##
 amqp_durable_queues=False
 kombu_reconnect_delay=5.0
 rabbit_userid=nova
@@ -35,6 +44,9 @@ backup_driver = cinder.backup.drivers.ceph
 [BRCD_FABRIC_EXAMPLE]
 [CISCO_FABRIC_EXAMPLE]
 [database]
+## filter options
+connection =
+##
 idle_timeout=3600
 max_pool_size=30
 max_retries=-1
@@ -42,6 +54,10 @@ max_overflow=60
 [fc-zone-manager]
 [keymgr]
 [keystone_authtoken]
+## filter options
+auth_host =
+admin_password =
+##
 auth_port=35357
 auth_protocol=http
 admin_user=cinder
@@ -54,6 +70,9 @@ signing_dirname=/tmp/keystone-signing-cinder
 [profiler]
 [ssl]
 [cinder_ceph]
+## filter options
+rbd_secret_uuid =
+##
 rbd_pool = volumes
 rbd_user = volumes
 rbd_max_clone_depth=5
@@ -62,6 +81,12 @@ volume_driver=cinder.volume.drivers.rbd.RBDDriver
 rbd_flatten_volume_from_snapshot=False
 rbd_ceph_conf=/etc/ceph/ceph.conf
 [cinder_eqlx]
+## filter options
+san_ip =
+san_login =
+eqlx_pool =
+san_password =
+##
 volume_driver=cinder.volume.drivers.eqlx.DellEQLSanISCSIDriver
 eqlx_use_chap=False
 eqlx_cli_max_retries=5

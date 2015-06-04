@@ -1,4 +1,11 @@
 [DEFAULT]
+## filter options
+admin_token = 
+rabbit_password =
+admin_bind_host =
+rabbit_hosts =
+public_bind_host =
+##
 compute_port=8774
 admin_port=35357
 public_port=5000
@@ -16,6 +23,9 @@ syslog_log_facility=LOG_USER
 [assignment]
 [auth]
 [cache]
+## filter options
+memcache_servers =
+##
 backend=keystone.common.cache.noop
 enabled=True
 memcache_dead_retry=300
@@ -27,6 +37,9 @@ template_file=/etc/keystone/default_catalog.templates
 driver=keystone.catalog.backends.sql.Catalog
 [credential]
 [database]
+## filter options
+connection =
+##
 idle_timeout=3600
 [ec2]
 driver=keystone.contrib.ec2.backends.sql.Ec2
@@ -41,6 +54,9 @@ driver=keystone.identity.backends.sql.Identity
 [matchmaker_redis]
 [matchmaker_ring]
 [memcache]
+## filter options
+servers =
+##
 [oauth1]
 [os_inherit]
 [paste_deploy]
@@ -79,6 +95,9 @@ paste.filter_factory=keystone.contrib.admin_crud:CrudExtension.factory
 [filter:xml_body]
 paste.filter_factory=keystone.middleware:XmlBodyMiddleware.factory
 [pipeline:public_api]
+## filter options
+pipeline =
+##
 [pipeline:admin_version_api]
 pipeline=stats_monitoring url_normalize xml_body admin_version_service
 [filter:stats_reporting]

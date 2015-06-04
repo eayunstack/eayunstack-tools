@@ -1,4 +1,14 @@
 [DEFAULT]
+## filter options
+debug =
+base_mac =
+nova_admin_tenant_id =
+nova_admin_password =
+nova_url =
+rabbit_hosts =
+nova_admin_auth_url =
+rabbit_password=
+##
 verbose = False
 state_path = /var/lib/neutron
 lock_path = /var/lib/neutron/lock
@@ -45,11 +55,19 @@ use_syslog_rfc_format=True
 root_helper = sudo neutron-rootwrap /etc/neutron/rootwrap.conf
 report_interval = 5
 [keystone_authtoken]
+## filter options
+auth_uri =
+auth_host =
+admin_password =
+##
 auth_port = 35357
 auth_protocol = http
 admin_tenant_name = services
 admin_user = neutron
 [database]
+## filter options
+connection =
+##
 max_retries = -1
 retry_interval = 2
 idle_timeout = 3600

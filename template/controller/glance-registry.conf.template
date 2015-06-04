@@ -1,4 +1,8 @@
 [DEFAULT]
+## filter options
+bind_host =
+sql_connection =
+##
 verbose=True
 debug=False
 bind_port=9191
@@ -13,6 +17,12 @@ sql_idle_timeout=3600
 log_dir=/var/log/glance
 [database]
 [keystone_authtoken]
+## filter options
+auth_uri =
+auth_host =
+identity_uri =
+admin_password =
+##
 admin_tenant_name=services
 admin_user=glance
 signing_dir=/tmp/keystone-signing-glance

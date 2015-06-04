@@ -1,4 +1,11 @@
 [DEFAULT]
+## filter options
+rabbit_hosts =
+registry_host =
+bind_host =
+rabbit_password =
+sql_connection =
+##
 verbose=True
 debug=False
 bind_port=9292
@@ -32,6 +39,12 @@ control_exchange=glance
 sql_idle_timeout=3600
 [database]
 [keystone_authtoken]
+## filter options
+auth_uri =
+identity_uri =
+auth_host =
+admin_password =
+##
 admin_tenant_name=services
 admin_user=glance
 auth_port=35357
