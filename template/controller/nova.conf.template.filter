@@ -9,14 +9,11 @@ osapi_volume_listen =
 neutron_url =
 keystone_ec2_url =
 novncproxy_host =
-teardown_unused_network_gateway =
 rabbit_password =
 neutron_admin_password =
 neutron_metadata_proxy_shared_secret =
-ssh_min_pool_conn =
-ssh_max_pool_conn =
 [database]
-connection = mysql://nova:VPwoEDHX@172.16.101.2/nova?read_timeout=60
+connection = 
 [keystone_authtoken]
 auth_host =
 auth_uri =

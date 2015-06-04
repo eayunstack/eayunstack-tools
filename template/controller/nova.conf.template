@@ -1,4 +1,19 @@
 [DEFAULT]
+## filter options
+glance_api_servers =
+osapi_compute_listen =
+neutron_admin_auth_url =
+rabbit_hosts =
+ec2_listen =
+memcached_servers =
+osapi_volume_listen =
+neutron_url =
+keystone_ec2_url =
+novncproxy_host =
+rabbit_password =
+neutron_admin_password =
+neutron_metadata_proxy_shared_secret =
+##
 amqp_durable_queues=False
 rabbit_use_ssl=False
 rabbit_userid=nova
@@ -89,6 +104,11 @@ workers=12
 [ironic]
 [keymgr]
 [keystone_authtoken]
+## filter options
+auth_host =
+auth_uri =
+admin_password =
+##
 auth_port=35357
 auth_protocol=http
 admin_user=nova
@@ -115,4 +135,7 @@ max_pool_size=30
 max_retries=-1
 max_overflow=60
 [database]
+## filter options
+connection =
+##
 idle_timeout=3600

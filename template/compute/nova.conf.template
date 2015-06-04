@@ -1,12 +1,24 @@
 [DEFAULT]
+## filter options
+debug=
+glance_api_servers =
+memcached_servers =
+neutron_admin_auth_url =
+rabbit_hosts =
+neutron_url =
+novncproxy_base_url =
+vncserver_proxyclient_address =
+rabbit_password =
+neutron_admin_password =
+##
 notification_driver=ceilometer.compute.nova_notifier
 notification_driver=nova.openstack.common.notifier.rpc_notifier
+notification_driver=
 amqp_durable_queues=False
 rabbit_use_ssl=False
 rabbit_userid=nova
 rabbit_virtual_host=/
 rabbit_ha_queues=True
-notification_driver=
 notification_topics=notifications
 rpc_backend=nova.openstack.common.rpc.impl_kombu
 notify_on_state_change=vm_and_task_state
@@ -62,6 +74,9 @@ connection_type=libvirt
 [keymgr]
 [keystone_authtoken]
 [libvirt]
+## filter options
+rbd_secret_uuid =
+##
 virt_type=kvm
 inject_key=False
 inject_partition=-2
@@ -87,4 +102,7 @@ vif_driver=nova.virt.libvirt.vif.LibvirtGenericVIFDriver
 [xenserver]
 [zookeeper]
 [database]
+## filter options
+connection =
+##
 idle_timeout=3600
