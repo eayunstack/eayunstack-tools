@@ -1,4 +1,5 @@
 [DEFAULT]
+debug =
 glance_api_servers =
 default_volume_type =
 osapi_volume_listen =

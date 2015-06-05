@@ -1,4 +1,5 @@
 [DEFAULT]
+debug =
 admin_token = 
 rabbit_password =
 admin_bind_host =

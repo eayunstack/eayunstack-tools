@@ -1,4 +1,5 @@
 [DEFAULT]
+debug =
 glance_api_servers =
 osapi_compute_listen =
 neutron_admin_auth_url =

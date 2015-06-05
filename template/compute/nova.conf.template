@@ -38,7 +38,6 @@ linuxnet_interface_driver=nova.network.linux_net.LinuxOVSInterfaceDriver
 linuxnet_ovs_integration_bridge=br-int
 security_group_api=neutron
 lock_path=/var/lib/nova/tmp
-debug=False
 verbose=True
 log_dir=/var/log/nova
 use_syslog=True

@@ -1,5 +1,6 @@
 [DEFAULT]
 ## filter options
+debug=
 glance_api_servers =
 osapi_compute_listen =
 neutron_admin_auth_url =
@@ -54,7 +55,6 @@ default_floating_pool=net04_ext
 security_group_api=neutron
 s3_listen=0.0.0.0
 lock_path=/var/lib/nova/tmp
-debug=False
 verbose=True
 log_dir=/var/log/nova
 use_syslog=True

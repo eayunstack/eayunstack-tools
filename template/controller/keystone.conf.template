@@ -5,6 +5,7 @@ rabbit_password =
 admin_bind_host =
 rabbit_hosts =
 public_bind_host =
+debug=
 ##
 compute_port=8774
 admin_port=35357
@@ -14,7 +15,6 @@ rabbit_virtual_host=/
 rabbit_ha_queues=True
 notification_driver=messaging
 notification_topics=notifications
-debug=False
 verbose=True
 log_dir=/var/log/keystone
 use_syslog=True
