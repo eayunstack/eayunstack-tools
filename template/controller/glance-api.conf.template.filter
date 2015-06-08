@@ -1,4 +1,5 @@
 [DEFAULT]
+debug =
 rabbit_hosts =
 registry_host =
 bind_host =

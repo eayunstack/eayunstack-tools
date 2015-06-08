@@ -13,6 +13,7 @@ novncproxy_host =
 rabbit_password =
 neutron_admin_password =
 neutron_metadata_proxy_shared_secret =
+teardown_unused_network_gateway =
 [database]
 connection = 
 [keystone_authtoken]

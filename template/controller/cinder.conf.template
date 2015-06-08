@@ -5,8 +5,6 @@ default_volume_type =
 osapi_volume_listen =
 rabbit_hosts =
 rabbit_password =
-ssh_min_pool_conn =
-ssh_max_pool_conn =
 debug=
 ##
 amqp_durable_queues=False
