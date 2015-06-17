@@ -277,6 +277,9 @@ def check_cpu():
         return
     else:
         cpu_min_freq = out
+        (status, out) = commands.getstatusoutput(
+            "cpupower frequency-info | grep \"current policy\" | awk \'{print $8}\'")
+        cpu_min_freq_unit = out
     (status, out) = commands.getstatusoutput(
         "cpupower frequency-info | grep \"current policy\" | awk \'{print $10}\'")
     if status != 0:
@@ -284,17 +287,23 @@ def check_cpu():
         return
     else:
         cpu_max_freq = out
+        (status, out) = commands.getstatusoutput(
+            "cpupower frequency-info | grep \"current policy\" | awk \'{print $11}\'")
+        cpu_max_freq_unit = out
     (status, out) = commands.getstatusoutput(
         "cpupower frequency-info | grep \"current CPU frequency\" | awk \'{print $5}\'")
     if status != 0:
-        LOG.error('Can not current CPU frequency !')
+        LOG.error('Can not get current CPU frequency !')
         return
     else:
         cpu_cur_freq = out
+        (status, out) = commands.getstatusoutput(
+            "cpupower frequency-info | grep \"current CPU frequency\" | awk \'{print $6}\'")
+        cpu_cur_freq_unit = out
     if float(cpu_cur_freq) >= float(cpu_min_freq) and float(cpu_cur_freq) <= float(cpu_max_freq):
-        LOG.debug('Current CPU Frequency: %s GHz' % cpu_cur_freq)
+        LOG.debug('Current CPU Frequency: %s %s' % (cpu_cur_freq, cpu_cur_freq_unit))
     else:
-        LOG.error('Current CPU Frequency: %s . Not within %s GHz and %s GHz' % (cpu_cur_freq, cpu_min_freq, cpu_max_freq))
+        LOG.error('Current CPU Frequency: %s %s. Not within %s %s and %s %s' % (cpu_cur_freq, cpu_cur_freq_unit, cpu_min_freq, cpu_min_freq_unit, cpu_max_freq, cpu_max_freq_unit))
 
 def check_nodes(obj_name):
    # node_list = get_node_list('all')
