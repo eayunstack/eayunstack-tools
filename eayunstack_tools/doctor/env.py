@@ -267,6 +267,34 @@ def check_network():
     remote_inf = _network_remote_network_inf(cfg)
     _network_check_remote(remote_inf)
 
+@userful_msg()
+@register
+def check_cpu():
+    (status, out) = commands.getstatusoutput(
+        "cpupower frequency-info | grep \"current policy\" | awk \'{print $7}\'")
+    if status != 0:
+        LOG.error('Can not get CPU min frequency !')
+        return
+    else:
+        cpu_min_freq = out
+    (status, out) = commands.getstatusoutput(
+        "cpupower frequency-info | grep \"current policy\" | awk \'{print $10}\'")
+    if status != 0:
+        LOG.error('Can not get CPU max frequency !')
+        return
+    else:
+        cpu_max_freq = out
+    (status, out) = commands.getstatusoutput(
+        "cpupower frequency-info | grep \"current CPU frequency\" | awk \'{print $5}\'")
+    if status != 0:
+        LOG.error('Can not current CPU frequency !')
+        return
+    else:
+        cpu_cur_freq = out
+    if float(cpu_cur_freq) >= float(cpu_min_freq) and float(cpu_cur_freq) <= float(cpu_max_freq):
+        LOG.debug('Current CPU Frequency: %s GHz' % cpu_cur_freq)
+    else:
+        LOG.error('Current CPU Frequency: %s . Not within %s GHz and %s GHz' % (cpu_cur_freq, cpu_min_freq, cpu_max_freq))
 
 def check_nodes(obj_name):
    # node_list = get_node_list('all')
