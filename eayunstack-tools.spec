@@ -17,6 +17,7 @@ Requires:	MySQL-python
 Requires:	python-paramiko
 Requires:	python-fuelclient
 Requires:	python-cinder
+Requires:	kernel-tools
 
 %description
 EayunStack Management Tools
