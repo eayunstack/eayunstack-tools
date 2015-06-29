@@ -270,6 +270,9 @@ def check_network():
 @userful_msg()
 @register
 def check_cpu():
+    if not intel_pstate_enabled():
+        LOG.debug('kernel parameter "intel_pstate" was disabled.')
+        return
     (status, out) = commands.getstatusoutput(
         "cpupower frequency-info | grep \"current policy\" | awk \'{print $7}\'")
     if status != 0:
@@ -304,6 +307,14 @@ def check_cpu():
         LOG.debug('Current CPU Frequency: %s %s' % (cpu_cur_freq, cpu_cur_freq_unit))
     else:
         LOG.error('Current CPU Frequency: %s %s. Not within %s %s and %s %s' % (cpu_cur_freq, cpu_cur_freq_unit, cpu_min_freq, cpu_min_freq_unit, cpu_max_freq, cpu_max_freq_unit))
+
+def intel_pstate_enabled():
+    (status, out) = commands.getstatusoutput(
+        "lsmod | grep -q \"^acpi_cpufreq\"")
+    if status == 0:
+        return True
+    else:
+        return False
 
 def check_nodes(obj_name):
    # node_list = get_node_list('all')
