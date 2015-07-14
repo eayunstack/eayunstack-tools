@@ -7,7 +7,6 @@ import glob
 import yaml
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import register_decorater, userful_msg, get_node_list, ssh_connect2
-from eayunstack_tools.logger import fmt_print
 from utils import check_service
 from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.utils import ping
@@ -54,10 +53,10 @@ def check_all():
             node_list = get_node_list(role)
             for node in node_list:
                 LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
-            if LOG.enable_debug:
-                out, err = ssh_connect2(node, 'sudo eayunstack --debug doctor env -a')
-            else:
-                out, err = ssh_connect2(node, 'sudo eayunstack doctor env -a')
+                if LOG.enable_debug:
+                    out, err = ssh_connect2(node, 'sudo eayunstack --debug doctor env -a')
+                else:
+                    out, err = ssh_connect2(node, 'sudo eayunstack doctor env -a')
                 if err:
                     LOG.error('Check failed !')
     else:
@@ -78,7 +77,7 @@ def check_ntp():
         p = re.compile(r'.+\((.+)\).+')
         try:
             server = p.match(out).groups()[0]
-            fmt_print('ntpserver is %s' % server)
+            LOG.debug('ntpserver is %s' % server)
         except:
             LOG.error('except ntpstate error, please check it')
             return
@@ -97,7 +96,7 @@ def check_selinux():
         LOG.error('getenforce error, please check it')
     else:
         if current_state == correct_state.capitalize():
-            fmt_print('SELinux current state is: %s' % current_state)
+            LOG.debug('SELinux current state is: %s' % current_state)
         else:
             LOG.warn('SELinux current state is: %s' % current_state)
             LOG.error('SELinux state need to be %s ' %
@@ -107,7 +106,7 @@ def check_selinux():
     current_conf = commands.getoutput(
         'grep "^SELINUX=" /etc/sysconfig/selinux | cut -d "=" -f 2')
     if current_conf == correct_conf:
-        fmt_print('SELinux current conf in profile is: %s' % current_conf)
+        LOG.debug('SELinux current conf in profile is: %s' % current_conf)
     else:
         LOG.warn('SELinux current conf in profile is: %s' % current_conf)
         LOG.error('SELinux configuration in profile need to be %s '
@@ -123,7 +122,7 @@ def check_disk():
     used_percent = int(math.ceil((
         float(vfs.f_blocks-vfs.f_bavail)/float(vfs.f_blocks))*100))
     if used_percent >= 0 and used_percent < limit:
-        fmt_print('The "/" filesystem used %s%% space !' % used_percent)
+        LOG.debug('The "/" filesystem used %s%% space !' % used_percent)
     elif used_percent >= limit:
         LOG.warn('The "/" filesystem used %s%% space !' % used_percent)
 
