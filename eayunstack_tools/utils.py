@@ -129,12 +129,12 @@ class NodeRole(object):
         try:
             with open(self._role_list_file_path, 'r') as f:
                 for i in f:
-                    # i: "node-6.eayun.com:node-6:172.16.100.10:ceph-osd:52.a8.3b.dc.c9.47"
+                    # i: "node-6.eayun.com:node-6:172.16.100.10:ceph-osd:52.a8.3b.dc.c9.47:192.168.1.239"
                     r = i.strip().split('\n')[0].split(':')
-                    if len(r) != 5:
+                    if len(r) != 6:
                         continue
                     nodes.append({'roles': r[3], 'host': r[0],
-                                  'ip': r[2], 'mac': r[4].replace('.', ':')})
+                                  'ip': r[2], 'mac': r[4].replace('.', ':'), 'idrac_addr': r[5]})
         except Exception as e:
             print 'failed to open file: %s: %s' % (self._role_list_file_path,
                                                    logger.fmt_excep_msg(e))
