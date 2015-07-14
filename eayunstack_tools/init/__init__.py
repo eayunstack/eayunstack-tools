@@ -47,7 +47,8 @@ def init_node_list_file():
         else:
             roles = node['roles'][0]
         host = fqdn.split('.')[0]
-        entry = fqdn + ':' + host + ':' + ip + ':' + roles + '\n'
+        mac = node['mac'].replace(':', '.')
+        entry = fqdn + ':' + host + ':' + ip + ':' + roles + ':' + mac +'\n'
         output = open(file_path,'a')
         output.write(entry)
         output.close()
