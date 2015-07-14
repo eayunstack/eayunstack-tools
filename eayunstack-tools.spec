@@ -1,6 +1,6 @@
 Name:		eayunstack-tools
 Version:	1.0
-Release:	16%{?dist}
+Release:	17%{?dist}
 Summary:	EayunStack Management tools
 
 Group:		Application
@@ -18,6 +18,7 @@ Requires:	python-paramiko
 Requires:	python-fuelclient
 Requires:	python-cinder
 Requires:	kernel-tools
+Requires:	ipmitool
 
 %description
 EayunStack Management Tools
@@ -72,6 +73,9 @@ fi
 
 
 %changelog
+* Tue Jul 14 2015 blkart <blkart.org@gmail.com> 1.0-17
+- commit 167cc599e0623c30b6f3e26cdeb6b5769f17cb81
+
 * Mon Jun 29 2015 blkart <blkart.org@gmail.com> 1.0-16
 - commit 95e40b7e6fed9e87267ad762aed90345daa77ea5
 
