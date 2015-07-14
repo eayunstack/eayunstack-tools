@@ -5,6 +5,7 @@ from fuelclient.client import APIClient
 from eayunstack_tools.utils import scp_connect
 from eayunstack_tools.logger import StackLOG as LOG
 from eayunstack_tools.utils import NODE_ROLE
+from eayunstack_tools.utils import ssh_connect
 
 
 def make(parser):
@@ -48,7 +49,8 @@ def init_node_list_file():
             roles = node['roles'][0]
         host = fqdn.split('.')[0]
         mac = node['mac'].replace(':', '.')
-        entry = fqdn + ':' + host + ':' + ip + ':' + roles + ':' + mac +'\n'
+        idrac_addr = get_idrac_addr(ip)
+        entry = fqdn + ':' + host + ':' + ip + ':' + roles + ':' + mac + ':' + idrac_addr + '\n'
         output = open(file_path,'a')
         output.write(entry)
         output.close()
@@ -81,3 +83,12 @@ def init_node_role_file():
         output.close()
         LOG.info('   To node %s ...' % ip)
         scp_connect(ip, tmp_path, file_path) 
+
+def get_idrac_addr(node_ip):
+    cmd_get_idrac_addr = 'ipmitool lan print | grep -v  "IP Address Source" | grep "IP Address"'
+    (out, err) = ssh_connect(node_ip, cmd_get_idrac_addr)
+    if out:
+        # return idrac address
+        return out.split(":")[1].strip()
+    else:
+        return ''
