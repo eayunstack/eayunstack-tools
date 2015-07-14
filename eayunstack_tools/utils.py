@@ -124,27 +124,7 @@ class NodeRole(object):
     def is_unknown(self):
         ROLES.UNKNOWN == self.node_role[0]
 
-    def _node_list_on_fuel(self):
-        from fuelclient.client import APIClient
-        LOG.setLevel(logging.CRITICAL)
-        nodes = []
-        rep = APIClient.get_request("nodes/")
-        for n in rep:
-            roles = ' '.join(i for i in n['roles'])
-            if not roles:
-                roles = 'unused'
-            host = n['fqdn']
-            ip = n['ip']
-            mac = n['mac']
-            nodes.append({'roles': roles, 'host': host, 'ip': ip, 'mac': mac})
-        # FIXME: our log level is DEBUG?
-        LOG.setLevel(logging.DEBUG)
-
-        def _cmp(s):
-            return s['roles']
-        return sorted(nodes, key=_cmp)
-
-    def _node_list_on_other(self):
+    def _node_list(self):
         nodes = []
         try:
             with open(self._role_list_file_path, 'r') as f:
@@ -162,12 +142,6 @@ class NodeRole(object):
         def _cmp(s):
             return s['roles']
         return sorted(nodes, key=_cmp)
-
-    def _node_list(self):
-        if self.is_fuel():
-            return self._node_list_on_fuel()
-        else:
-            return self._node_list_on_other()
 
     @property
     def nodes(self):
