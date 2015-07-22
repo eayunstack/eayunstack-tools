@@ -219,7 +219,7 @@ def check_mysql_connect(server, user, pwd, dbname):
         cursor.execute('SELECT VERSION()')
         cursor.fetchone()
         db.close()
-        fmt_print('Check Sucessfully.')
+        LOG.debug('Check Sucessfully.')
     except:
         LOG.error('Check Faild.')
 
@@ -228,7 +228,7 @@ def check_component_availability(component, check_cmd):
     if os.path.exists(ENV_FILE_PATH):
         (s, o) = commands.getstatusoutput('source %s;' % ENV_FILE_PATH + check_cmd)
         if s == 0:
-            fmt_print('Check Successfully.')
+            LOG.debug('Check Successfully.')
         else:
             LOG.error('Check Faild.')
             LOG.error(o)
@@ -241,7 +241,7 @@ def check_node_profiles(role):
         LOG.info('Checking "%s" Component' % c.capitalize())
         profile_list = eval('get_%s_profiles' % c)()
         for p in profile_list:
-            fmt_print('Profile: ' + p)
+            LOG.debug('Profile: ' + p)
             check_profile(p, role)
 
 def check_node_services(node):
@@ -249,7 +249,7 @@ def check_node_services(node):
     check_cmd = get_component_check_cmd()
     for c in component_list:
         LOG.info('Checking "%s" Component' % c.capitalize())
-        LOG.info('-Service Status')
+        LOG.debug('-Service Status')
         if c == 'nova':
             service_list = eval('get_%s_%s_services' % (node, c))()
         else:
@@ -259,9 +259,9 @@ def check_node_services(node):
             check_service(s)
         if node != 'controller':
             continue
-        LOG.info('-DB Connectivity')
+        LOG.debug('-DB Connectivity')
         check_db_connect(c)
-        LOG.info('-Service Availability')
+        LOG.debug('-Service Availability')
         check_component_availability(c, check_cmd[c])
 
 # get all nodes list
