@@ -2,6 +2,7 @@ import logging
 import sys
 import StringIO
 import commands
+import re
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -122,7 +123,20 @@ Content-Transfer-Encoding: 8bit
         else:
             if remote:
                 for l in msg.split('\n'):
-                    print l
+                    p = re.compile(r'\[(.*)\] (.*)')
+                    if p.match(l):
+                        level = p.match(l).groups()[0]
+                        msg = p.match(l).groups()[1]
+                        if 'INFO' in level:
+                            self.logger.info(msg)
+                        if 'DEBUG' in level:
+                            self.debug(msg)
+                        if 'WARN' in level:
+                            self.warn(msg)
+                        if 'ERROR' in level:
+                            self.error(msg)
+                    else:
+                        print l
             else:
                 self.logger.info(msg)
 
@@ -144,7 +158,10 @@ Content-Transfer-Encoding: 8bit
             self.logger.warn(msg)
 
     def error(self, msg):
-        self._email_buffer.write(msg)
+        # do some decoration :)
+        if self._email_buffer:
+            msg = "[ ERROR ] %s\n" % (msg.strip('\n'))
+            self._email_buffer.write(msg)
         if self.log_file:
             self.log_file.write(msg)
         else:
