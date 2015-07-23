@@ -89,7 +89,9 @@ class _StackLOG(object):
         if self.log_file:
             self.log_file.close()
         if self._email_address:
-            self._send_email()
+            # If some error occurs, send it
+            if self._email_buffer.getvalue():
+                self._send_email()
             self._email_buffer.close()
 
     def _send_email(self):
