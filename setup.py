@@ -31,6 +31,7 @@ setup(
             'cls = eayunstack_tools.doctor.cls:make',
             'stack = eayunstack_tools.doctor.stack:make',
             'all = eayunstack_tools.doctor.all:make',
+            'net = eayunstack_tools.doctor.net:make',
         ],
         'manage_command': [
             'volume = eayunstack_tools.manage.volume:make',
