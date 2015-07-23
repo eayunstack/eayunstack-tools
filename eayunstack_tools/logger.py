@@ -1,5 +1,8 @@
 import logging
 import sys
+import StringIO
+import commands
+import re
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -58,6 +61,8 @@ class _StackLOG(object):
     def __init__(self):
         self.log_file = None
         self._enable_debug = False
+        self._email_address = None
+        self._email_buffer = None
 
     def setLevel(self, level):
         if self.log_file:
@@ -65,7 +70,7 @@ class _StackLOG(object):
         else:
             self.logger.setLevel(level)
 
-    def open(self, filename, debug=False):
+    def open(self, filename=None, debug=False, email_address=None):
         if filename:
             self.log_file = open(filename, 'a')
         else:
@@ -76,10 +81,43 @@ class _StackLOG(object):
             ch.setFormatter(color_format())
             self.logger.addHandler(ch)
         self._enable_debug = debug
+        if email_address:
+            self._email_address = email_address
+            self._email_buffer = StringIO.StringIO()
 
     def close(self):
         if self.log_file:
             self.log_file.close()
+        if self._email_address:
+            # If some error occurs, send it
+            if self._email_buffer.getvalue():
+                self._send_email()
+            self._email_buffer.close()
+
+    def _send_email(self):
+        # TODO: get sender address from config file
+        # TODO: check ssmtp?
+        # TODO: using python smtp module to send email
+        _email = """Date: Thursday, July 23, 2015 at 10:42:47 AM
+From: eayunstack <eayunstack@163.com>
+To: %s <%s>
+Subject: mail from: eayunstack
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 8bit
+
+%s
+""" % (self._email_address, self._email_address, self._email_buffer.getvalue())
+
+        # TODO: Using random filename?
+        with open('/tmp/email.txt', 'w') as f:
+            f.write(_email)
+            f.flush()
+            cmd = 'ssmtp -t < /tmp/email.txt'
+            self.info("Send email to %s" % self._email_address)
+            (status, out) = commands.getstatusoutput(cmd)
+            if status != 0:
+                self.error("Send email failed: %s" % out)
 
     def info(self, msg, remote=False):
         if self.log_file:
@@ -87,7 +125,20 @@ class _StackLOG(object):
         else:
             if remote:
                 for l in msg.split('\n'):
-                    print l
+                    p = re.compile(r'\[(.*)\] (.*)')
+                    if p.match(l):
+                        level = p.match(l).groups()[0]
+                        msg = p.match(l).groups()[1]
+                        if 'INFO' in level:
+                            self.logger.info(msg)
+                        if 'DEBUG' in level:
+                            self.debug(msg)
+                        if 'WARN' in level:
+                            self.warn(msg)
+                        if 'ERROR' in level:
+                            self.error(msg)
+                    else:
+                        print l
             else:
                 self.logger.info(msg)
 
@@ -109,6 +160,10 @@ class _StackLOG(object):
             self.logger.warn(msg)
 
     def error(self, msg):
+        # do some decoration :)
+        if self._email_buffer:
+            msg = "[ ERROR ] %s\n" % (msg.strip('\n'))
+            self._email_buffer.write(msg)
         if self.log_file:
             self.log_file.write(msg)
         else:

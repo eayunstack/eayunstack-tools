@@ -25,6 +25,12 @@ def create_parser():
         help='Log debug message or not',
     )
 
+    parser.add_argument(
+        '-e', '--email',
+        dest='EMAIL',
+        help='email address which send error log to',
+    )
+
     sub = parser.add_subparsers(
         title='Commands',
         metavar='COMMAND',
@@ -52,7 +58,7 @@ def main():
     else:
         args = parser.parse_args()
 
-    StackLOG.open(args.FILENAME, args.DEBUG)
+    StackLOG.open(args.FILENAME, args.DEBUG, args.EMAIL)
     try:
         return args.func(args)
     finally:
