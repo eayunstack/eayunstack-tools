@@ -6,6 +6,7 @@ import paramiko
 import os
 import socket
 import commands
+import platform
 
 from eayunstack_tools.logger import StackLOG as LOG
 
@@ -71,6 +72,7 @@ class NodeRole(object):
         self._role_file_path = role_file_path
         self._role_list_file_path = '/.eayunstack/node-list'
         self._roles = self._get_roles()
+        self._get_hostname = platform.node
 
     def _get_roles(self):
         """Get roles which node represents"""
@@ -146,6 +148,10 @@ class NodeRole(object):
     @property
     def nodes(self):
         return self._node_list()
+
+    @property
+    def hostname(self):
+        return self._get_hostname
 
 NODE_ROLE = NodeRole()
 
@@ -244,4 +250,4 @@ def ping(peer):
     if status == 0:
         LOG.debug('%s reached' % peer)
     else:
-        LOG.error('%s can not be reached!' % peer)
+        LOG.error('%s can not be reached!' % peer)    

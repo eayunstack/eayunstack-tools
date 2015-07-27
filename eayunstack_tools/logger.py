@@ -162,8 +162,8 @@ Content-Transfer-Encoding: 8bit
     def error(self, msg):
         # do some decoration :)
         if self._email_buffer:
-            msg = "[ ERROR ] %s\n" % (msg.strip('\n'))
-            self._email_buffer.write(msg)
+            _msg = "[ ERROR ] %s\n" % (msg.strip('\n'))
+            self._email_buffer.write(_msg)
         if self.log_file:
             self.log_file.write(msg)
         else:

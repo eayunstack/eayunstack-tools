@@ -1,5 +1,5 @@
 from eayunstack_tools.logger import StackLOG as LOG
-from eayunstack_tools.utils import ssh_connect2, NODE_ROLE
+from eayunstack_tools.utils import ssh_connect, ssh_connect2, NODE_ROLE
 import commands
 import json
 import re
@@ -50,7 +50,17 @@ dict format:
     return routers
 
 
-def port_check_one(pid):
+def vrouter_get_gw_remote(l3_host, rid):
+    cmd = "ip netns exec qrouter-%s ip route show | "\
+          "grep 'default' | awk '{print $3}'" % (rid)
+    out, err = ssh_connect(l3_host, cmd)
+    if not err:
+        return out.strip('\n')
+    else:
+        return None
+
+
+def port_check_one(pid, l3_host=None):
     def port_log(device_owner, s):
         if device_owner == 'network:router_gateway':
             LOG.error(s)
@@ -63,31 +73,39 @@ def port_check_one(pid):
     if out:
         out = json.loads(out)
         detail = dict(map(lambda d: (d['Field'], d['Value']), out))
+        device_owner = detail['device_owner']
+        rid = detail['device_id']
+        if l3_host is None:
+            # if l3_host is None, it is certain that the function is called
+            # via command line, rather than vrouter_check_one, so it's ok
+            # to call vrouter_get_l3_host here.
+            l3_host = vrouter_get_l3_host(rid)
 
         # 1) check status of gateway port and interface port
         if detail['status'] != 'ACTIVE':
-            port_log(detail['device_owner'], "status of port %s[%s] is down"
-                     % (detail['device_owner'], pid))
+            port_log(device_owner, "status of port %s[%s] on %s is down"
+                     % (device_owner, pid, l3_host))
         if not detail['admin_state_up']:
-            port_log(detail['device_owner'], "admin_status of port %s[%s] is down"
-                     % (detail['device_owner'], pid))
+            port_log(device_owner, "admin_status of port %s[%s] on %s is down"
+                     % (device_owner, pid, l3_host))
 
         # 2) ping external gateway to check network status
-        if detail['device_owner'] == 'network:router_gateway':
-            cmd = "ip netns exec qrouter-%s ip route show | "\
-                  "grep 'default' | awk '{print $3}'" % (detail['device_id'])
-            gw = run_command(cmd)
-            if out:
-                cmd = "ip netns exec qrouter-%s ping -c 1 %s"\
-                      % (detail['device_id'], gw)
-                LOG.debug("check external gateway")
-                out = run_command(cmd)
-                if out:
+        LOG.debug('check gateway for port on %s' % (l3_host))
+        if device_owner == 'network:router_gateway':
+            LOG.debug('this port is external port, check external gateway')
+            gw = vrouter_get_gw_remote(l3_host, rid)
+            if gw:
+                LOG.debug("check external gateway %s on %s" % (gw, l3_host))
+                cmd = "ip netns exec qrouter-%s ping -c 1 %s" % (rid, gw)
+                out, err = ssh_connect(l3_host, cmd)
+                if not err:
                     LOG.debug("external gateway is ok")
                 else:
-                    LOG.error("failed to connect external gateway")
+                    LOG.error("failed to connect external gateway on %s" % (l3_host))
             else:
-                LOG.error("failed to get external gateway")
+                LOG.error("failed to get external gateway on %s" % (l3_host))
+        else:
+            LOG.debug('this port is normal port, do not need to check gateway')
 
 
 def vrouter_check_one(rid):
@@ -97,10 +115,24 @@ def vrouter_check_one(rid):
     if out:
         ports = csv2dict(out)
 
+    l3_host = vrouter_get_l3_host(rid)
     for port in ports:
-        LOG.debug('check port %s[%s]' % (port['name'], port['id']))
-        port_check_one(port['id'])
+        LOG.debug('start checking port %s[%s]' % (port['name'], port['id']))
+        port_check_one(port['id'], l3_host)
+        LOG.debug('finish checking port %s[%s]' % (port['name'], port['id']))
     # TODO: check dhcp?
+
+
+def vrouter_get_l3_host(rid):
+    cmd = "neutron l3-agent-list-hosting-router -f csv %s" \
+          % (rid)
+    out = run_command(cmd)
+    if out:
+        hosts = csv2dict(out)
+        return hosts[0]['host']
+    else:
+        LOG.error('can not get l3 host for router %s' % (rid))
+        return None
 
 
 def _vrouter_check(parser):
@@ -122,24 +154,9 @@ def _vrouter_check(parser):
         #    is done on neutron node which namespace belong to.
         # tenant ID
         for router in routers:
-            cmd = "neutron l3-agent-list-hosting-router -f csv %s" \
-                  % (router['id'])
-            out = run_command(cmd)
-            if out:
-                hosts = csv2dict(out)
-                if hosts:
-                    # TODO: check admin_state_up and so on
-                    l3_host = hosts[0]['host']
-                    LOG.info('check route %s[%s] on host %s'
-                             % (router['name'], router['id'], l3_host))
-                    if LOG.enable_debug:
-                        cmd = 'source /root/openrc;eayunstack --debug doctor '\
-                              'net vrouter --rid %s' % (router['id'])
-                    else:
-                        cmd = 'source /root/openrc;eayunstack doctor '\
-                              'net vrouter --rid %s' % (router['id'])
-                    # TODO: if l3_host is localhost, do not ssh_connect2
-                    ssh_connect2(l3_host, cmd)
+            LOG.info('start checking route %s[%s]' % (router['name'], router['id']))
+            vrouter_check_one(router['id'])
+            LOG.info('finish checking route %s[%s]' % (router['name'], router['id']))
 
 
 def vrouter_check(parser):
