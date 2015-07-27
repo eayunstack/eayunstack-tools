@@ -19,6 +19,7 @@ setup(
             'fuel = eayunstack_tools.fuel:make',
             'manage = eayunstack_tools.manage:make',
             'init = eayunstack_tools.init:make',
+            'list = eayunstack_tools.list:make',
         ],
         'fuel_command': [
             'backup = eayunstack_tools.fuel.backup:make',
@@ -36,7 +37,6 @@ setup(
         'manage_command': [
             'volume = eayunstack_tools.manage.volume:make',
             'ami = eayunstack_tools.manage.ami:make',
-            'list = eayunstack_tools.manage.list:make',
         ],
     },
 )
