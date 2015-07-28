@@ -154,6 +154,9 @@ Content-Transfer-Encoding: 8bit
                 self.logger.debug(msg)
 
     def warn(self, msg):
+        if self._email_buffer:
+            _msg = "[ WARNING ] %s\n" % (msg.strip('\n'))
+            self._email_buffer.write(_msg)
         if self.log_file:
             self.log_file.write(msg)
         else:
