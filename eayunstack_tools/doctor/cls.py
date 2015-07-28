@@ -1,7 +1,7 @@
 #check cluster status
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import NODE_ROLE, get_controllers_hostname
-from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, get_ceph_health, get_ceph_osd_status, check_all_nodes
+from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, ceph_check_health, get_ceph_osd_status, check_all_nodes
 import logging
 
 from eayunstack_tools.logger import StackLOG as LOG
@@ -152,10 +152,8 @@ def check_ceph():
         return
     # get cluster status
     LOG.info('%s%s Checking ceph cluster status' %('='*5, '>'))
-    if get_ceph_health():
-        LOG.info('Ceph cluster check successfully !')    
-    else:
-        LOG.error('Ceph cluster check faild !')
+    ceph_check_health()
+
     # check osd status
     LOG.info('%s%s Checking ceph osd status' %('='*5, '>'))
     check_success = True
