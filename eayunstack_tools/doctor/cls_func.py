@@ -43,18 +43,29 @@ def get_haproxy_nodes():
             running_nodes.append(entry.split()[5])
     return running_nodes
 
+
 # get ceph cluster status
-def get_ceph_health():
+def ceph_check_health():
+    def _log(func, msg):
+        func('Ceph cluster check faild !')
+        # FIXME: cause the log module issue, need to send error msg line 
+        # by line
+        for l in oo.split('\n'):
+            func(l)
+
     (s, o) = commands.getstatusoutput('ceph health')
     if s != 0:
-        return False
+        return
     else:
         if o == 'HEALTH_OK':
-            return True
+            LOG.info('Ceph cluster check successfully !')
         else:
             (ss, oo) = commands.getstatusoutput('ceph -s')
-            print oo
-            return False
+            if o.startswith('HEALTH_WARN'):
+                _log(LOG.warn, oo)
+            else:
+                _log(LOG.error, oo)
+
 
 # get ceph osd status
 def get_ceph_osd_status():
@@ -83,6 +94,14 @@ def check_all_nodes(check_obj):
         LOG.warn('Node list is null !')
         return
     else:
-        for node in node_list:
-            LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, 'controller', node, '*'*15))
-            ssh_connect2(node, check_cmd)
+        if check_obj == 'ceph':
+            # only need to check one node for ceph cluster
+            ceph_node = node_list[0]
+            LOG.info('%s Role: %-10s Node: %-13s %s'
+                     % ('*'*15, 'controller', ceph_node, '*'*15))
+            ssh_connect2(ceph_node, check_cmd)
+        else:
+            for node in node_list:
+                LOG.info('%s Role: %-10s Node: %-13s %s'
+                         % ('*'*15, 'controller', node, '*'*15))
+                ssh_connect2(node, check_cmd)
