@@ -30,11 +30,7 @@ def stack(parser):
             if not NODE_ROLE.is_mongo():
                 cmd_warn('mongo')
                 return
-        if parser.CEPH_OSD:
-            if not NODE_ROLE.is_ceph_osd():
-                cmd_warn('ceph-osd')
-                return
-    if parser.CONTROLLER or parser.COMPUTE or parser.MONGO or parser.CEPH_OSD:
+    if parser.CONTROLLER or parser.COMPUTE or parser.MONGO:
         if parser.PROFILE and not parser.SERVICE and not parser.CHECK_ALL:
             if parser.CONTROLLER:
                 check('controller', 'profile')
@@ -42,8 +38,6 @@ def stack(parser):
                 check('compute', 'profile')
             if parser.MONGO:
                 check('mongo', 'profile')
-            if parser.CEPH_OSD:
-                check('ceph-osd', 'profile')
         if parser.SERVICE and not parser.PROFILE and not parser.CHECK_ALL:
             if parser.CONTROLLER:
                 check('controller', 'service')
@@ -51,8 +45,6 @@ def stack(parser):
                 check('compute', 'service')
             if parser.MONGO:
                 check('mongo', 'service')
-            if parser.CEPH_OSD:
-                check('ceph-osd', 'service')
         if parser.SERVICE and parser.PROFILE or parser.CHECK_ALL or not parser.PROFILE and not parser.SERVICE:
             if parser.CONTROLLER:
                 check('controller', 'all')
@@ -60,8 +52,6 @@ def stack(parser):
                 check('compute', 'all')
             if parser.MONGO:
                 check('mongo', 'all')
-            if parser.CEPH_OSD:
-                check('ceph-osd', 'all')
         return
     # check all
     if parser.CHECK_ALL and parser.PROFILE and parser.SERVICE:
@@ -119,26 +109,18 @@ def make(parser):
         default=False,
         help='Check All Mongo Node',
     )
-    parser.add_argument(
-        '--ceph-osd',
-        dest='CEPH_OSD',
-        action='store_true',
-        default=False,
-        help='Check All Ceph-osd Node',
-    )
     common.add_common_opt(parser)
     parser.set_defaults(func=stack)
 
 # check all component
 
 # IMPORTANT: node include fuel
-all_roles = ('controller','compute','mongo','ceph_osd')
+all_roles = ('controller','compute','mongo')
 
 def check(role, obj):
    if NODE_ROLE.is_fuel():
        check_nodes(role, obj)
    else:
-       if role == 'ceph-osd': role = 'ceph_osd'
        if not eval('NODE_ROLE.is_%s' % role)():
            LOG.warn('This command can only run on fuel or %s node !' % role)
        else:
@@ -156,27 +138,26 @@ def check_all():
         check_all_service()
     else:
         for role in all_roles:
-            if role == 'ceph_osd': role = 'ceph-osd'
             check_nodes(role, 'all')
 
 def check_all_profile():
     if NODE_ROLE.is_fuel():
         for role in all_roles:
-            if role == 'ceph_osd': role = 'ceph-osd'
             check_nodes(role, 'profile', multi_role=True)
     else:
         for node_role in node_roles:
            # print node_role
-       	    eval('check_%s_profile' % node_role)()
+            if node_role != 'ceph_osd':
+       	        eval('check_%s_profile' % node_role)()
 
 def check_all_service():
     if NODE_ROLE.is_fuel():
         for role in all_roles:
-            if role == 'ceph_osd': role = 'ceph-osd'
             check_nodes(role, 'service', multi_role=True)
     else:
         for node_role in node_roles:
-            eval('check_%s_service' % node_role)()
+            if node_role != 'ceph_osd':
+                eval('check_%s_service' % node_role)()
 
 # check controller profile & service
 @userful_msg()
@@ -210,17 +191,6 @@ def check_mongo_profile():
 @register
 def check_mongo_service():
     check_node_services('mongo')
-
-# check ceph_osd profile & service
-@userful_msg()
-@register
-def check_ceph_osd_profile():
-    check_node_profiles('ceph_osd')
-
-@userful_msg()
-@register
-def check_ceph_osd_service():
-    check_node_services('ceph_osd')
 
 def cmd_warn(node_role):
     LOG.warn('This command can only run on fuel or %s node !' % node_role)
