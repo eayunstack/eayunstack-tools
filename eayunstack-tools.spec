@@ -1,6 +1,6 @@
 Name:		eayunstack-tools
 Version:	1.0
-Release:	20%{?dist}
+Release:	21%{?dist}
 Summary:	EayunStack Management tools
 
 Group:		Application
@@ -73,6 +73,9 @@ fi
 
 
 %changelog
+* Tue Aug 4 2015 blkart <blkart.org@gmail.com> 1.0-21
+- commit fb21b14762ae9e51b0ea727ad1a0a12dc877122b
+
 * Wed Jul 29 2015 blkart <blkart.org@gmail.com> 1.0-20
 - commit 95fdfa13a09e7a5a3154d1cb89f3dba9caf5804c
 
