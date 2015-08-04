@@ -152,7 +152,11 @@ def check_key(section, key, profile, template):
 def check_key_common(key, profile, template):
     current_value = get_value_common(key, profile)
     correct_value = get_value_common(key, template)
-    if not correct_value:
+    filterfile = template + '.filter'
+    if os.path.exists(filterfile):
+        if get_value_common(key, filterfile) is '':
+            LOG.debug('"%s = %s" option in the filter file, skip check this option.' % (key, current_value))
+    elif not correct_value:
         LOG.warn('Can not check following option, please check it by yourself. ')
         fmt_print('%s=%s' % (key, current_value))
     elif current_value != correct_value:
