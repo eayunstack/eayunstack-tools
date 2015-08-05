@@ -139,17 +139,18 @@ def vrouter_check_one(rid):
         ports = csv2dict(out)
 
     l3_host = vrouter_get_l3_host(rid)
-    for port in ports:
-        LOG.debug('start checking port %s[%s]' % (port['name'], port['id']))
-        port_check_one(port['id'], l3_host)
-        LOG.debug('finish checking port %s[%s]' % (port['name'], port['id']))
+    if l3_host:
+        for port in ports:
+            LOG.debug('start checking port %s[%s]' % (port['name'], port['id']))
+            port_check_one(port['id'], l3_host)
+            LOG.debug('finish checking port %s[%s]' % (port['name'], port['id']))
     # TODO: check dhcp?
 
 
 def vrouter_get_l3_host(rid):
     cmd = "neutron l3-agent-list-hosting-router -f csv %s" \
           % (rid)
-    out = run_command(cmd)
+    out = run_command(cmd).strip('\r\n')
     if out:
         hosts = csv2dict(out)
         return hosts[0]['host']
