@@ -1,4 +1,5 @@
 from eayunstack_tools.logger import StackLOG as LOG
+from eayunstack_tools.logger import fmt_excep_msg
 from eayunstack_tools.utils import ssh_connect, ssh_connect2, NODE_ROLE
 import commands
 import json
@@ -12,7 +13,6 @@ def run_command(cmd):
     (status, out) = commands.getstatusoutput(cmd)
     if status != 0:
         LOG.error("run %s error: %s" % (cmd, out))
-        reval = None
     else:
         reval = out
     return reval
@@ -60,6 +60,29 @@ def vrouter_get_gw_remote(l3_host, rid):
         return None
 
 
+# Some fuck juno deploy doest not support json format of port-show message
+def port_result_to_json(out, fmt='json'):
+    detail = dict()
+    if fmt == 'json':
+        _out = json.loads(out)
+        detail = dict(map(lambda d: (d['Field'], d['Value']), _out))
+        return detail
+    elif fmt == 'shell':
+        """
+admin_state_up="True"
+allowed_address_pairs=""
+binding:host_id="node-5.eayun.com"
+        """
+        for l in out.split('\n'):
+            p = re.compile(r'(.*)="(.*)"')
+            try:
+                ret = p.match(l).groups()
+                detail[ret[0]] = ret[1]
+            except Exception as e:
+                LOG.error('failed to get port message: %s' % fmt_excep_msg(e))
+        return detail
+
+
 def port_check_one(pid, l3_host=None):
     def port_log(device_owner, s):
         if device_owner == 'network:router_gateway':
@@ -67,12 +90,12 @@ def port_check_one(pid, l3_host=None):
         else:
             LOG.warn(s)
 
-    cmd = 'neutron port-show %s -f json -F status -F admin_state_up '\
-          '-F device_owner -F device_id' % (pid)
+    fmt = 'json'
+    cmd = 'neutron port-show %s -f %s -F status -F admin_state_up '\
+          '-F device_owner -F device_id' % (pid, fmt)
     out = run_command(cmd)
     if out:
-        out = json.loads(out)
-        detail = dict(map(lambda d: (d['Field'], d['Value']), out))
+        detail = port_result_to_json(out, fmt)        
         device_owner = detail['device_owner']
         rid = detail['device_id']
         if l3_host is None:
