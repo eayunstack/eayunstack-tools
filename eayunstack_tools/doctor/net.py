@@ -86,9 +86,9 @@ binding:host_id="node-5.eayun.com"
 def port_check_one(pid, l3_host=None):
     def port_log(device_owner, s):
         if device_owner == 'network:router_gateway':
-            LOG.error(s)
-        else:
             LOG.warn(s)
+        else:
+            LOG.error(s)
 
     fmt = 'json'
     cmd = 'neutron port-show %s -f %s -F status -F admin_state_up '\
