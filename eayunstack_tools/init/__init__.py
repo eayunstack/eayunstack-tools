@@ -2,10 +2,10 @@ import sys
 import logging
 import os
 from fuelclient.client import APIClient
-from eayunstack_tools.utils import scp_connect
+from eayunstack_tools.sys_utils import scp_connect
 from eayunstack_tools.logger import StackLOG as LOG
 from eayunstack_tools.utils import NODE_ROLE
-from eayunstack_tools.utils import ssh_connect
+from eayunstack_tools.sys_utils import ssh_connect
 
 
 def make(parser):

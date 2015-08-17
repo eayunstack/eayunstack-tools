@@ -6,7 +6,7 @@ import MySQLdb
 import ConfigParser
 import re
 from eayunstack_tools.manage.eqlx_ssh_conn import ssh_execute as eqlx_ssh_execute
-from eayunstack_tools.utils import ssh_connect
+from eayunstack_tools.sys_utils import ssh_connect
 from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.manage.utils import get_value as get_volume_value
 

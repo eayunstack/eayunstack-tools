@@ -1,4 +1,5 @@
-from eayunstack_tools.utils import get_node_list, ssh_connect2
+from eayunstack_tools.utils import get_node_list
+from eayunstack_tools.sys_utils import ssh_connect2
 import commands
 import re
 from eayunstack_tools.logger import StackLOG as LOG

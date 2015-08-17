@@ -1,6 +1,6 @@
 import commands
-import logging
 from eayunstack_tools.utils import NODE_ROLE
+from functools import wraps
 
 from eayunstack_tools.logger import StackLOG as LOG
 
@@ -46,3 +46,26 @@ def check_process(name):
         LOG.debug('%s is running' % (name))
     else:
         LOG.error('%s is not running' % name)
+
+
+def register_decorater():
+    reg = []
+
+    def decorater(f):
+        reg.append(f.__name__)
+        return f
+
+    decorater.all = reg
+    return decorater
+
+
+def userful_msg():
+    def decorate(f):
+        @wraps(f)
+        def newfunc(*a, **kw):
+            LOG.debug('%s%s start running %s ' % ('='*5, '>', f.__name__))
+            ret = f(*a, **kw)
+            return ret
+        return newfunc
+
+    return decorate        
