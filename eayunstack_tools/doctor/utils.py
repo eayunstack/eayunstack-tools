@@ -31,14 +31,14 @@ def check_service(name):
     if out == 'active':
         LOG.debug('Service %s is running ...' % name)
     else:
-        LOG.error('Service %s is not running on %s ...' % (name, NODE_ROLE.hostname()))
+        LOG.error('Service %s is not running ...' % name)
 
     (_, out) = commands.getstatusoutput(
         'systemctl is-enabled %s.service' % (name))
     if 'enabled' in out:
         LOG.debug('Service %s is enabled ...' % name)
     else:
-        LOG.error('Service %s is not enabled on %s ...' % (name, NODE_ROLE.hostname()))
+        LOG.error('Service %s is not enabled ...' % name)
 
 def check_process(name):
     (status, out) = commands.getstatusoutput('pgrep -lf %s' % (name))
