@@ -61,7 +61,7 @@ def ceph_check_health():
         if o == 'HEALTH_OK':
             LOG.info('Ceph cluster check successfully !')
         else:
-            (ss, oo) = commands.getstatusoutput('ceph -s')
+            (ss, oo) = commands.getstatusoutput('ceph health detail')
             if o.startswith('HEALTH_WARN'):
                 _log(LOG.warn, oo)
             else:
