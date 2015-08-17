@@ -1,4 +1,5 @@
-from eayunstack_tools.utils import get_node_list, ssh_connect2
+from eayunstack_tools.utils import get_node_list
+from eayunstack_tools.sys_utils import ssh_connect2
 import commands
 import re
 from eayunstack_tools.logger import StackLOG as LOG
@@ -60,7 +61,7 @@ def ceph_check_health():
         if o == 'HEALTH_OK':
             LOG.info('Ceph cluster check successfully !')
         else:
-            (ss, oo) = commands.getstatusoutput('ceph -s')
+            (ss, oo) = commands.getstatusoutput('ceph health detail')
             if o.startswith('HEALTH_WARN'):
                 _log(LOG.warn, oo)
             else:

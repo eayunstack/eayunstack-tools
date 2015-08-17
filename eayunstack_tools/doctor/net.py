@@ -1,6 +1,7 @@
 from eayunstack_tools.logger import StackLOG as LOG
 from eayunstack_tools.logger import fmt_excep_msg
-from eayunstack_tools.utils import ssh_connect, ssh_connect2, NODE_ROLE
+from eayunstack_tools.utils import NODE_ROLE
+from eayunstack_tools.sys_utils import ssh_connect, ssh_connect2
 import commands
 import json
 import re

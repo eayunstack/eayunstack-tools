@@ -1,14 +1,7 @@
 import pkg_resources
-from functools import wraps
-import logging
 import logger
-import paramiko
 import os
-import socket
-import commands
 import platform
-
-from eayunstack_tools.logger import StackLOG as LOG
 
 
 def make_subcommand(parser, command):
@@ -32,29 +25,6 @@ def make_subcommand(parser, command):
     return parser
 
 
-def register_decorater():
-    reg = []
-
-    def decorater(f):
-        reg.append(f.__name__)
-        return f
-
-    decorater.all = reg
-    return decorater
-
-
-def userful_msg():
-    def decorate(f):
-        @wraps(f)
-        def newfunc(*a, **kw):
-            LOG.debug('%s%s start running %s ' % ('='*5, '>', f.__name__))
-            ret = f(*a, **kw)
-            return ret
-        return newfunc
-
-    return decorate
-
-
 def enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
     return type('Enum', (), enums)
@@ -66,13 +36,13 @@ ROLES = enum('FUEL', 'CONTROLLER', 'COMPUTE', 'CEPH_OSD', 'MONGO', 'UNKNOWN')
 class NodeRole(object):
     def __init__(self):
         if os.path.exists('/.node-role'):
-            role_file_path='/.node-role'
+            role_file_path = '/.node-role'
         else:
-            role_file_path='/.eayunstack/node-role'
+            role_file_path = '/.eayunstack/node-role'
         self._role_file_path = role_file_path
         self._role_list_file_path = '/.eayunstack/node-list'
         self._roles = self._get_roles()
-        self._get_hostname = platform.node
+        self._get_hostname = platform.node()
 
     def _get_roles(self):
         """Get roles which node represents"""
@@ -97,7 +67,8 @@ class NodeRole(object):
         except Exception as e:
             # If the file not exists, or something wrong happens, we consume
             # the node is unknow, and fire a warn message
-            print 'Unknow node, please fix the issue: %s' % logger.fmt_excep_msg(e)
+            print 'Unknow node, please fix the issue: %s'\
+                % logger.fmt_excep_msg(e)
             roles.append(ROLES.UNKNOWN)
         if not roles:
             print 'Unknow node, please fix it'
@@ -107,6 +78,21 @@ class NodeRole(object):
     @property
     def node_role(self):
         return self._roles
+
+    @property
+    def role(self):
+        if self.is_fuel():
+            return 'fule'
+        elif self.is_controller():
+            return 'controller'
+        elif self.is_compute():
+            return 'compute'
+        elif self.is_ceph_osd():
+            return 'ceph_osd'
+        elif self.is_mongo():
+            return 'mongo'
+        elif self.is_unknown():
+            return 'unknown'
 
     def is_fuel(self):
         return ROLES.FUEL in self.node_role
@@ -136,7 +122,8 @@ class NodeRole(object):
                     if len(r) != 6:
                         continue
                     nodes.append({'roles': r[3], 'host': r[0],
-                                  'ip': r[2], 'mac': r[4].replace('.', ':'), 'idrac_addr': r[5]})
+                                  'ip': r[2], 'mac': r[4].replace('.', ':'),
+                                  'idrac_addr': r[5]})
         except Exception as e:
             print 'failed to open file: %s: %s' % (self._role_list_file_path,
                                                    logger.fmt_excep_msg(e))
@@ -155,6 +142,7 @@ class NodeRole(object):
 
 NODE_ROLE = NodeRole()
 
+
 def get_controllers_hostname():
     file_path = '/.eayunstack/node-list'
     controllers = []
@@ -170,6 +158,7 @@ def get_controllers_hostname():
         node_list_file.close()
     return controllers
 
+
 def get_node_list(role):
     node_list = []
     try:
@@ -181,73 +170,3 @@ def get_node_list(role):
     except:
         node_list = []
     return node_list
-
-def ssh_connect(hostname, commands, key_file=os.environ['HOME'] + '/.ssh/id_rsa', ssh_port=22, username='root', timeout=2):
-    # Temporarily disable INFO level logging
-    logging.disable(logging.INFO)
-    # need use rsa key, if use dsa key replace 'RSA' to 'DSS'
-    key = paramiko.RSAKey.from_private_key_file(key_file)
-    s = paramiko.SSHClient()
-    s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    try:
-        s.connect(hostname, ssh_port, username=username, pkey=key, timeout=timeout)
-        stdin, stdout, stderr = s.exec_command(commands)
-        result_out = stdout.read()
-        result_err = stderr.read()
-    except paramiko.ssh_exception.AuthenticationException:
-        result_out = result_err = ''
-        LOG.error('Can not connect to this node !')
-        LOG.error('Authentication (publickey) failed !')
-    except socket.timeout:
-        result_out = result_err = ''
-        LOG.error('Can not connect to this node !')
-        LOG.error('Connect time out !')
-    finally:
-        s.close()
-        logging.disable(logging.NOTSET)
-    return result_out, result_err
-
-
-def ssh_connect2(hostname, commands):
-    """exec ssh command and print the result """
-    out, err = ssh_connect(hostname, commands)
-    if out:
-        LOG.info(out, remote=True)
-    elif err:
-        LOG.info(err, remote=True)
-    return out, err
-
-
-def scp_connect(hostname, local_path, remote_path, key_file=os.environ['HOME'] + '/.ssh/id_rsa',username='root', port=22, timeout=2):
-    logging.disable(logging.INFO)
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    try:
-        key = paramiko.RSAKey.from_private_key_file(key_file)
-        ssh.connect(hostname=hostname, username=username, port=port, pkey=key, timeout=timeout)
-        sftp = ssh.open_sftp()
-        try:
-            sftp.chdir(os.path.dirname(remote_path))
-        except IOError:
-            sftp.mkdir(os.path.dirname(remote_path))
-        sftp.put(local_path,remote_path)
-        sftp.close()
-    except socket.timeout:
-        LOG.error('Can not connect to %s, connection timeout !' % hostname)
-    except socket.error:
-        LOG.error('Can not connect to %s !' % hostname)
-    except paramiko.ssh_exception.AuthenticationException:
-        LOG.error('SSH Authentication failed for user %s !' % username)
-    except IOError as msg:
-        LOG.error('IOError: %s' % msg)
-    finally:
-        ssh.close()
-        logging.disable(logging.NOTSET)
-
-
-def ping(peer):
-    (status, out) = commands.getstatusoutput('ping -c 1 %s' % (peer))
-    if status == 0:
-        LOG.debug('%s reached' % peer)
-    else:
-        LOG.error('%s can not be reached!' % peer)    

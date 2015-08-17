@@ -1,6 +1,6 @@
 import commands
-import logging
 from eayunstack_tools.utils import NODE_ROLE
+from functools import wraps
 
 from eayunstack_tools.logger import StackLOG as LOG
 
@@ -31,14 +31,14 @@ def check_service(name):
     if out == 'active':
         LOG.debug('Service %s is running ...' % name)
     else:
-        LOG.error('Service %s is not running on %s ...' % (name, NODE_ROLE.hostname()))
+        LOG.error('Service %s is not running ...' % name)
 
     (_, out) = commands.getstatusoutput(
         'systemctl is-enabled %s.service' % (name))
     if 'enabled' in out:
         LOG.debug('Service %s is enabled ...' % name)
     else:
-        LOG.error('Service %s is not enabled on %s ...' % (name, NODE_ROLE.hostname()))
+        LOG.error('Service %s is not enabled ...' % name)
 
 def check_process(name):
     (status, out) = commands.getstatusoutput('pgrep -lf %s' % (name))
@@ -46,3 +46,26 @@ def check_process(name):
         LOG.debug('%s is running' % (name))
     else:
         LOG.error('%s is not running' % name)
+
+
+def register_decorater():
+    reg = []
+
+    def decorater(f):
+        reg.append(f.__name__)
+        return f
+
+    decorater.all = reg
+    return decorater
+
+
+def userful_msg():
+    def decorate(f):
+        @wraps(f)
+        def newfunc(*a, **kw):
+            LOG.debug('%s%s start running %s ' % ('='*5, '>', f.__name__))
+            ret = f(*a, **kw)
+            return ret
+        return newfunc
+
+    return decorate        

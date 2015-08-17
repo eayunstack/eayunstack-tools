@@ -6,11 +6,12 @@ import MySQLdb
 import ConfigParser
 import re
 from eayunstack_tools.manage.eqlx_ssh_conn import ssh_execute as eqlx_ssh_execute
-from eayunstack_tools.utils import ssh_connect
+from eayunstack_tools.sys_utils import ssh_connect
 from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.manage.utils import get_value as get_volume_value
 
 from eayunstack_tools.logger import StackLOG as LOG
+volumd_id = None
 
 env_path = os.environ['HOME'] + '/openrc'
 
@@ -22,8 +23,8 @@ def volume(parser):
         if not parser.ID:
             LOG.error('Please use [--id ID] to specify the volume ID !')
         else:
-            volume_id = parser.ID
             global volume_id
+            volume_id = parser.ID
             destroy_volume()
 
 def make(parser):

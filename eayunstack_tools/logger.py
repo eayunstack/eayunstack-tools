@@ -3,6 +3,7 @@ import sys
 import StringIO
 import commands
 import re
+from eayunstack_tools.utils import NODE_ROLE
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -121,6 +122,8 @@ Content-Transfer-Encoding: 8bit
 
     def info(self, msg, remote=False):
         if self.log_file:
+            msg = '(%s) (%s): %s' % (
+                NODE_ROLE.role, NODE_ROLE.hostname, msg)
             self.log_file.write(msg)
         else:
             if remote:
@@ -132,28 +135,36 @@ Content-Transfer-Encoding: 8bit
                         if 'INFO' in level:
                             self.logger.info(msg)
                         if 'DEBUG' in level:
-                            self.debug(msg)
+                            self.debug(msg, remote=True)
                         if 'WARN' in level:
-                            self.warn(msg)
+                            self.warn(msg, remote=True)
                         if 'ERROR' in level:
-                            self.error(msg)
+                            self.error(msg, remote=True)
                     else:
                         print l
             else:
+                msg = '(%s) (%s): %s' % (
+                    NODE_ROLE.role, NODE_ROLE.hostname, msg)
                 self.logger.info(msg)
 
     @property
     def enable_debug(self):
         return self._enable_debug
 
-    def debug(self, msg):
+    def debug(self, msg, remote=False):
         if self._enable_debug:
+            if not remote:
+                msg = '(%s) (%s): %s' % (
+                    NODE_ROLE.role, NODE_ROLE.hostname, msg)
             if self.log_file:
                 self.log_file.write(msg)
             else:
                 self.logger.debug(msg)
 
-    def warn(self, msg):
+    def warn(self, msg, remote=False):
+        if not remote:
+            msg = '(%s) (%s): %s' % (
+                NODE_ROLE.role, NODE_ROLE.hostname, msg)
         if self._email_buffer:
             _msg = "[ WARNING ] %s\n" % (msg.strip('\n'))
             self._email_buffer.write(_msg)
@@ -162,7 +173,10 @@ Content-Transfer-Encoding: 8bit
         else:
             self.logger.warn(msg)
 
-    def error(self, msg):
+    def error(self, msg, remote=False):
+        if not remote:
+            msg = '(%s) (%s): %s' % (
+                NODE_ROLE.role, NODE_ROLE.hostname, msg)
         # do some decoration :)
         if self._email_buffer:
             _msg = "[ ERROR ] %s\n" % (msg.strip('\n'))

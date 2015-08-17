@@ -1,7 +1,7 @@
 #check openstack compent
 import logging
 from eayunstack_tools.doctor import common, config, utils
-from eayunstack_tools.utils import register_decorater, userful_msg
+from eayunstack_tools.doctor.utils import register_decorater, userful_msg
 from eayunstack_tools.logger import fmt_print
 from eayunstack_tools.logger import StackLOG as LOG
 from eayunstack_tools.doctor.config import *
