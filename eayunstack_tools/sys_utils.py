@@ -23,12 +23,11 @@ def ssh_connect(hostname, commands,
         result_err = stderr.read()
     except paramiko.ssh_exception.AuthenticationException:
         result_out = result_err = ''
-        LOG.error('Can not connect to this node !')
-        LOG.error('Authentication (publickey) failed !')
+        LOG.error('Can not connect to %s, Authentication (publickey) '
+                  'failed !' % (hostname))
     except socket.timeout:
         result_out = result_err = ''
-        LOG.error('Can not connect to this node !')
-        LOG.error('Connect time out !')
+        LOG.error('Can not connect to %s, Connect time out !' % (hostname))
     finally:
         s.close()
         logging.disable(logging.NOTSET)

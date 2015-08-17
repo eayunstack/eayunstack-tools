@@ -42,7 +42,7 @@ class NodeRole(object):
         self._role_file_path = role_file_path
         self._role_list_file_path = '/.eayunstack/node-list'
         self._roles = self._get_roles()
-        self._get_hostname = platform.node
+        self._get_hostname = platform.node()
 
     def _get_roles(self):
         """Get roles which node represents"""
@@ -78,6 +78,21 @@ class NodeRole(object):
     @property
     def node_role(self):
         return self._roles
+
+    @property
+    def role(self):
+        if self.is_fuel():
+            return 'fule'
+        elif self.is_controller():
+            return 'controller'
+        elif self.is_compute():
+            return 'compute'
+        elif self.is_ceph_osd():
+            return 'ceph_osd'
+        elif self.is_mongo():
+            return 'mongo'
+        elif self.is_unknown():
+            return 'unknown'
 
     def is_fuel(self):
         return ROLES.FUEL in self.node_role
