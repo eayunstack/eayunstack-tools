@@ -169,6 +169,7 @@ def check_controller_profile():
 @register
 def check_controller_service():
     check_node_services('controller')
+    check_services_list()
 
 # check compute profile & service
 @userful_msg()
