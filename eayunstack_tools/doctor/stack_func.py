@@ -12,6 +12,7 @@ from eayunstack_tools.doctor.utils import get_node_role, check_service
 from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.sys_utils import ssh_connect2
 from eayunstack_tools.logger import StackLOG as LOG
+from eayunstack_tools.doctor.pythonclient import PythonClient
 
 node_role = get_node_role()
 
@@ -302,3 +303,19 @@ def check_nodes(node_role, check_obj, multi_role=False):
         LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, node_role, node, '*'*15))
         # ssh to node and run command
         ssh_connect2(node, check_cmd)
+
+def check_services_list():
+    logging.disable(logging.INFO)
+    pc = PythonClient()
+    nova_services_list = pc.nova_services_list()
+    check_services(nova_services_list)
+    cinder_services_list = pc.cinder_services_list()
+    check_services(cinder_services_list)
+    logging.disable(logging.NOTSET)
+
+def check_services(services_list):
+    for service in services_list:
+        if service['status'] != 'enabled':
+            LOG.warn('Service %s on %s status is %s' % (service['binary'], service['host'], service['status']))
+        if service['state'] != 'up':
+            LOG.error('Service %s on %s state is %s' % (service['binary'], service['host'], service['state']))
