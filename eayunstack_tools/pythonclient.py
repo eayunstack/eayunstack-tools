@@ -29,3 +29,11 @@ class PythonClient():
             s['state'] = service.state
             sl.append(s)
         return sl
+
+    def cinder_get_volume(self, volume_id):
+        volume = self.cinderclient.volumes.get(volume_id)
+        return volume
+
+    def cinder_get_snapshots(self, volume_id):
+        snapshots = self.cinderclient.volume_snapshots.list(search_opts={'volume_id': volume_id})
+        return snapshots
