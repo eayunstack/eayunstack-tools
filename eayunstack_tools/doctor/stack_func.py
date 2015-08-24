@@ -12,7 +12,7 @@ from eayunstack_tools.doctor.utils import get_node_role, check_service
 from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.sys_utils import ssh_connect2
 from eayunstack_tools.logger import StackLOG as LOG
-from eayunstack_tools.doctor.pythonclient import PythonClient
+from eayunstack_tools.pythonclient import PythonClient
 
 node_role = get_node_role()
 

@@ -1,4 +1,4 @@
-from eayunstack_tools.doctor.credentials import get_nova_credentials_v2, get_cinder_credentials
+from eayunstack_tools.credentials import get_nova_credentials_v2, get_cinder_credentials
 from novaclient.client import Client as nova_Client
 from cinderclient.v2.client import Client as cinder_Client
 
