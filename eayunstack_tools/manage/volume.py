@@ -11,9 +11,12 @@ from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.manage.utils import get_value as get_volume_value
 
 from eayunstack_tools.logger import StackLOG as LOG
+from eayunstack_tools.pythonclient import PythonClient
 volumd_id = None
 
 env_path = os.environ['HOME'] + '/openrc'
+
+pc = PythonClient()
 
 def volume(parser):
     if not NODE_ROLE.is_controller():
@@ -47,14 +50,10 @@ def make(parser):
 
 def destroy_volume():
     # get volume's info
-    (s, o) = commands.getstatusoutput('source %s && cinder show %s' % (env_path, volume_id))
-    if s != 0 or o is None:
-        LOG.error('Can not find this volume !')
-        return
-    else:
-        status = get_volume_value(o, 'status')
-        volume_type = get_volume_value(o, 'volume_type')
-        attachments = get_volume_value(o, 'attachments')
+    volume_info = get_volume_info()
+    status = volume_info.status
+    volume_type = volume_info.volume_type
+    attachments = volume_info.attachments
 
     if not determine_volume_status(status):
         LOG.warn('User give up to destroy this volume.')
@@ -90,7 +89,7 @@ def determine_volume_status(status):
         return True
 
 def determine_detach_status(attachments):
-    if attachments == '[]':
+    if len(attachments) == 0:
         return True
     else:
         return False
@@ -106,21 +105,10 @@ def determine_delete_snapshot():
         return False
 
 def get_volume_snapshots():
-    (s, o) = commands.getstatusoutput('source %s && cinder snapshot-list --volume-id %s' % (env_path, volume_id))
-    if s != 0 or o is None:
-        LOG.error('Can not get the snapshot info for this volume !')
-        return
-    else:
-        snapshots_id = get_snapshots_list(o, volume_id)
-    return snapshots_id
-
-def get_snapshots_list(info, key):
-    values = []
-    for entry in info.split('\n'):
-        if len(entry.split('|')) > 1:
-            if entry.split('|')[2].strip() == key:
-                values.append(entry.split('|')[1].strip())
-    return values
+    snapshot_ids = []
+    for snapshot in get_snapshot_list():
+        snapshot_ids.append(snapshot.id)
+    return snapshot_ids
 
 def get_backend_type():
     sql_select_type_id = 'SELECT volume_type_id FROM volumes WHERE id =\'%s\';' % volume_id
@@ -383,3 +371,14 @@ def update_volume_quota():
         db_connect(sql_update_gigabytes_rbd)
         db_connect(sql_update_volumes_rbd)
 
+def get_volume_info():
+    logging.disable(logging.INFO)
+    volume_info = pc.cinder_get_volume(volume_id)
+    logging.disable(logging.NOTSET)
+    return volume_info
+
+def get_snapshot_list():
+    logging.disable(logging.INFO)
+    snapshot_list = pc.cinder_get_snapshots(volume_id)
+    logging.disable(logging.NOTSET)
+    return snapshot_list
