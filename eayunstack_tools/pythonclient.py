@@ -35,5 +35,16 @@ class PythonClient():
         return volume
 
     def cinder_get_snapshots(self, volume_id):
-        snapshots = self.cinderclient.volume_snapshots.list(search_opts={'volume_id': volume_id})
+        snapshots = self.cinderclient.volume_snapshots.list(search_opts={'volume_id': volume_id,'all_tenants': 1})
         return snapshots
+
+    def nova_delete_server_volume(self, server_id, volume_id):
+        self.novaclient.volumes.delete_server_volume(server_id, volume_id)
+
+    def nova_server(self, server_id):
+        server = self.novaclient.servers.get(server_id)
+        return server
+
+    def nova_volume(self, server_id, volume_id):
+        volume = self.novaclient.volumes.get_server_volume(server_id, volume_id)
+        return volume

@@ -5,6 +5,7 @@ import commands
 import MySQLdb
 import ConfigParser
 import re
+import time
 from eayunstack_tools.manage.eqlx_ssh_conn import ssh_execute as eqlx_ssh_execute
 from eayunstack_tools.sys_utils import ssh_connect
 from eayunstack_tools.utils import NODE_ROLE
@@ -12,11 +13,15 @@ from eayunstack_tools.manage.utils import get_value as get_volume_value
 
 from eayunstack_tools.logger import StackLOG as LOG
 from eayunstack_tools.pythonclient import PythonClient
+from eayunstack_tools.stack_db import Stack_DB
 volumd_id = None
 
 env_path = os.environ['HOME'] + '/openrc'
 
 pc = PythonClient()
+
+cinder_db = Stack_DB('cinder')
+nova_db = Stack_DB('nova')
 
 def volume(parser):
     if not NODE_ROLE.is_controller():
@@ -54,14 +59,31 @@ def destroy_volume():
     status = volume_info.status
     volume_type = volume_info.volume_type
     attachments = volume_info.attachments
+    attached_servers = []
+    for attachment in attachments:
+        attached_servers.append(attachment['server_id'])
 
     if not determine_volume_status(status):
         LOG.warn('User give up to destroy this volume.')
         return
     else:
         if not determine_detach_status(attachments):
-            LOG.warn('This volume was attached to instance, please delete the instance.')
-            return
+            if determine_detach_volume(attached_servers):
+                if detach_volume(attached_servers, volume_id):
+                    snapshots_id = get_volume_snapshots()
+                    if snapshots_id:
+                        if not determine_delete_snapshot():
+                            LOG.warn('User give up to destroy this volume.')
+                            return
+                        else:
+                            # delete all snapshots & volume
+                            if delete_snapshots(snapshots_id):
+                                delete_volume()
+                    else:
+                        delete_volume()
+            else:
+                LOG.warn('User give up to detach and destroy this volume.')
+                return
         else:
             snapshots_id = get_volume_snapshots()
             if snapshots_id:
@@ -382,3 +404,68 @@ def get_snapshot_list():
     snapshot_list = pc.cinder_get_snapshots(volume_id)
     logging.disable(logging.NOTSET)
     return snapshot_list
+
+def determine_detach_volume(attached_servers):
+    while True:
+        detach_volume = raw_input('This volume was attached to instance %s, do you want to detach it and destroy it? [yes/no]: ' % attached_servers)
+        if detach_volume in ['yes','no']:
+            break
+    if detach_volume == 'yes':
+        return True
+    else:
+        return False
+
+def detach_volume(attached_servers, volume_id):
+    LOG.info('Detaching volume "%s" .' % volume_id)
+    volume_bootable = get_volume_info().bootable
+    if volume_bootable == 'false':
+        # detach volume from instance by python sdk first
+        logging.disable(logging.INFO)
+        for server_id in attached_servers:
+            pc.nova_delete_server_volume(server_id, volume_id)
+        logging.disable(logging.NOTSET)
+        t = 0
+        while t <= 14:
+            volume_status = get_volume_info().status
+            if volume_status == 'available':
+                break
+            time.sleep(3)
+            t+=3
+        # if timeout, detach-disk by virsh on compute node & update database
+        if get_volume_info().status != 'available':
+            if detach_disk_on_compute_node(attached_servers, volume_id):
+                # update database
+                LOG.info('   Updating database.')
+                # NOTE use UTC time
+                detach_at = time.strftime('%Y-%m-%d %X', time.gmtime())
+                sql_update_cinder_db = 'UPDATE volumes SET status="available",attach_status="detached" WHERE id="%s";' % volume_id
+                cinder_db.connect(sql_update_cinder_db)
+                for server_id in attached_servers:
+                    sql_update_nova_db = 'UPDATE block_device_mapping SET deleted_at="%s",deleted=id WHERE instance_uuid="%s" and volume_id="%s" and deleted=0;' % (detach_at, server_id, volume_id)
+                    nova_db.connect(sql_update_nova_db)
+        if get_volume_info().status == 'available':
+            return True
+    else:
+        LOG.warn('Can not detach root device. Please delete instance "%s" first.' % attached_servers)
+        return False
+
+def detach_disk_on_compute_node(attached_servers, volume_id):
+    for server_id in attached_servers:
+        LOG.info('   Detaching disk "%s" from instance "%s".' % (volume_id, server_id))
+        logging.disable(logging.INFO)
+        server = pc.nova_server(server_id)
+        server_status = server._info['status']
+        server_host = server._info['OS-EXT-SRV-ATTR:host']
+        server_instance_name = server._info['OS-EXT-SRV-ATTR:instance_name']
+        server_device = os.path.basename(pc.nova_volume(server_id, volume_id)._info['device'])
+        logging.disable(logging.NOTSET)
+        if server_status == 'ACTIVE':
+            detach_disk_cmd = 'virsh detach-disk %s %s --persistent' % (server_instance_name, server_device)
+            reval = ssh_connect(server_host, detach_disk_cmd)
+            if 'Disk detached successfully\n\n' in reval:
+                LOG.info('   Disk detached successfully.')
+                return True
+            else:
+                LOG.error('   Disk detached failed.')
+                return False
+
