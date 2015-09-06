@@ -30,3 +30,11 @@ def get_cinder_credentials():
     d['auth_url'] = var['OS_AUTH_URL']
     d['project_id'] = var['OS_TENANT_NAME']
     return d
+
+def get_neutron_credentials():
+    d = {}
+    d['username'] = var['OS_USERNAME']
+    d['password'] = var['OS_PASSWORD']
+    d['auth_url'] = var['OS_AUTH_URL']
+    d['tenant_name'] = var['OS_TENANT_NAME']
+    return d
