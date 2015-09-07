@@ -37,6 +37,7 @@ setup(
         'manage_command': [
             'volume = eayunstack_tools.manage.volume:make',
             'ami = eayunstack_tools.manage.ami:make',
+            'instance = eayunstack_tools.manage.instance:make',
         ],
     },
 )

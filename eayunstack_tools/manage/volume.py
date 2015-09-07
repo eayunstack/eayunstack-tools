@@ -191,6 +191,10 @@ def get_node_list(role):
 def delete_snapshots(snapshots_id, volume_id):
     LOG.info('Deleting snapshot %s ...' % snapshots_id)
     if delete_backend_snapshots(snapshots_id, volume_id):
+        try:
+            delete_image(snapshots_id)
+        except Exception,ex:
+            LOG.error('   Delete image failed!\n %s' % ex)
         update_snapshots_db(snapshots_id, volume_id)
         return True
     else:
@@ -467,3 +471,15 @@ def detach_disk_on_compute_node(attached_servers, volume_id):
                 LOG.error('   Disk detached failed.')
                 return False
 
+def delete_image(snapshots_id):
+    logging.disable(logging.DEBUG)
+    for snapshot_id in snapshots_id:
+        tenant_id = pc.cinder_get_tenant_id(snapshot_id)
+        images = pc.glance_get_images(tenant_id)
+        for image in images:
+            image_id = image.get('id')
+            image_block_device_mapping = image['block_device_mapping']
+            if snapshot_id in image_block_device_mapping:
+                LOG.info('   Delete image "%s".' % image_id)
+                pc.glance_delete_image(image_id)
+    logging.disable(logging.NOTSET)
