@@ -88,7 +88,7 @@ component_check_cmd = {
         'keystone':'keystone tenant-list',
         'glance':'glance image-list',
         'nova':'nova list',
-        'neutron':'neutron net-list',
+        'neutron':'PYTHONIOENCODING=utf-8 neutron net-list',
         'cinder':'cinder list',
         'ceilometer':'ceilometer list'
         }
