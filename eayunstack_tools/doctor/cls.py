@@ -1,7 +1,7 @@
 #check cluster status
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import NODE_ROLE, get_controllers_hostname
-from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, ceph_check_health, get_ceph_osd_status, check_all_nodes
+from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, ceph_check_health, get_ceph_osd_status, check_all_nodes, get_crm_resource_list, get_crm_resource_running_nodes
 import logging
 
 from eayunstack_tools.logger import StackLOG as LOG
@@ -17,13 +17,15 @@ def cls(parser):
         check_haproxy()
     if parser.CLUSTER_NAME == 'ceph':
         check_ceph()
+    if parser.CLUSTER_NAME == 'pacemaker':
+        check_pacemaker()
 
 def make(parser):
     '''Check cluster'''
     parser.add_argument(
         '-n',
         dest='CLUSTER_NAME',
-        choices=['mysql','rabbitmq','ceph','haproxy'],
+        choices=['mysql','rabbitmq','ceph','haproxy','pacemaker'],
         help='Cluster Name',
     )
     common.add_common_opt(parser)
@@ -43,6 +45,7 @@ def check_all():
         check_mysql()
         check_haproxy()
         check_ceph()
+        check_pacemaker()
 
 def check_rabbitmq():
     # node role check
@@ -170,3 +173,28 @@ def check_ceph():
                     check_success = False
     if check_success:
         LOG.info('Ceph osd status check successfully !')
+
+def check_pacemaker():
+    LOG.info('%s%s Checking pacemaker resource status' %('='*5, '>'))
+    check_crm_resource_status()
+
+def check_crm_resource_status():
+    controllers = get_controllers_hostname()
+    resource_list = get_crm_resource_list()
+    for (resource, t) in resource_list:
+        running_nodes = get_crm_resource_running_nodes(resource)
+        if running_nodes is not None:
+            if t == 'cp':
+                error_nodes = []
+                for node in controllers:
+                    if node not in running_nodes:
+                        error_nodes.append(node)
+                if error_nodes:
+                    LOG.error('Resource %s does not running on node %s !' % (resource, error_nodes))
+                else:
+                    LOG.info('Resource %s check successfully !' % resource)
+            else:
+                LOG.info('Resource %s check successfully !' % resource)
+        else:
+            LOG.error('Resource %s does not running on any node !' % resource)
+

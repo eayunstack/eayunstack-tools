@@ -106,3 +106,30 @@ def check_all_nodes(check_obj):
                 LOG.info('%s Role: %-10s Node: %-13s %s'
                          % ('*'*15, 'controller', node, '*'*15))
                 ssh_connect2(node, check_cmd)
+
+def get_crm_resource_list():
+    resource_list = []
+    (s, o) = commands.getstatusoutput('crm_resource -l')
+    if s != 0 or o is None:
+        return
+    else:
+        for entry in o.split('\n'):
+            if ':' in entry:
+                entry = entry.split(':')[0]
+                entry = ('clone_' + entry, 'cp')
+            else:
+                entry = (entry, 'p')
+            resource_list.append(entry)
+        resource_list = list(set(resource_list))
+    return resource_list
+
+def get_crm_resource_running_nodes(resource):
+    running_nodes = []
+    (s, o) = commands.getstatusoutput('crm_resource --locate --resource %s 2> /dev/null | grep "running on"' % resource)
+    if s != 0 or o is None:
+        return
+    else:
+        for entry in o.split('\n'):
+            running_nodes.append(entry.split()[5])
+    return running_nodes
+
