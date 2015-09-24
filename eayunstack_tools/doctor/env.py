@@ -13,6 +13,7 @@ from utils import check_service
 from eayunstack_tools.utils import NODE_ROLE
 
 from eayunstack_tools.logger import StackLOG as LOG
+from collections import OrderedDict
 register = register_decorater()
 
 
@@ -126,6 +127,30 @@ def check_disk():
         LOG.debug('The "/" filesystem used %s%% space !' % used_percent)
     elif used_percent >= limit:
         LOG.warn('The "/" filesystem used %s%% space !' % used_percent)
+
+#Check Memory Use /proc/meminfo file
+@userful_msg
+@register
+def check_mem():
+    ''' Return the information in /proc/meminfo
+    as a dictionary '''
+    limit = 80
+    meminfo=OrderedDict()
+
+    with open('/proc/meminfo') as f:
+        for line in f:
+            meminfo[line.split(':')[0]] = line.split(':')[1].strip()
+
+    Total = int((meminfo['MemTotal']).strip('kB')) / 1024.0
+    UseMemory = Total - (int((meminfo['MemFree']).strip('kB'))) / 1024.0 -(int((meminfo['Buffers']).strip('kB')))/1024.0 -(int((meminfo['Cached']).strip('kB'))) /1024.0
+
+    mem_per = UseMemory / Total * 100
+    if  mem_per >=0 and mem_per < limit:
+        LOG.debug('The System Memory used %s %% Memory' % mem_per)
+    elif mem_per >= limit
+        LOG.warn('The System Memory used %s %% Memory' % mem_per)
+
+    return check_mem
 
 
 def _network_get_nic_status():
