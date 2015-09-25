@@ -3,6 +3,7 @@ import sys
 import pkg_resources
 import os
 from eayunstack_tools.logger import StackLOG
+from eayunstack_tools.utils import NODE_ROLE
 
 
 def create_parser():
@@ -42,7 +43,7 @@ def create_parser():
         (e.name, e.load()) for e in pkg_resources.iter_entry_points('command')
     ]
     for (name, fn) in entry_points:
-        if os.path.exists('/var/www/nailgun') and name == 'manage':
+        if name == 'manage' and not NODE_ROLE.is_controller():
             continue
         p = sub.add_parser(
             name,
