@@ -129,12 +129,12 @@ def check_disk():
         LOG.warn('The "/" filesystem used %s%% space !' % used_percent)
 
 #Check Memory Use /proc/meminfo file
-@userful_msg
+@userful_msg()
 @register
-def check_mem():
+def check_memory():
     ''' Return the information in /proc/meminfo
     as a dictionary '''
-    limit = 80
+    limit = 85
     meminfo=OrderedDict()
 
     with open('/proc/meminfo') as f:
@@ -145,12 +145,10 @@ def check_mem():
     UseMemory = Total - (int((meminfo['MemFree']).strip('kB'))) / 1024.0 -(int((meminfo['Buffers']).strip('kB')))/1024.0 -(int((meminfo['Cached']).strip('kB'))) /1024.0
 
     mem_per = UseMemory / Total * 100
-    if  mem_per >=0 and mem_per < limit:
+    if mem_per >= 0 and mem_per < limit:
         LOG.debug('The System Memory used %s %% Memory' % mem_per)
-    elif mem_per >= limit
+    elif mem_per >= limit:
         LOG.warn('The System Memory used %s %% Memory' % mem_per)
-
-    return check_mem
 
 
 def _network_get_nic_status():
