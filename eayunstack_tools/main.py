@@ -64,5 +64,7 @@ def main():
     StackLOG.open(args.FILENAME, args.DEBUG, args.EMAIL)
     try:
         return args.func(args)
+    except KeyboardInterrupt:
+        pass
     finally:
         StackLOG.close()

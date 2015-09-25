@@ -28,6 +28,9 @@ def ssh_connect(hostname, commands,
     except socket.timeout:
         result_out = result_err = ''
         LOG.error('Can not connect to %s, Connect time out !' % (hostname))
+    except socket.error:
+        result_out = result_err = ''
+        LOG.error('Can not connect to %s, Connect Destination Host Unreachable !' %(hostname))
     finally:
         s.close()
         logging.disable(logging.NOTSET)
