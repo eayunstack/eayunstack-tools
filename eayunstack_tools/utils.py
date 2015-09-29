@@ -82,7 +82,7 @@ class NodeRole(object):
     @property
     def role(self):
         if self.is_fuel():
-            return 'fule'
+            return 'fuel'
         elif self.is_controller():
             return 'controller'
         elif self.is_compute():
