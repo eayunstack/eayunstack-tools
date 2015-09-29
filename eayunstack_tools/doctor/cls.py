@@ -175,6 +175,9 @@ def check_ceph():
         LOG.info('Ceph osd status check successfully !')
 
 def check_pacemaker():
+    if not NODE_ROLE.is_controller():
+        LOG.warn('This command can only run on controller node !')
+        return
     LOG.info('%s%s Checking pacemaker resource status' %('='*5, '>'))
     check_crm_resource_status()
 
