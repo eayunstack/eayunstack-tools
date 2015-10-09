@@ -101,14 +101,14 @@ class _StackLOG(object):
         # TODO: using python smtp module to send email
         _email = """Date: Thursday, July 23, 2015 at 10:42:47 AM
 From: eayunstack <eayunstack@163.com>
-To: %s <%s>
+To: %s
 Subject: mail from: eayunstack
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 8bit
 
 %s
-""" % (self._email_address, self._email_address, self._email_buffer.getvalue())
+""" % (self._email_address, self._email_buffer.getvalue())
 
         # TODO: Using random filename?
         with open('/tmp/email.txt', 'w') as f:

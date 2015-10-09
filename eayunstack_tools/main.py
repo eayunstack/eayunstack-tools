@@ -30,7 +30,7 @@ def create_parser():
     parser.add_argument(
         '-e', '--email',
         dest='EMAIL',
-        help='email address which send error log to',
+        help='email address which send error log to(use commas to separate multiple email address)',
     )
 
     sub = parser.add_subparsers(
