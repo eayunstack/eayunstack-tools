@@ -11,9 +11,10 @@ import sys
 # TODO: move to utils.py?
 def run_command(cmd):
     reval = None
-    (status, out) = commands.getstatusoutput(cmd)
+    run_cmd = 'source /root/openrc;' + cmd
+    (status, out) = commands.getstatusoutput(run_cmd)
     if status != 0:
-        LOG.error("run %s error: %s" % (cmd, out))
+        LOG.error("run %s error: %s" % (run_cmd, out))
     else:
         reval = out
     return reval
