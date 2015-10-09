@@ -69,7 +69,7 @@ fi
 
 %files
 %doc
-%attr(0755,root,root)/.eayunstack
+%attr(0750,root,root)/.eayunstack
 /usr/bin/eayunstack
 /usr/lib/python2.7/site-packages/
 
