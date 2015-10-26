@@ -67,5 +67,7 @@ def main():
         return args.func(args)
     except KeyboardInterrupt:
         pass
+    except Exception,e:
+        StackLOG.error("Application running Error, The error is: %s" % e)
     finally:
         StackLOG.close()

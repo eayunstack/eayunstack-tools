@@ -76,6 +76,15 @@ def get_ceph_osd_status():
     else:
         return o
 
+# get ceph global space
+def get_ceph_space():
+    (s,o) = commands.getstatusoutput("ceph df | grep 'RAW USED' -A 1 | awk '{print $4}'")
+    if s != 0 or o is None:
+        return float(-1)
+    else:
+        space_use = float((o.split("USED\n"))[1])
+        return space_use
+
 # check all nodes
 def check_all_nodes(check_obj):
     if check_obj is 'all':
