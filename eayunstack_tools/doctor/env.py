@@ -65,25 +65,24 @@ def check_all():
         for i in register.all:
             eval(i)()
 
+def _get_ntpserver():
+    (s, o) = commands.getstatusoutput(
+        'ntpq -pn 2> /dev/null | egrep \'^\*|^\+\' | awk \'{print $1}\'')
+    if s != 0 or not o:
+        return
+    ntpservers = sorted(o.split('\n'))
+    ntpserver = ntpservers[0][1:]
+    return ntpserver
 
 @userful_msg()
 @register
 def check_ntp():
     check_service('ntpd')
-    (s, out) = commands.getstatusoutput(
-        'ntpstat | grep "synchronised to NTP server"')
-    if s != 0:
-        LOG.error('ntpstat error, please check it')
-        return
+    ntpserver = _get_ntpserver()
+    if not ntpserver:
+        LOG.error('Can not get ntp server, please check it.')
     else:
-        p = re.compile(r'.+\((.+)\).+')
-        try:
-            server = p.match(out).groups()[0]
-            LOG.debug('ntpserver is %s' % server)
-        except:
-            LOG.error('except ntpstate error, please check it')
-            return
-
+        LOG.debug('ntpserver is %s' % ntpserver)
 
 @userful_msg()
 @register
