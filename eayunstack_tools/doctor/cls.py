@@ -1,7 +1,7 @@
 #check cluster status
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import NODE_ROLE, get_controllers_hostname
-from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, ceph_check_health, get_ceph_osd_status, check_all_nodes, get_crm_resource_list, get_crm_resource_running_nodes
+from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, ceph_check_health, get_ceph_osd_status, check_all_nodes, get_crm_resource_list, get_crm_resource_running_nodes,get_ceph_space
 import logging
 
 from eayunstack_tools.logger import StackLOG as LOG
@@ -19,13 +19,15 @@ def cls(parser):
         check_ceph()
     if parser.CLUSTER_NAME == 'pacemaker':
         check_pacemaker()
+    if parser.CLUSTER_NAME == 'cephspace':
+        check_cephspace()
 
 def make(parser):
     '''Check cluster'''
     parser.add_argument(
         '-n',
         dest='CLUSTER_NAME',
-        choices=['mysql','rabbitmq','ceph','haproxy','pacemaker'],
+        choices=['mysql','rabbitmq','ceph','haproxy','pacemaker','cephspace'],
         help='Cluster Name',
     )
     common.add_common_opt(parser)
@@ -46,6 +48,7 @@ def check_all():
         check_haproxy()
         check_ceph()
         check_pacemaker()
+        check_cephspace()
 
 def check_rabbitmq():
     # node role check
@@ -173,6 +176,23 @@ def check_ceph():
                     check_success = False
     if check_success:
         LOG.info('Ceph osd status check successfully !')
+
+def check_cephspace():
+    # node role check
+    if NODE_ROLE.is_controller():
+        LOG.info('%s%s Checking ceph space' % ('='*5, '>'))
+        ceph_space = get_ceph_space()
+        limit_war = 83
+        limit_error = 93
+        if ceph_space >= 0 and ceph_space < limit_war:
+            LOG.info('The ceph space is used: %s%%' % ceph_space)
+        elif ceph_space >= limit_war and ceph_space < limit_error:
+            LOG.warn('The ceph space is used: %s%%' % ceph_space)
+    # Whe ceph_space Error ,The ceph_space return -1 
+        elif ceph_space < 0: 
+            LOG.error('The ceph space check error: Get ceph space Faild')
+        else:
+            LOG.error('The ceph space is used: %s%%' % ceph_space)
 
 def check_pacemaker():
     if not NODE_ROLE.is_controller():
