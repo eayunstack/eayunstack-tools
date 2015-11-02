@@ -145,9 +145,9 @@ def check_memory():
 
     mem_per = UseMemory / Total * 100
     if mem_per >= 0 and mem_per < limit:
-        LOG.debug('The System Memory used %s %% Memory' % mem_per)
+        LOG.debug('The system memory has been used %.2f%%!' % mem_per)
     elif mem_per >= limit:
-        LOG.warn('The System Memory used %s %% Memory' % mem_per)
+        LOG.error('The system memory has been used %.2f%%!' % mem_per)
 
 
 def _network_get_nic_status():
