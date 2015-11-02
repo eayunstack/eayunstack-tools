@@ -3,6 +3,7 @@ import sys
 import StringIO
 import commands
 import re
+import time
 from eayunstack_tools.utils import NODE_ROLE
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -64,6 +65,12 @@ class StackEmail(object):
         self.content_list = []
 
     def send(self):
+        if self.compare_content():
+            # TODO: update timestramp?
+            StackLOG.info('nothing shoule be sent, since the email'
+                          'content has not changed')
+            return ''
+
         # TODO: get sender address from config file
         # TODO: check ssmtp?
         # TODO: using python smtp module to send email
@@ -86,10 +93,32 @@ Content-Transfer-Encoding: 8bit
             if status != 0:
                 return out
             else:
+                self.save_content()
                 return ''
 
     def add_content(self, content):
         self.content_list.append(content)
+
+    def compare_content(self):
+        try:
+            with open('/tmp/.last_stack_email', 'r') as f:
+                last_content_list = []
+                for l in f:
+                    if l.startswith('#'):
+                        continue
+                    last_content_list.append(l)
+                return set(self.content_list) == set(last_content_list)
+        except IOError:
+            return False
+        except:
+            return False
+
+    def save_content(self):
+        # TODO: nice last_file name?
+        with open('/tmp/.last_stack_email', 'w') as f:
+            f.write('#date: %f\n' % (time.time()))
+            for content in self.content_list:
+                f.write(content)
 
 
 class _StackLOG(object):
