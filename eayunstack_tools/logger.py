@@ -153,10 +153,11 @@ class _StackLOG(object):
             self.log_file.close()
         if self._email_address:
             # If some error occurs, send it
-            self.info('Send email to %s' % (self._email_address))
-            out = self.email.send()
-            if out:
-                self.logger.error(out)
+            if self.email.content_list:
+                self.info('Send email to %s' % (self._email_address))
+                out = self.email.send()
+                if out:
+                    self.logger.error(out)
 
     def info(self, msg, remote=False):
         if self.log_file:
