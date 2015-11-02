@@ -82,6 +82,9 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 8bit
 
+Hi, maintainers:
+  eayunstack has something wrong, please fix it!
+
 %s
 """ % (self.email_address, ''.join(self.content_list))
         # TODO: Using random filename?
