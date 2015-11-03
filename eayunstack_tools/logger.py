@@ -3,6 +3,7 @@ import sys
 import StringIO
 import commands
 import re
+import time
 from eayunstack_tools.utils import NODE_ROLE
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -58,12 +59,76 @@ def color_format():
     return ColoredFormatter(color_fmt)
 
 
+class StackEmail(object):
+    def __init__(self, email_address):
+        self.email_address = email_address
+        self.content_list = []
+
+    def send(self):
+        if self.compare_content():
+            # TODO: update timestramp?
+            StackLOG.info('nothing shoule be sent, since the email'
+                          'content has not changed')
+            return ''
+
+        # TODO: get sender address from config file
+        # TODO: check ssmtp?
+        # TODO: using python smtp module to send email
+        _email = """Date: Thursday, July 23, 2015 at 10:42:47 AM
+From: eayunstack <eayunstack@163.com>
+To: %s
+Subject: mail from: eayunstack
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 8bit
+
+Hi, maintainers:
+  eayunstack has something wrong, please fix it!
+
+%s
+""" % (self.email_address, ''.join(self.content_list))
+        # TODO: Using random filename?
+        with open('/tmp/email.txt', 'w') as f:
+            f.write(_email)
+            f.flush()
+            cmd = 'ssmtp -t < /tmp/email.txt'
+            (status, out) = commands.getstatusoutput(cmd)
+            if status != 0:
+                return out
+            else:
+                self.save_content()
+                return ''
+
+    def add_content(self, content):
+        self.content_list.append(content)
+
+    def compare_content(self):
+        try:
+            with open('/tmp/.last_stack_email', 'r') as f:
+                last_content_list = []
+                for l in f:
+                    if l.startswith('#'):
+                        continue
+                    last_content_list.append(l)
+                return set(self.content_list) == set(last_content_list)
+        except IOError:
+            return False
+        except:
+            return False
+
+    def save_content(self):
+        # TODO: nice last_file name?
+        with open('/tmp/.last_stack_email', 'w') as f:
+            f.write('#date: %f\n' % (time.time()))
+            for content in self.content_list:
+                f.write(content)
+
+
 class _StackLOG(object):
     def __init__(self):
         self.log_file = None
         self._enable_debug = False
         self._email_address = None
-        self._email_buffer = None
 
     def setLevel(self, level):
         if self.log_file:
@@ -84,41 +149,18 @@ class _StackLOG(object):
         self._enable_debug = debug
         if email_address:
             self._email_address = email_address
-            self._email_buffer = StringIO.StringIO()
+            self.email = StackEmail(email_address)
 
     def close(self):
         if self.log_file:
             self.log_file.close()
         if self._email_address:
             # If some error occurs, send it
-            if self._email_buffer.getvalue():
-                self._send_email()
-            self._email_buffer.close()
-
-    def _send_email(self):
-        # TODO: get sender address from config file
-        # TODO: check ssmtp?
-        # TODO: using python smtp module to send email
-        _email = """Date: Thursday, July 23, 2015 at 10:42:47 AM
-From: eayunstack <eayunstack@163.com>
-To: %s
-Subject: mail from: eayunstack
-MIME-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 8bit
-
-%s
-""" % (self._email_address, self._email_buffer.getvalue())
-
-        # TODO: Using random filename?
-        with open('/tmp/email.txt', 'w') as f:
-            f.write(_email)
-            f.flush()
-            cmd = 'ssmtp -t < /tmp/email.txt'
-            self.info("Send email to %s" % self._email_address)
-            (status, out) = commands.getstatusoutput(cmd)
-            if status != 0:
-                self.error("Send email failed: %s" % out)
+            if self.email.content_list:
+                self.info('Send email to %s' % (self._email_address))
+                out = self.email.send()
+                if out:
+                    self.logger.error(out)
 
     def info(self, msg, remote=False):
         if self.log_file:
@@ -165,9 +207,9 @@ Content-Transfer-Encoding: 8bit
         if not remote:
             msg = '(%s) (%s): %s' % (
                 NODE_ROLE.role, NODE_ROLE.hostname, msg)
-        if self._email_buffer:
+        if self._email_address:
             _msg = "[ WARNING ] %s\n" % (msg.strip('\n'))
-            self._email_buffer.write(_msg)
+            self.email.add_content(_msg)
         if self.log_file:
             self.log_file.write(msg)
         else:
@@ -178,9 +220,9 @@ Content-Transfer-Encoding: 8bit
             msg = '(%s) (%s): %s' % (
                 NODE_ROLE.role, NODE_ROLE.hostname, msg)
         # do some decoration :)
-        if self._email_buffer:
+        if self._email_address:
             _msg = "[ ERROR ] %s\n" % (msg.strip('\n'))
-            self._email_buffer.write(_msg)
+            self.email.add_content(_msg)
         if self.log_file:
             self.log_file.write(msg)
         else:
