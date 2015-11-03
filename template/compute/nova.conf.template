@@ -11,15 +11,11 @@ vncserver_proxyclient_address =
 rabbit_password =
 neutron_admin_password =
 ##
-notification_driver=ceilometer.compute.nova_notifier
-notification_driver=nova.openstack.common.notifier.rpc_notifier
-notification_driver=
 amqp_durable_queues=False
 rabbit_use_ssl=False
 rabbit_userid=nova
 rabbit_virtual_host=/
 rabbit_ha_queues=True
-notification_topics=notifications
 rpc_backend=nova.openstack.common.rpc.impl_kombu
 notify_on_state_change=vm_and_task_state
 notify_api_faults=False

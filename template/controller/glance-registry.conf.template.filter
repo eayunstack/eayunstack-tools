@@ -2,6 +2,9 @@
 debug =
 bind_host =
 sql_connection =
+notification_driver =
+notification_topics =
+default_publisher_id =
 [keystone_authtoken]
 auth_uri =
 auth_host =

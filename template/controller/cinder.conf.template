@@ -12,7 +12,6 @@ kombu_reconnect_delay=5.0
 rabbit_userid=nova
 rabbit_virtual_host=/
 rabbit_ha_queues=True
-notification_driver=cinder.openstack.common.notifier.rpc_notifier
 rpc_backend=cinder.openstack.common.rpc.impl_kombu
 control_exchange=cinder
 api_paste_config=/etc/cinder/api-paste.ini
