@@ -5,6 +5,7 @@ rabbit_password =
 admin_bind_host =
 rabbit_hosts =
 public_bind_host =
+notification_topics =
 [cache]
 memcache_servers =
 [memcache]

@@ -14,7 +14,6 @@ rabbit_userid=nova
 rabbit_virtual_host=/
 rabbit_ha_queues=True
 notification_driver=messaging
-notification_topics=notifications
 verbose=True
 log_dir=/var/log/keystone
 use_syslog=True

@@ -5,6 +5,9 @@ registry_host =
 bind_host =
 rabbit_password =
 sql_connection =
+notification_driver =
+default_publisher_id =
+notification_topics =
 [keystone_authtoken]
 auth_uri =
 identity_uri =
