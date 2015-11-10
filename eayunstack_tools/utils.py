@@ -2,6 +2,7 @@ import pkg_resources
 import logger
 import os
 import platform
+import logging
 
 
 def make_subcommand(parser, command):
@@ -170,3 +171,23 @@ def get_node_list(role):
     except:
         node_list = []
     return node_list
+
+def logging_disable(func):
+    def fn(*args, **kwargs):
+        logging.disable(logging.INFO)
+        r = func(*args, **kwargs)
+        logging.disable(logging.NOTSET)
+        return r
+    return fn
+
+@logging_disable
+def get_fuel_node_ip(env):
+    fuel_node_ip = None
+    from fuelclient.objects.environment import Environment
+    e = Environment(env)
+    nodes_id = [x.data['id'] for x in e.get_all_nodes()]
+    for fact in e.get_default_facts('deployment', [nodes_id[0]]):
+        fuel_node_ip = fact['master_ip']
+        if fuel_node_ip:
+            break
+    return fuel_node_ip
