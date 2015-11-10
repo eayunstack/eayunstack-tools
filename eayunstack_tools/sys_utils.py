@@ -76,6 +76,36 @@ def scp_connect(hostname, local_path, remote_path,
         ssh.close()
         logging.disable(logging.NOTSET)
 
+def scp_connect2(hostname, local_path, remote_path,
+                username, password, port=22, timeout=2):
+    success = False
+    logging.disable(logging.INFO)
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        ssh.connect(hostname=hostname, username=username, password=password,
+                    port=port, timeout=timeout)
+        sftp = ssh.open_sftp()
+        try:
+            sftp.chdir(os.path.dirname(remote_path))
+        except IOError:
+            sftp.mkdir(os.path.dirname(remote_path))
+        sftp.put(local_path, remote_path)
+        sftp.close()
+        success = True
+    except socket.timeout:
+        LOG.error('Can not connect to %s, connection timeout !' % hostname)
+    except socket.error:
+        LOG.error('Can not connect to %s !' % hostname)
+    except paramiko.ssh_exception.AuthenticationException:
+        LOG.error('SSH Authentication failed for user %s !' % username)
+    except IOError as msg:
+        LOG.error('IOError: %s' % msg)
+    finally:
+        ssh.close()
+        logging.disable(logging.NOTSET)
+        return success
+
 
 def ping(peer):
     (status, out) = commands.getstatusoutput('ping -c 1 %s' % (peer))
