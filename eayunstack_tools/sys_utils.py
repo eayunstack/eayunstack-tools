@@ -5,6 +5,7 @@ import paramiko
 import os
 import subprocess
 import traceback
+import json
 from eayunstack_tools.logger import StackLOG as LOG
 
 
@@ -135,4 +136,26 @@ def run_command(cmd, shell=True, cwd=None):
         stderr = str(e)
         returncode = 1
     return (stdout, stderr, returncode)
+
+def run_command_on_node(host_id, cmd):
+    docker_container = 'fuel-core-6.0.1-astute'
+    local_cmd = 'docker exec ' \
+              + docker_container \
+              + ' mco rpc --with-identity ' \
+              + str(host_id) \
+              + ' --agent execute_shell_command --action execute ' \
+              + '--argument cmd="' \
+              + cmd \
+              + '" -j'
+    (out, err, returncode) = run_command(local_cmd)
+    stdout = stderr = exitcode = None
+    if returncode == 0 and err == '' and out != '':
+        res = json.loads(out)[0]
+        data = res['data']
+        stdout = data['stdout']
+        stderr = data['stderr']
+        exitcode = data['exit_code']
+    else:
+        exitcode = 1
+    return (stdout, stderr, exitcode)
 
