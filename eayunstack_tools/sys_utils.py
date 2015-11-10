@@ -3,6 +3,8 @@ import commands
 import logging
 import paramiko
 import os
+import subprocess
+import traceback
 from eayunstack_tools.logger import StackLOG as LOG
 
 
@@ -113,3 +115,24 @@ def ping(peer):
         LOG.debug('%s reached' % peer)
     else:
         LOG.error('%s can not be reached!' % peer)
+
+def run_command(cmd, shell=True, cwd=None):
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            cwd=cwd,
+            shell=shell,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        (stdout, stderr) = proc.communicate()
+        stdout = stdout.rstrip('\n')
+        returncode = proc.returncode
+    except Exception as e:
+        LOG.error("Cannot execute command '%s': %s : %s" %
+                          (cmd, str(e), traceback.format_exc()))
+        stdout = None
+        stderr = str(e)
+        returncode = 1
+    return (stdout, stderr, returncode)
+
