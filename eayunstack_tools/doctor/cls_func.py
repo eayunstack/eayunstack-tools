@@ -51,7 +51,7 @@ def ceph_check_health():
         func('Ceph cluster check faild !')
         # FIXME: cause the log module issue, need to send error msg line 
         # by line
-        for l in oo.split('\n'):
+        for l in msg.split('\n'):
             func(l)
 
     (s, o) = commands.getstatusoutput('ceph health')
@@ -63,9 +63,15 @@ def ceph_check_health():
         else:
             (ss, oo) = commands.getstatusoutput('ceph health detail')
             if o.startswith('HEALTH_WARN'):
-                _log(LOG.warn, oo)
+                count = len(oo)
+                if count > 150:
+                    _log(LOG.warn, oo.splitlines()[0])
+                    _log(LOG.warn, oo.splitlines()[1])
             else:
-                _log(LOG.error, oo)
+                count = len(oo)
+                if count > 150:
+                    _log(LOG.error, oo.splitlines()[0])
+                    _log(LOG.error, oo.splitlines()[1])
 
 
 # get ceph osd status
