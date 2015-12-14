@@ -66,12 +66,10 @@ def ceph_check_health():
                 count = len(oo)
                 if count > 150:
                     _log(LOG.warn, oo.splitlines()[0])
-                    _log(LOG.warn, oo.splitlines()[1])
             else:
                 count = len(oo)
                 if count > 150:
                     _log(LOG.error, oo.splitlines()[0])
-                    _log(LOG.error, oo.splitlines()[1])
 
 
 # get ceph osd status
