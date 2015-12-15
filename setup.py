@@ -25,7 +25,9 @@ setup(
             'backup = eayunstack_tools.fuel.backup:make',
             'restore = eayunstack_tools.fuel.restore:make',
             'ceph_cluster_network = '
-            'eayunstack_tools.fuel.ceph_cluster_network:make'
+            'eayunstack_tools.fuel.ceph_cluster_network:make',
+            'deployment_monitor_plugins = '
+            'eayunstack_tools.fuel.deployment_monitor_plugins:make',
         ],
         'doctor_command': [
             'env = eayunstack_tools.doctor.env:make',
