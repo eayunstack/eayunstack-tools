@@ -14,7 +14,6 @@ from eayunstack_tools.manage.utils import get_value as get_volume_value
 from eayunstack_tools.logger import StackLOG as LOG
 from eayunstack_tools.pythonclient import PythonClient
 from eayunstack_tools.stack_db import Stack_DB
-volumd_id = None
 
 env_path = os.environ['HOME'] + '/openrc'
 
@@ -31,9 +30,8 @@ def volume(parser):
         if not parser.ID:
             LOG.error('Please use [--id ID] to specify the volume ID !')
         else:
-            global volume_id
             volume_id = parser.ID
-            destroy_volume()
+            destroy_volume(volume_id)
 
 def make(parser):
     '''Volume Management'''
@@ -53,9 +51,9 @@ def make(parser):
     )
     parser.set_defaults(func=volume)
 
-def destroy_volume():
+def destroy_volume(volume_id):
     # get volume's info
-    volume_info = get_volume_info()
+    volume_info = get_volume_info(volume_id)
     status = volume_info.status
     volume_type = volume_info.volume_type
     attachments = volume_info.attachments
@@ -70,32 +68,32 @@ def destroy_volume():
         if not determine_detach_status(attachments):
             if determine_detach_volume(attached_servers):
                 if detach_volume(attached_servers, volume_id):
-                    snapshots_id = get_volume_snapshots()
+                    snapshots_id = get_volume_snapshots(volume_id)
                     if snapshots_id:
                         if not determine_delete_snapshot():
                             LOG.warn('User give up to destroy this volume.')
                             return
                         else:
                             # delete all snapshots & volume
-                            if delete_snapshots(snapshots_id):
-                                delete_volume()
+                            if delete_snapshots(snapshots_id, volume_id):
+                                delete_volume(volume_id)
                     else:
-                        delete_volume()
+                        delete_volume(volume_id)
             else:
                 LOG.warn('User give up to detach and destroy this volume.')
                 return
         else:
-            snapshots_id = get_volume_snapshots()
+            snapshots_id = get_volume_snapshots(volume_id)
             if snapshots_id:
                 if not determine_delete_snapshot():
                     LOG.warn('User give up to destroy this volume.')
                     return
                 else:
                     # delete all snapshots & volume
-                    if delete_snapshots(snapshots_id):
-                        delete_volume()
+                    if delete_snapshots(snapshots_id, volume_id):
+                        delete_volume(volume_id)
             else:
-                delete_volume()
+                delete_volume(volume_id)
 
 def determine_volume_status(status):
     if status in ['available','creating','deleting','error_deleting','attaching','detaching']:
@@ -126,13 +124,13 @@ def determine_delete_snapshot():
     else:
         return False
 
-def get_volume_snapshots():
+def get_volume_snapshots(volume_id):
     snapshot_ids = []
-    for snapshot in get_snapshot_list():
+    for snapshot in get_snapshot_list(volume_id):
         snapshot_ids.append(snapshot.id)
     return snapshot_ids
 
-def get_backend_type():
+def get_backend_type(volume_id):
     sql_select_type_id = 'SELECT volume_type_id FROM volumes WHERE id =\'%s\';' % volume_id
     volume_type_id = db_connect(sql_select_type_id)[0]
     sql_select_type_name = 'SELECT name FROM volume_types WHERE id =\'%s\';' % volume_type_id
@@ -190,23 +188,27 @@ def get_node_list(role):
         node_list_file.close()
     return node_list
 
-def delete_snapshots(snapshots_id):
+def delete_snapshots(snapshots_id, volume_id):
     LOG.info('Deleting snapshot %s ...' % snapshots_id)
-    if delete_backend_snapshots(snapshots_id):
-        update_snapshots_db(snapshots_id)
+    if delete_backend_snapshots(snapshots_id, volume_id):
+        try:
+            delete_image(snapshots_id)
+        except Exception,ex:
+            LOG.error('   Delete image failed!\n %s' % ex)
+        update_snapshots_db(snapshots_id, volume_id)
         return True
     else:
         return False
 
-def delete_backend_snapshots(snapshots_id):
-    backend_type = get_backend_type()
+def delete_backend_snapshots(snapshots_id, volume_id):
+    backend_type = get_backend_type(volume_id)
     if backend_type == 'eqlx':
-        if delete_backend_snapshots_eqlx(snapshots_id):
+        if delete_backend_snapshots_eqlx(snapshots_id, volume_id):
             return True
         else:
             return False
     elif backend_type == 'rbd':
-        if delete_backend_snapshots_rbd(snapshots_id):
+        if delete_backend_snapshots_rbd(snapshots_id, volume_id):
             return True
         else:
             return False
@@ -214,7 +216,7 @@ def delete_backend_snapshots(snapshots_id):
         LOG.error('Do not support to delete "%s" type snapshot.' % backend_type)
         return False
 
-def delete_backend_snapshots_eqlx(snapshots_id):
+def delete_backend_snapshots_eqlx(snapshots_id, volume_id):
     LOG.info('   Deleting backend(eqlx) snapshots ...')
     for snapshot_id in snapshots_id:
         LOG.info('   [%s]Deleting backend snapshot ...' % snapshot_id)
@@ -226,7 +228,7 @@ def delete_backend_snapshots_eqlx(snapshots_id):
         else:
             return True
 
-def delete_backend_snapshots_rbd(snapshots_id):
+def delete_backend_snapshots_rbd(snapshots_id, volume_id):
     success = True
     rbd_pool = get_config('cinder_ceph', 'rbd_pool')
     LOG.info('   Deleting backend(rbd) snapshots ...')
@@ -248,28 +250,28 @@ def delete_backend_snapshots_rbd(snapshots_id):
             success = False
     return success
 
-def delete_volume():
+def delete_volume(volume_id):
     LOG.info('Deleting volume %s ...' % volume_id)
-    if delete_backend_volume():
-        update_db()
+    if delete_backend_volume(volume_id):
+        update_db(volume_id)
 
-def delete_backend_volume():
+def delete_backend_volume(volume_id):
     # get backend store type
-    backend_type = get_backend_type()
+    backend_type = get_backend_type(volume_id)
     if backend_type == 'eqlx':
-        if delete_backend_volume_eqlx():
+        if delete_backend_volume_eqlx(volume_id):
             return True
         else:
             return False
     elif backend_type == 'rbd':
-        if delete_backend_volume_rbd():
+        if delete_backend_volume_rbd(volume_id):
             return True
         else:
             return False
     else:
         LOG.error('Do not support to delete "%s" type volume.' % backend_type)
 
-def delete_backend_volume_eqlx():
+def delete_backend_volume_eqlx(volume_id):
     # get provider_location
     sql_get_provider_location = 'SELECT provider_location FROM volumes WHERE id =\'%s\';' % volume_id
     provider_location = str(db_connect(sql_get_provider_location)).split()[1]
@@ -303,7 +305,7 @@ def delete_backend_volume_eqlx():
     else:
         return True
 
-def delete_backend_volume_rbd():
+def delete_backend_volume_rbd(volume_id):
     LOG.info('   Deleting backend(rbd) volume ...')
     rbd_pool = get_config('cinder_ceph', 'rbd_pool')
     (s, o) = commands.getstatusoutput('rbd -p %s info volume-%s' % (rbd_pool, volume_id))
@@ -318,7 +320,7 @@ def delete_backend_volume_rbd():
         else:
             return True
 
-def update_snapshots_db(snapshots_id):
+def update_snapshots_db(snapshots_id, volume_id):
    # (host, pwd) = get_db_host_pwd()
     LOG.info('   Updating database ...')
     for snapshot_id in snapshots_id:
@@ -329,17 +331,17 @@ def update_snapshots_db(snapshots_id):
         rest = db_connect(sql_select)
         if rest[0] == 1 and rest[1] == 'deleted' and rest[2] == '100%':
             LOG.info('   [%s]Updating snapshot quota ...' % snapshot_id)
-            update_snapshot_quota(snapshot_id)
+            update_snapshot_quota(snapshot_id, volume_id)
         else:
             LOG.error('   Database update faild !')
 
-def update_snapshot_quota(snapshot_id):
+def update_snapshot_quota(snapshot_id, volume_id):
     # get snapshot size & project id
     sql_get_size_project_id = 'SELECT volume_size,project_id FROM snapshots WHERE id=\'%s\';' % snapshot_id
     get_size_project_id = db_connect(sql_get_size_project_id)
     size = get_size_project_id[0]
     project_id = get_size_project_id[1]
-    backend_type = get_backend_type()
+    backend_type = get_backend_type(volume_id)
     sql_update_gigabytes = 'UPDATE quota_usages SET in_use=in_use-%s where project_id=\'%s\' and resource=\'gigabytes\';' % (size, project_id)
     sql_update_snapshots = 'UPDATE quota_usages SET in_use=in_use-1 where project_id=\'%s\' and resource=\'snapshots\';' %  project_id
     db_connect(sql_update_gigabytes)
@@ -355,12 +357,12 @@ def update_snapshot_quota(snapshot_id):
         db_connect(sql_update_snapshots_rbd)
         db_connect(sql_update_gigabytes_rbd)
     
-def update_db():
+def update_db(volume_id):
     LOG.info('   Updating database ...')
-    update_volume_table()
-    update_volume_quota()
+    update_volume_table(volume_id)
+    update_volume_quota(volume_id)
 
-def update_volume_table():
+def update_volume_table(volume_id):
     LOG.info('   [%s]Updating volumes table ...' % volume_id)
     sql_update = 'UPDATE volumes SET deleted=1,status=\'deleted\' WHERE id=\'%s\';' % volume_id
     db_connect(sql_update)
@@ -369,7 +371,7 @@ def update_volume_table():
     if rest[0] != 1 or rest[1] != 'deleted':
         LOG.error('   Database update faild !')
 
-def update_volume_quota():
+def update_volume_quota(volume_id):
     LOG.info('   [%s]Updating volume quota ...' % volume_id)
     # get volume size & project id
     sql_get_size_project_id = 'SELECT size,project_id FROM volumes WHERE id=\'%s\';' % volume_id
@@ -377,7 +379,7 @@ def update_volume_quota():
     size = get_size_project_id[0]
     project_id = get_size_project_id[1]
     # get backend type
-    backend_type = get_backend_type()
+    backend_type = get_backend_type(volume_id)
     sql_update_gigabytes = 'UPDATE quota_usages SET in_use=in_use-%s where project_id=\'%s\' and resource=\'gigabytes\';' % (size, project_id)
     sql_update_volumes = 'UPDATE quota_usages SET in_use=in_use-1 where project_id=\'%s\' and resource=\'volumes\';' %  project_id
     db_connect(sql_update_gigabytes)
@@ -393,13 +395,13 @@ def update_volume_quota():
         db_connect(sql_update_gigabytes_rbd)
         db_connect(sql_update_volumes_rbd)
 
-def get_volume_info():
+def get_volume_info(volume_id):
     logging.disable(logging.INFO)
     volume_info = pc.cinder_get_volume(volume_id)
     logging.disable(logging.NOTSET)
     return volume_info
 
-def get_snapshot_list():
+def get_snapshot_list(volume_id):
     logging.disable(logging.INFO)
     snapshot_list = pc.cinder_get_snapshots(volume_id)
     logging.disable(logging.NOTSET)
@@ -417,7 +419,7 @@ def determine_detach_volume(attached_servers):
 
 def detach_volume(attached_servers, volume_id):
     LOG.info('Detaching volume "%s" .' % volume_id)
-    volume_bootable = get_volume_info().bootable
+    volume_bootable = get_volume_info(volume_id).bootable
     if volume_bootable == 'false':
         # detach volume from instance by python sdk first
         logging.disable(logging.INFO)
@@ -426,13 +428,13 @@ def detach_volume(attached_servers, volume_id):
         logging.disable(logging.NOTSET)
         t = 0
         while t <= 14:
-            volume_status = get_volume_info().status
+            volume_status = get_volume_info(volume_id).status
             if volume_status == 'available':
                 break
             time.sleep(3)
             t+=3
         # if timeout, detach-disk by virsh on compute node & update database
-        if get_volume_info().status != 'available':
+        if get_volume_info(volume_id).status != 'available':
             if detach_disk_on_compute_node(attached_servers, volume_id):
                 # update database
                 LOG.info('   Updating database.')
@@ -443,7 +445,7 @@ def detach_volume(attached_servers, volume_id):
                 for server_id in attached_servers:
                     sql_update_nova_db = 'UPDATE block_device_mapping SET deleted_at="%s",deleted=id WHERE instance_uuid="%s" and volume_id="%s" and deleted=0;' % (detach_at, server_id, volume_id)
                     nova_db.connect(sql_update_nova_db)
-        if get_volume_info().status == 'available':
+        if get_volume_info(volume_id).status == 'available':
             return True
     else:
         LOG.warn('Can not detach root device. Please delete instance "%s" first.' % attached_servers)
@@ -469,3 +471,15 @@ def detach_disk_on_compute_node(attached_servers, volume_id):
                 LOG.error('   Disk detached failed.')
                 return False
 
+def delete_image(snapshots_id):
+    logging.disable(logging.DEBUG)
+    for snapshot_id in snapshots_id:
+        tenant_id = pc.cinder_get_tenant_id(snapshot_id)
+        images = pc.glance_get_images(tenant_id)
+        for image in images:
+            image_id = image.get('id')
+            image_block_device_mapping = image['block_device_mapping']
+            if snapshot_id in image_block_device_mapping:
+                LOG.info('   Delete image "%s".' % image_id)
+                pc.glance_delete_image(image_id)
+    logging.disable(logging.NOTSET)
