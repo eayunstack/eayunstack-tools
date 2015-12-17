@@ -357,22 +357,14 @@ def deployment_openstack_node(node, plugin_version):
                 + '/puppet/'
     manifest_path = plugin_dir + 'manifests/'
     module_path = plugin_dir + 'modules/'
-    manifest_base = ['check_environment_configuration.pp',
-                    'base.pp']
-    manifest_controller = ['controller.pp']
-    manifest_compute = ['compute.pp']
-    manifest_ceph_osd = ['ceph_osd.pp']
-    manifest_mongo = []
-    manifest_list = manifest_base
+
+    manifest_list = ['check_environment_configuration.pp', 'base.pp']
+    manifest_mapping = {'controller': ['controller.pp'],
+                        'compute': ['compute.pp'],
+                        'ceph-osd': ['ceph_osd.pp']}
     for role in host_roles:
-        if role == 'controller':
-            manifest_list = manifest_list + manifest_controller
-        if role == 'compute':
-            manifest_list = manifest_list + manifest_compute
-        if role == 'ceph-osd':
-            manifest_list = manifest_list + manifest_ceph_osd
-        if role == 'mongo':
-            manifest_list = manifest_list + manifest_mongo
+        manifest_list.extend(manifest_mapping.get(role, []))
+
     for manifest in manifest_list:
         puppet_apply2(host_id, module_path, manifest_path + manifest)
     
