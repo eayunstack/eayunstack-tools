@@ -14,6 +14,8 @@ novncproxy_host =
 rabbit_password =
 neutron_admin_password =
 neutron_metadata_proxy_shared_secret =
+osapi_compute_workers=
+metadata_workers=
 ##
 amqp_durable_queues=False
 rabbit_use_ssl=False
@@ -36,9 +38,7 @@ max_age=0
 quota_driver=nova.quota.DbQuotaDriver
 report_interval=10
 enabled_apis=ec2,osapi_compute,metadata
-osapi_compute_workers=12
 metadata_listen=0.0.0.0
-metadata_workers=12
 service_down_time=60
 rootwrap_config=/etc/nova/rootwrap.conf
 api_paste_config=/etc/nova/api-paste.ini
@@ -94,7 +94,7 @@ neutron_admin_username=neutron
 [cells]
 [cinder]
 [conductor]
-workers=12
+workers=
 [ephemeral_storage_encryption]
 [glance]
 [hyperv]

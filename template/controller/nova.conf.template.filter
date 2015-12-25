@@ -17,6 +17,8 @@ teardown_unused_network_gateway =
 notification_driver =
 notification_topics =
 notify_on_state_change =
+osapi_compute_workers=
+metadata_workers=
 
 [database]
 connection = 
@@ -24,3 +26,5 @@ connection =
 auth_host =
 auth_uri =
 admin_password =
+[conductor]
+workers=

@@ -6,12 +6,12 @@ bind_host =
 rabbit_password =
 sql_connection =
 debug =
+workers=
 ##
 verbose=True
 bind_port=9292
 log_file=/var/log/glance/api.log
 backlog=4096
-workers=12
 show_image_direct_url=True
 use_syslog=True
 syslog_log_facility=LOG_LOCAL2
