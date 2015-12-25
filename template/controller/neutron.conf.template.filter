@@ -8,6 +8,9 @@ rabbit_hosts =
 nova_admin_auth_url =
 rabbit_password=
 notification_topics =
+notification_driver=
+api_workers = 
+rpc_workers = 
 [keystone_authtoken]
 auth_uri =
 auth_host =

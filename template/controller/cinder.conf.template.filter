@@ -1,12 +1,13 @@
 [DEFAULT]
 debug =
 glance_api_servers =
-default_volume_type =
+#default_volume_type =
 osapi_volume_listen =
 rabbit_hosts =
 rabbit_password =
 notification_driver =
 notification_topics =
+enabled_backends=
 [cinder_ceph]
 rbd_secret_uuid =
 [cinder_eqlx]
