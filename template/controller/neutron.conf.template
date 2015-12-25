@@ -8,6 +8,8 @@ nova_url =
 rabbit_hosts =
 nova_admin_auth_url =
 rabbit_password=
+api_workers = 
+rpc_workers = 
 ##
 verbose = False
 state_path = /var/lib/neutron
@@ -31,8 +33,6 @@ agent_down_time = 15
 router_scheduler_driver = neutron.scheduler.l3_agent_scheduler.ChanceScheduler
 allow_automatic_l3agent_failover = True
 dhcp_agents_per_network = 1
-api_workers = 12
-rpc_workers = 12
 use_ssl = False
 notify_nova_on_port_status_changes = True
 notify_nova_on_port_data_changes = True

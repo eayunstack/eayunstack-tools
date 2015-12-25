@@ -8,6 +8,7 @@ sql_connection =
 notification_driver =
 default_publisher_id =
 notification_topics =
+workers =
 [keystone_authtoken]
 auth_uri =
 identity_uri =
