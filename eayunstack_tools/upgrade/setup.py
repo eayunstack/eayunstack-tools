@@ -38,9 +38,19 @@ def setup_rsyncd_config():
         'gid': '0',
         'use chroot': 'no',
     }
-    docker_copy_command = 'dockerctl copy {src} {dst}'
-    copy_out = docker_copy_command.format(src=rsyncd_conf, dst=tmp_rsyncd_conf)
-    copy_in = docker_copy_command.format(src=tmp_rsyncd_conf, dst=rsyncd_conf)
+    # The container is mounted in another namespace
+    docker_copy_command = 'nsenter -m -t {pid} dockerctl copy {src} {dst}'
+    # The following section is NOT that migration-friendly
+    find_docker_pid_command = 'systemctl -p MainPID show docker|sed "s/.*=//"'
+    (s, o) = commands.getstatusoutput(find_docker_pid_command)
+    if s != 0:
+        LOG.error('Failed to get the pid of the docker daemon!')
+        return
+    pid = o
+    copy_out = docker_copy_command.format(
+        pid=pid, src=rsyncd_conf, dst=tmp_rsyncd_conf)
+    copy_in = docker_copy_command.format(
+        pid=pid, src=tmp_rsyncd_conf, dst=rsyncd_conf)
 
     (s, o) = commands.getstatusoutput(copy_out)
     if s != 0:
