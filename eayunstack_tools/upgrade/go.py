@@ -155,8 +155,8 @@ def go_upgrade(myip):
         with open(FIRST_CONTROLLER, 'r') as first_controller_file:
             first_controller = first_controller_file.readline()
         nodes = [
-            n['id'] for n in nodes
-            if n['online'] and n['id'] != first_controller
+            str(n['id']) for n in nodes
+            if n['online'] and str(n['id']) != first_controller
         ]
         with open(OTHER_NODES, 'wb') as other_nodes_file:
             other_nodes_file.write(' '.join(nodes))
