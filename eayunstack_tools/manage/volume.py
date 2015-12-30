@@ -131,10 +131,19 @@ def get_volume_snapshots(volume_id):
     return snapshot_ids
 
 def get_backend_type(volume_id):
-    sql_select_type_id = 'SELECT volume_type_id FROM volumes WHERE id =\'%s\';' % volume_id
-    volume_type_id = db_connect(sql_select_type_id)[0]
-    sql_select_type_name = 'SELECT name FROM volume_types WHERE id =\'%s\';' % volume_type_id
-    backend_type = db_connect(sql_select_type_name)[0]
+    backend_type = None
+    sql_select_volume_type_name = \
+        'select name from volumes,volume_types where \
+         volumes.id=\'%s\' and volumes.volume_type_id=volume_types.id' \
+         % volume_id
+    volume_type_name = db_connect(sql_select_volume_type_name)
+    if 'rbd' or 'ceph' in volume_type_name[0]:
+        backend_type = 'rbd'
+    elif 'eqlx' in volume_type_name[0]:
+        backend_type = 'eqlx'
+    # TODO the default volume type is "rbd" in eayunstack environment
+    if backend_type == None:
+        backend_type = 'rbd'
     return backend_type
 
 def db_connect(sql, user='cinder', dbname='cinder'):
