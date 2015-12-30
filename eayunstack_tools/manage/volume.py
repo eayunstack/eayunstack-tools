@@ -76,9 +76,9 @@ def destroy_volume(volume_id):
                         else:
                             # delete all snapshots & volume
                             if delete_snapshots(snapshots_id, volume_id):
-                                delete_volume(volume_id)
+                                delete_volume(volume_id, status)
                     else:
-                        delete_volume(volume_id)
+                        delete_volume(volume_id, status)
             else:
                 LOG.warn('User give up to detach and destroy this volume.')
                 return
@@ -91,9 +91,9 @@ def destroy_volume(volume_id):
                 else:
                     # delete all snapshots & volume
                     if delete_snapshots(snapshots_id, volume_id):
-                        delete_volume(volume_id)
+                        delete_volume(volume_id, status)
             else:
-                delete_volume(volume_id)
+                delete_volume(volume_id, status)
 
 def determine_volume_status(status):
     if status in ['available','creating','deleting','error_deleting','attaching','detaching']:
@@ -250,10 +250,13 @@ def delete_backend_snapshots_rbd(snapshots_id, volume_id):
             success = False
     return success
 
-def delete_volume(volume_id):
+def delete_volume(volume_id, volume_status):
     LOG.info('Deleting volume %s ...' % volume_id)
-    if delete_backend_volume(volume_id):
+    if volume_status == 'creating':
         update_db(volume_id)
+    else:
+        if delete_backend_volume(volume_id):
+            update_db(volume_id)
 
 def delete_backend_volume(volume_id):
     # get backend store type
