@@ -21,6 +21,7 @@ Requires:	kernel-tools
 Requires:	ipmitool
 Requires:	python-novaclient
 Requires:	python-cinderclient
+Requires:	python-neutronclient
 
 %description
 EayunStack Management Tools
