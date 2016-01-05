@@ -15,3 +15,5 @@ notification_topics =
 connection =
 [libvirt]
 rbd_secret_uuid = 
+cpu_mode=
+virt_type=
