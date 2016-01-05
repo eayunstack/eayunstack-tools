@@ -9,6 +9,7 @@ from eayunstack_tools.logger import fmt_print
 from eayunstack_tools.doctor.config import get_db_profile, get_component_check_cmd
 from eayunstack_tools.doctor.config import *
 from eayunstack_tools.doctor.utils import get_node_role, check_service
+from eayunstack_tools.doctor.utils import run_doctor_on_nodes
 from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.sys_utils import ssh_connect2
 from eayunstack_tools.logger import StackLOG as LOG
@@ -278,7 +279,7 @@ def get_node_list(role):
     try:
         for node in NODE_ROLE.nodes:
             if node['roles'] == role:
-                node_list.append(node['ip'])
+                node_list.append(node['host'])
     except:
         LOG.error('Can not get the node list !')
         node_list = []
@@ -299,10 +300,9 @@ def check_nodes(node_role, check_obj, multi_role=False):
     if len(node_list) == 0:
         LOG.warn('Node list is null !')
         return
-    for node in node_list:
-        LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, node_role, node, '*'*15))
-        # ssh to node and run command
-        ssh_connect2(node, check_cmd)
+    proc_list = run_doctor_on_nodes(node_role, node_list, check_cmd)
+    for proc in proc_list:
+        proc.join()
 
 def check_services_list():
     logging.disable(logging.INFO)
@@ -319,3 +319,4 @@ def check_services(services_list):
             LOG.warn('Service %s on %s status is %s' % (service['binary'], service['host'], service['status']))
         if service['state'] != 'up':
             LOG.error('Service %s on %s state is %s' % (service['binary'], service['host'], service['state']))
+

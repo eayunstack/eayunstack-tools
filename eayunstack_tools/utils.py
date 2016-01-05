@@ -165,9 +165,9 @@ def get_node_list(role):
     try:
         for node in NODE_ROLE.nodes:
             if role == 'all':
-                node_list.append(node['ip'])
+                node_list.append(node['host'])
             elif node['roles'] == role:
-                node_list.append(node['ip'])
+                node_list.append(node['host'])
     except:
         node_list = []
     return node_list

@@ -1,8 +1,10 @@
 import commands
+from multiprocessing import Process
 from eayunstack_tools.utils import NODE_ROLE
 from functools import wraps
 
 from eayunstack_tools.logger import StackLOG as LOG
+from eayunstack_tools.sys_utils import ssh_connect2
 
 def search_service(service):
     (s, out) = commands.getstatusoutput('systemctl list-unit-files | grep "%s"' %(service))
@@ -69,3 +71,20 @@ def userful_msg():
         return newfunc
 
     return decorate        
+
+def run_doctor_cmd_on_node(role, node, cmd):
+    LOG.info('%s%s Push check cmd to %-13s (%-10s) %s%s'
+            % ('<', '='*2, node, role, '='*2, '>'))
+    ssh_connect2(node, cmd)
+
+'''
+Use multiprocess to launch doctor check cmd on all node at the same time.
+'''
+def run_doctor_on_nodes(node_role, node_list, check_cmd):
+    proc_list = []
+    for node in node_list:
+        proc=Process(target=run_doctor_cmd_on_node,
+                    args=(node_role, node, check_cmd))
+        proc.start()
+        proc_list.append(proc)
+    return proc_list

@@ -8,6 +8,7 @@ import yaml
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import get_node_list
 from eayunstack_tools.doctor.utils import register_decorater, userful_msg
+from eayunstack_tools.doctor.utils import run_doctor_on_nodes
 from eayunstack_tools.sys_utils import ssh_connect2, ping
 from utils import check_service
 from eayunstack_tools.utils import NODE_ROLE
@@ -51,16 +52,12 @@ def make(parser):
 def check_all():
     '''Check All Environement Object'''
     if NODE_ROLE.is_fuel():
+        check_cmd = get_check_cmd('all')
         for role in ['controller','compute','mongo','ceph-osd']:
             node_list = get_node_list(role)
-            for node in node_list:
-                LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
-                if LOG.enable_debug:
-                    out, err = ssh_connect2(node, 'sudo eayunstack --debug doctor env -a')
-                else:
-                    out, err = ssh_connect2(node, 'sudo eayunstack doctor env -a')
-                if err:
-                    LOG.error('Check failed !')
+            proc_list = run_doctor_on_nodes(role, node_list, check_cmd)
+        for proc in proc_list:
+            proc.join()
     else:
         for i in register.all:
             eval(i)()
@@ -340,14 +337,23 @@ def intel_pstate_enabled():
 
 def check_nodes(obj_name):
    # node_list = get_node_list('all')
+    check_cmd = get_check_cmd(obj_name)
     for role in ['controller','compute','mongo','ceph-osd']:
         node_list = get_node_list(role)
-        for node in node_list:
-            LOG.info('%s Role: %-10s Node: %-13s %s' % ('*'*15, role, node, '*'*15))
-            if LOG.enable_debug:
-                out, err = ssh_connect2(node, 'sudo eayunstack --debug doctor env -n %s' % obj_name)
-            else:
-                out, err = ssh_connect2(node, 'sudo eayunstack doctor env -n %s' % obj_name)
+        proc_list = run_doctor_on_nodes(role, node_list, check_cmd)
+    for proc in proc_list:
+        proc.join()
 
-            if err:
-                LOG.error('Check failed !')
+def get_check_cmd(obj_name):
+    main_cmd = 'sudo eayunstack'
+    sub_cmd = ' doctor env'
+    if obj_name == 'all':
+        cmd_args = ' -a'
+    else:
+        cmd_args = ' -n ' + obj_name
+    if LOG.enable_debug:
+        check_cmd = main_cmd + ' --debug' + sub_cmd + cmd_args
+    else:
+        check_cmd = main_cmd + sub_cmd + cmd_args
+    return check_cmd
+
