@@ -9,6 +9,7 @@ notification_driver =
 default_publisher_id =
 notification_topics =
 workers =
+sql_max_overflow =
 [keystone_authtoken]
 auth_uri =
 identity_uri =
