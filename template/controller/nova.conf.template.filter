@@ -22,6 +22,8 @@ metadata_workers=
 
 [database]
 connection = 
+[DATABASE]
+max_overflow =
 [keystone_authtoken]
 auth_host =
 auth_uri =

@@ -17,6 +17,7 @@ eqlx_pool =
 san_password =
 [database]
 connection =
+max_overflow =
 [keystone_authtoken]
 auth_host =
 admin_password = 

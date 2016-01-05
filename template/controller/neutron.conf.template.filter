@@ -1,4 +1,5 @@
 [DEFAULT]
+verbose =
 debug =
 base_mac =
 nova_admin_tenant_id =
@@ -11,6 +12,7 @@ notification_topics =
 notification_driver=
 api_workers = 
 rpc_workers = 
+service_plugins =
 [keystone_authtoken]
 auth_uri =
 auth_host =

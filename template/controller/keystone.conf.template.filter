@@ -10,6 +10,8 @@ notification_topics =
 memcache_servers =
 [memcache]
 servers =
+[DATABASE]
+max_overflow =
 [database]
 connection =
 [pipeline:public_api]
