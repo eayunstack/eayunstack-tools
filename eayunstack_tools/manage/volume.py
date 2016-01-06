@@ -490,8 +490,8 @@ def delete_image(snapshots_id):
         images = pc.glance_get_images(tenant_id)
         for image in images:
             image_id = image.get('id')
-            image_block_device_mapping = image['block_device_mapping']
-            if snapshot_id in image_block_device_mapping:
+            image_block_device_mapping = image.get('block_device_mapping')
+            if image_block_device_mapping and snapshot_id in image_block_device_mapping:
                 LOG.info('   Delete image "%s".' % image_id)
                 pc.glance_delete_image(image_id)
     logging.disable(logging.NOTSET)
