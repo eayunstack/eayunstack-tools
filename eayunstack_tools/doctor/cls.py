@@ -166,6 +166,7 @@ def check_ceph():
     osd_status = get_ceph_osd_status()
     if not osd_status:
         LOG.error('Can not get ceph osd status !')
+        check_success = False
     else:
         for l in osd_status.split('\n'):
             if 'id' not in l and 'weigh' not in l and 'osd.' in l:
