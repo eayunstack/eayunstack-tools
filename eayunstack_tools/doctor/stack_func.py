@@ -300,9 +300,10 @@ def check_nodes(node_role, check_obj, multi_role=False):
     if len(node_list) == 0:
         LOG.warn('Node list is null !')
         return
-    proc_list = run_doctor_on_nodes(node_role, node_list, check_cmd)
+    (proc_list, pipe) = run_doctor_on_nodes(node_role, node_list, check_cmd)
     for proc in proc_list:
         proc.join()
+    LOG.info(pipe.recv(), remote=True)
 
 def check_services_list():
     logging.disable(logging.INFO)
