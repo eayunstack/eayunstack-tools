@@ -1,5 +1,5 @@
 import commands
-from multiprocessing import Process
+from multiprocessing import Process, Pipe
 from eayunstack_tools.utils import NODE_ROLE
 from functools import wraps
 
@@ -72,19 +72,20 @@ def userful_msg():
 
     return decorate        
 
-def run_doctor_cmd_on_node(role, node, cmd):
+def run_doctor_cmd_on_node(role, node, cmd, pipe):
     LOG.info('%s%s Push check cmd to %-13s (%-10s) %s%s'
             % ('<', '='*2, node, role, '='*2, '>'))
-    ssh_connect2(node, cmd)
+    ssh_connect2(node, cmd, pipe=pipe)
 
 '''
 Use multiprocess to launch doctor check cmd on all node at the same time.
 '''
 def run_doctor_on_nodes(node_role, node_list, check_cmd):
+    parent_conn, child_conn = Pipe()
     proc_list = []
     for node in node_list:
         proc=Process(target=run_doctor_cmd_on_node,
-                    args=(node_role, node, check_cmd))
+                    args=(node_role, node, check_cmd, child_conn,))
         proc.start()
         proc_list.append(proc)
-    return proc_list
+    return proc_list, parent_conn

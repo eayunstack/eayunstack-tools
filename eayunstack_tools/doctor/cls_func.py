@@ -113,9 +113,10 @@ def check_all_nodes(check_obj):
             ceph_node = node_list[0]
             run_doctor_cmd_on_node('controller', ceph_node, check_cmd)
         else:
-            proc_list = run_doctor_on_nodes('controller', node_list, check_cmd)
+            (proc_list, pipe) = run_doctor_on_nodes('controller', node_list, check_cmd)
             for proc in proc_list:
                 proc.join()
+            LOG.info(pipe.recv(), remote=True)
 
 def get_crm_resource_list():
     resource_list = []

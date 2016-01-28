@@ -55,9 +55,10 @@ def check_all():
         check_cmd = get_check_cmd('all')
         for role in ['controller','compute','mongo','ceph-osd']:
             node_list = get_node_list(role)
-            proc_list = run_doctor_on_nodes(role, node_list, check_cmd)
+            (proc_list, pipe) = run_doctor_on_nodes(role, node_list, check_cmd)
         for proc in proc_list:
             proc.join()
+        LOG.info(pipe.recv(), remote=True)
     else:
         for i in register.all:
             eval(i)()
@@ -349,9 +350,10 @@ def check_nodes(obj_name):
     check_cmd = get_check_cmd(obj_name)
     for role in ['controller','compute','mongo','ceph-osd']:
         node_list = get_node_list(role)
-        proc_list = run_doctor_on_nodes(role, node_list, check_cmd)
+        (proc_list, pipe) = run_doctor_on_nodes(role, node_list, check_cmd)
     for proc in proc_list:
         proc.join()
+    LOG.info(pipe.recv(), remote=True)
 
 def get_check_cmd(obj_name):
     main_cmd = 'sudo eayunstack'
