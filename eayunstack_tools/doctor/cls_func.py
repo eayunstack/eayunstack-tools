@@ -9,13 +9,12 @@ from eayunstack_tools.doctor.utils import run_doctor_on_nodes
 # get node list for rabbitmq cluster
 def get_rabbitmq_nodes():
     running_nodes = []
-    (s, o) = commands.getstatusoutput('rabbitmqctl cluster_status | grep running_nodes')
+    (s, o) = commands.getstatusoutput('rabbitmqctl -q cluster_status')
     if s == 0:
-        p = re.compile(r'{running_nodes,\[(.+)\]},')
-        m = p.match(o.strip()).groups()
-        running_nodes = []
-        nodes = m[0].split(',')
-        for node in nodes:
+        p = re.compile('.*running_nodes,\[([^\]]+)\]', re.S)
+        rns = p.findall(o)
+        for rn in rns[0].split(','):
+            node = rn.strip()
             pp = re.compile(r'\'rabbit@(.+)\'')
             mm = pp.match(node).groups()
             running_nodes.append(mm[0])
