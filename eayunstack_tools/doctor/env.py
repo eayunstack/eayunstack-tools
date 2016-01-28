@@ -166,18 +166,25 @@ def _network_local_network_inf(cfg):
     network_scheme = cfg['network_scheme']
 
     def _find_phy_port(role):
-        port = None
-        try:
-            action = filter(lambda scheme: scheme['action'] == 'add-patch'
-                            and role in scheme['bridges'],
-                            network_scheme['transformations'])[0]
-            br_phy = (set(action['bridges']) - set([role])).pop()
-            action = filter(lambda scheme: scheme['action'] == 'add-port'
-                            and br_phy == scheme['bridge'],
-                            network_scheme['transformations'])[0]
-            port = action['name']
-        except:
-            port = None
+        port = []
+        action = filter(lambda scheme: scheme['action'] == 'add-patch'
+                        and role in scheme['bridges'],
+                        network_scheme['transformations'])[0]
+        br_phy = (set(action['bridges']) - set([role])).pop()
+        port_actions = filter(lambda scheme: scheme['action'] == 'add-port'
+                             and br_phy == scheme['bridge'],
+                             network_scheme['transformations'])
+        bond_actions = filter(lambda scheme: scheme['action'] == 'add-bond'
+                             and br_phy == scheme['bridge'],
+                             network_scheme['transformations'])
+        if port_actions:
+            action = port_actions[0]
+            port.append(action['name'])
+        elif bond_actions:
+            action = bond_actions[0]
+            port.extend(action['interfaces'])
+        else:
+            port = []
             LOG.error('failed to find physics nic for role:%s' % role)
         return port
 
@@ -215,11 +222,13 @@ def _network_check_local(local_inf, nic_status):
     if NODE_ROLE.is_ceph_osd():
         local_inf = [i for i in local_inf if i['name'] != 'br-prv']
 
-    nic_need = [i['phy_port'] for i in local_inf]
+    nic_need = []
+    for inf in local_inf:
+        nic_need.extend(inf['phy_port'])
     for nic in set(nic_need):
         # if two network roles use same nic, e.g. br-mgmt and br-fw-admin
         # use eno1, we can ignore it since we just want physic network nic
-        inf = filter(lambda inf: inf['phy_port'] == nic, local_inf)[0]
+        inf = filter(lambda inf: nic in inf['phy_port'], local_inf)[0]
         if nic_status[nic].lower() != 'yes':
             LOG.error('Network card %s(%s) is not connected' %
                       (nic, inf['name']))
