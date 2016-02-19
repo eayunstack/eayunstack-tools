@@ -170,6 +170,8 @@ class _StackLOG(object):
         else:
             if remote:
                 for l in msg.split('\n'):
+                    if not len(l):
+                        continue 
                     p = re.compile(r'\[(.*)\] (.*)')
                     if p.match(l):
                         level = p.match(l).groups()[0]
