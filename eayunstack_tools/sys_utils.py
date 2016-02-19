@@ -40,19 +40,15 @@ def ssh_connect(hostname, commands,
     return result_out, result_err
 
 
-def ssh_connect2(hostname, commands, pipe=None):
+def ssh_connect2(hostname, commands, check_all=False):
     """exec ssh command and print the result """
     out, err = ssh_connect(hostname, commands)
-    if out:
-        if pipe:
-            pipe.send(out)
-        else:
-            LOG.info(out, remote=True)
-    elif err:
-        if pipe:
-            pipe.send(err)
-        else:
-            LOG.info(err, remote=True)
+    if out and not check_all:
+        LOG.info(out, remote=True)
+    elif err and not check_all:
+        LOG.info(err, remote=True)
+    if check_all:
+        logging.disable(logging.INFO)
     return out, err
 
 
