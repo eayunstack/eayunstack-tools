@@ -1,6 +1,7 @@
 import sys
 import logging
 import os
+import yaml
 from fuelclient.client import APIClient
 from eayunstack_tools.sys_utils import scp_connect
 from eayunstack_tools.logger import StackLOG as LOG
@@ -30,6 +31,7 @@ def init(parser):
     if parser.UPDATE:
         update()
         return
+    init_env()
     init_node_list_file()
     init_node_role_file()
 
@@ -128,3 +130,23 @@ def update():
             LOG.info('Update on %s successfully.' % node)
             LOG.info('Current version: %s' % current_ver)
             print
+
+def init_env():
+    env_file = '/.eayunstack/.env.yaml'
+    if not os.path.exists(env_file):
+        os.mknod(env_file)
+    f = open(env_file)
+    env_info = yaml.load(f)
+    f.close()
+    if not env_info:
+        env_info = {}
+    if env_info.has_key('env_name'):
+        env_name = env_info['env_name']
+    else:
+        env_name = ''
+    env_name = raw_input('Please enter environment name [%s]: '
+                         % env_name)
+    if env_name:
+        env_info['env_name'] = env_name
+    with open(env_file, 'w') as env_yaml:
+        env_yaml.write(yaml.dump(env_info, default_flow_style=False))
