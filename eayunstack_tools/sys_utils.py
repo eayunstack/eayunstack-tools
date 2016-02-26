@@ -6,8 +6,10 @@ import os
 import subprocess
 import traceback
 import json
+import eventlet
 from eayunstack_tools.logger import StackLOG as LOG
 
+eventlet.monkey_patch()
 
 def ssh_connect(hostname, commands,
                 key_file=os.environ['HOME'] + '/.ssh/id_rsa',
@@ -160,4 +162,19 @@ def run_command_on_node(host_id, cmd):
     else:
         exitcode = 1
     return (stdout, stderr, exitcode)
+
+def run_cmd_on_node(node, cmd):
+    out, err = ssh_connect(node, cmd)
+    logging.disable(logging.INFO)
+    return out, err
+
+def run_cmd_on_nodes(node_list, cmd):
+    pile = eventlet.GreenPile()
+    results = {}
+    for node in node_list:
+        pile.spawn(run_cmd_on_node, node, cmd)
+    for node, res in zip(node_list, pile):
+        results[node] = res
+    logging.disable(logging.NOTSET)
+    return results
 
