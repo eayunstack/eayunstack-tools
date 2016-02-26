@@ -53,12 +53,17 @@ def check_all():
     '''Check All Environement Object'''
     if NODE_ROLE.is_fuel():
         check_cmd = get_check_cmd('all')
+        nodes = []
         for role in ['controller','compute','mongo','ceph-osd']:
             node_list = get_node_list(role)
-            (proc_list, pipe) = run_doctor_on_nodes(role, node_list, check_cmd)
-        for proc in proc_list:
-            proc.join()
-        LOG.info(pipe.recv(), remote=True)
+            for node in node_list:
+                node_info = {}
+                node_info['role'] = role
+                node_info['name'] = node
+                nodes.append(node_info)
+        result = run_doctor_on_nodes(nodes, check_cmd)
+        for res in result:
+            LOG.info(res, remote=True)
     else:
         for i in register.all:
             eval(i)()
@@ -348,12 +353,17 @@ def intel_pstate_enabled():
 def check_nodes(obj_name):
    # node_list = get_node_list('all')
     check_cmd = get_check_cmd(obj_name)
+    nodes = []
     for role in ['controller','compute','mongo','ceph-osd']:
         node_list = get_node_list(role)
-        (proc_list, pipe) = run_doctor_on_nodes(role, node_list, check_cmd)
-    for proc in proc_list:
-        proc.join()
-    LOG.info(pipe.recv(), remote=True)
+        for node in node_list:
+            node_info = {}
+            node_info['role'] = role
+            node_info['name'] = node
+            nodes.append(node_info)
+    result = run_doctor_on_nodes(nodes, check_cmd)
+    for res in result:
+        LOG.info(res, remote=True)
 
 def get_check_cmd(obj_name):
     main_cmd = 'sudo eayunstack'
