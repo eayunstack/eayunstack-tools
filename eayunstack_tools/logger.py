@@ -4,6 +4,8 @@ import StringIO
 import commands
 import re
 import time
+import yaml
+import os
 from eayunstack_tools.utils import NODE_ROLE
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -72,6 +74,9 @@ class StackEmail(object):
             return ''
 
         # TODO: get sender address from config file
+        sender_address = get_sender_address()
+        if not sender_address:
+            return ''
         # TODO: check ssmtp?
         # TODO: using python smtp module to send email
         _email = """Date: Thursday, July 23, 2015 at 10:42:47 AM
@@ -83,10 +88,10 @@ Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 8bit
 
 Hi, maintainers:
-  eayunstack has something wrong, please fix it!
+  *** %s *** environment has something wrong, please fix it!
 
 %s
-""" % (self.email_address, ''.join(self.content_list))
+""" % (self.email_address, sender_address, ''.join(self.content_list))
         # TODO: Using random filename?
         with open('/tmp/email.txt', 'w') as f:
             f.write(_email)
@@ -252,3 +257,19 @@ def fmt_excep_msg(exc):
         return '%s: %s\n' % (exc.__class__.__name__, exc)
     else:
         return '%s\n' % (exc.__class__.__name__)
+
+def get_sender_address():
+    env_file = '/.eayunstack/.env.yaml'
+    if not os.path.exists(env_file):
+        StackLOG.error(
+            'Please run "eayunstack init" command on fuel node first.')
+        return
+    f = open(env_file)
+    env_info = yaml.load(f)
+    f.close()
+    if not env_info or not env_info.has_key('env_name'):
+        StackLOG.error(
+            'Please run "eayunstack init" command on fuel node first.')
+        return
+    sender_address = env_info['env_name']
+    return sender_address
