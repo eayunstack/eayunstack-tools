@@ -7,6 +7,7 @@ import time
 import yaml
 import os
 from eayunstack_tools.utils import NODE_ROLE
+from email import utils as email_utils
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -79,7 +80,10 @@ class StackEmail(object):
             return ''
         # TODO: check ssmtp?
         # TODO: using python smtp module to send email
-        _email = """Date: Thursday, July 23, 2015 at 10:42:47 AM
+
+        datetime = email_utils.formatdate(localtime=True)
+
+        _email = """Date: %s
 From: eayunstack <eayunstack@163.com>
 To: %s
 Subject: mail from: eayunstack
@@ -91,7 +95,7 @@ Hi, maintainers:
   *** %s *** environment has something wrong, please fix it!
 
 %s
-""" % (self.email_address, sender_address, ''.join(self.content_list))
+""" % (datetime, self.email_address, sender_address, ''.join(self.content_list))
         # TODO: Using random filename?
         with open('/tmp/email.txt', 'w') as f:
             f.write(_email)
