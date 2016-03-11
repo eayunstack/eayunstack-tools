@@ -9,12 +9,14 @@ from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import get_node_list
 from eayunstack_tools.doctor.utils import register_decorater, userful_msg
 from eayunstack_tools.doctor.utils import run_doctor_on_nodes
+from eayunstack_tools.doctor.utils import get_cpu_processors, get_cpu_load
 from eayunstack_tools.sys_utils import ssh_connect2, ping
 from utils import check_service
 from eayunstack_tools.utils import NODE_ROLE
 
 from eayunstack_tools.logger import StackLOG as LOG
 from collections import OrderedDict
+from decimal import Decimal
 register = register_decorater()
 
 
@@ -378,3 +380,28 @@ def get_check_cmd(obj_name):
         check_cmd = main_cmd + sub_cmd + cmd_args
     return check_cmd
 
+@userful_msg()
+@register
+def check_cpuload():
+    cpu_processors = get_cpu_processors()
+    if not cpu_processors:
+        LOG.error('Can not get cpu cores!')
+        return
+    # get cpu load limit
+    cpu_load_warn_limit = cpu_processors * 0.7
+    cpu_load_error_limit = cpu_processors * 0.9
+    # get cpu load averages(one, five, and fifteen minute averages)
+    cpu_load = get_cpu_load()
+    if not cpu_load:
+        LOG.error('Can not get cpu load!')
+        return
+    # use five minute average to confirm the cpu load status
+    cpu_load_five_minute_average = cpu_load.split(',')[1].strip()
+    if Decimal(cpu_load_five_minute_average) > Decimal(cpu_load_error_limit):
+        LOG.error('Current CPU load averages is : %s. '
+                  'Please check system status.' % cpu_load)
+    elif Decimal(cpu_load_five_minute_average) > Decimal(cpu_load_warn_limit):
+        LOG.warn('Current CPU load averages is : %s. '
+                 'Please check system status.' % cpu_load)
+    else:
+        LOG.debug('Current CPU load averages is : %s.' % cpu_load)
