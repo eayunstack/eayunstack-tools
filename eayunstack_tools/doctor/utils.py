@@ -1,6 +1,7 @@
 import commands
 import eventlet
 import logging
+import re
 from multiprocessing import Process, Pipe
 from eayunstack_tools.utils import NODE_ROLE
 from functools import wraps
@@ -94,3 +95,21 @@ def run_doctor_on_nodes(node_list, check_cmd):
         result.append(res)
     logging.disable(logging.NOTSET)
     return result
+
+def get_cpu_processors():
+    (status, output) = commands.getstatusoutput(
+        'cat /proc/cpuinfo | grep "processor" | wc -l')
+    if status != 0:
+        return None
+    cpu_processors = int(output)
+    return cpu_processors
+
+def get_cpu_load():
+    (status, output) = commands.getstatusoutput('uptime')
+    if status != 0:
+        return None
+    p = re.compile(r'(.+)load average:(.+)')
+    m = p.match(output).groups()
+    cpu_load = m[1].strip()
+    return cpu_load
+
