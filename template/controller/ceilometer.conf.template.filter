@@ -1,0 +1,20 @@
+[DEFAULT]
+api_workers = 
+rabbit_password = 
+rabbit_hosts =
+collector_workers = 
+notification_workers = 
+[api]
+host = 
+[database]
+connection = 
+[keystone_authtoken]
+auth_uri = 
+admin_password = 
+auth_host = 
+[publisher]
+metering_secret = 
+[service_credentials]
+os_password = 
+os_auth_url =
+
