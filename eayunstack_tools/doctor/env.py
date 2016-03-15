@@ -263,6 +263,8 @@ def _network_remote_network_inf(cfg):
             node_inf['host'] = n['fqdn']
             if not n['role'].endswith('mongo'):
                 node_inf['storage_address'] = n['storage_address']
+            if n['role'].endswith('ceph-osd'):
+                node_inf['ceph_cluster_address'] = n['ceph_cluster_address']
             all_node_inf.append(node_inf)
         except:
             LOG.error("failed to parse node:%s" % n['fqdn'])
@@ -282,6 +284,8 @@ def _network_check_remote(remote_inf):
             _ping(inf, 'storage_address')
         if NODE_ROLE.is_controller() and inf['role'] == 'controller':
             _ping(inf, 'public_address')
+        if NODE_ROLE.is_ceph_osd() and inf['role'] == 'ceph-osd':
+            _ping(inf, 'ceph_cluster_address')
 
 
 @userful_msg()
