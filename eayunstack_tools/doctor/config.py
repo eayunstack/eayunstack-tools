@@ -45,7 +45,8 @@ glance_s = [
 neutron_s = [
         'neutron-server',
         'neutron-ovs-cleanup',
-        'openvswitch'
+        'openvswitch',
+        'neutron-metering-agent'
     ]
 
 controller_nova_s = [
@@ -55,7 +56,8 @@ controller_nova_s = [
         ]
 
 compute_nova_s = [
-        'openstack-nova-compute'
+        'openstack-nova-compute',
+        'openstack-ceilometer-compute'
         ]
 
 cinder_s = [
@@ -65,7 +67,10 @@ cinder_s = [
     ]
 
 ceilometer_s = [
-        'openstack-ceilometer'
+        'openstack-ceilometer-alarm-notifier',
+        'openstack-ceilometer-collector',
+        'openstack-ceilometer-notification',
+        'httpd'
         ]
 
 mongo_s = [
@@ -79,7 +84,8 @@ component_db_p = {
         'glance':'/etc/glance/glance-registry.conf',
         'nova':'/etc/nova/nova.conf',
         'neutron':'/etc/neutron/neutron.conf',
-        'cinder':'/etc/cinder/cinder.conf'
+        'cinder':'/etc/cinder/cinder.conf',
+        'ceilometer':'/etc/ceilometer/ceilometer.conf'
         }
 
 # component availability check command
@@ -90,7 +96,7 @@ component_check_cmd = {
         'nova':'nova list',
         'neutron':'PYTHONIOENCODING=utf-8 neutron net-list',
         'cinder':'cinder list',
-        'ceilometer':'ceilometer list'
+        'ceilometer':'ceilometer sample-list -m image -l 1'
         }
 
 # component list for every node
@@ -100,7 +106,8 @@ controller_c = [
         'glance',
         'nova',
         'neutron',
-        'cinder'
+        'cinder',
+        'ceilometer'
         ]
 
 compute_c = [

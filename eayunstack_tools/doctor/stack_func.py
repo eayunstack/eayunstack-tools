@@ -213,6 +213,9 @@ def check_db_connect(component):
             value = cp.get('database', 'sql_connection')
         else:
             value = cp.get('database', 'connection')
+        if component == 'ceilometer':
+            check_mongodb_connect(value)
+            return
         p = re.compile(r'mysql://(.+):(.+)@(.+)/(.+)\?(.+)')
         m = p.match(value).groups()
         check_mysql_connect(m[2], m[0], m[1], m[3])
@@ -229,6 +232,19 @@ def check_mysql_connect(server, user, pwd, dbname):
         LOG.debug('Check Sucessfully.')
     except:
         LOG.error('Check Faild.')
+
+def check_mongodb_connect(uri):
+    from pymongo import MongoClient
+    try:
+        client = MongoClient(uri)
+        db = client.ceilometer
+        collection_list = db.collection_names()
+        if collection_list:
+            LOG.debug('Check Sucessfully.')
+    except:
+        LOG.error('Check Faild.')
+    finally:
+        db.logout()
 
 def check_component_availability(component, check_cmd):
     ENV_FILE_PATH = '/root/openrc'
