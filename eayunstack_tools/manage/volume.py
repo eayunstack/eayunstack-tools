@@ -450,19 +450,55 @@ def detach_volume(attached_servers, volume_id):
             if detach_disk_on_compute_node(attached_servers, volume_id):
                 # update database
                 LOG.info('   Updating database.')
-                # NOTE use UTC time
-                detach_at = time.strftime('%Y-%m-%d %X', time.gmtime())
-                sql_update_cinder_db = 'UPDATE volumes SET status="available",attach_status="detached" WHERE id="%s";' % volume_id
-                cinder_db.connect(sql_update_cinder_db)
+                db_set_volume_detached()
                 for server_id in attached_servers:
                     sql_update_nova_db = 'UPDATE block_device_mapping SET deleted_at="%s",deleted=id WHERE instance_uuid="%s" and volume_id="%s" and deleted=0;' % (detach_at, server_id, volume_id)
                     nova_db.connect(sql_update_nova_db)
         if get_volume_info(volume_id).status == 'available':
             return True
     else:
-        LOG.warn('Can not detach root device. Please delete instance "%s" first.' % attached_servers)
+        # check instance was deleted
+        for attached_server in attached_servers:
+            sql_get_instance_deleted_status = \
+                'SELECT deleted from instances where uuid=\'%s\';' \
+                %  attached_server
+            instance_deleted_status = \
+                nova_db.connect(sql_get_instance_deleted_status)[0][0]
+            if instance_deleted_status == 1:
+                continue
+            else:
+                LOG.warn('Please delete instance "%s" first.' % attached_servers)
+                return False
+        # if instance was deleted, set volume attach_status to detached
+        if determine_set_volume_to_detached(attached_servers):
+            LOG.info('Set volume %s attach status to detached' % volume_id)
+            db_set_volume_detached()
+            return True
+        else:
+            LOG.warn('Please delete instance "%s" first.' % attached_servers)
+            return False
+
+def determine_set_volume_to_detached(attached_servers):
+    while True:
+        determine = raw_input('This volume was attached to instances %s, '
+                              'but these servers has been deleted, do you '
+                              'want to set the volume attach status to '
+                              'detached? [yes/no]: ' % attached_servers)
+        if determine in ['yes','no']:
+            break
+    if determine == 'yes':
+        return True
+    else:
         return False
 
+def db_set_volume_detached():
+    # NOTE use UTC time
+    detach_at = time.strftime('%Y-%m-%d %X', time.gmtime())
+    sql_update_volume_attach_status = 'UPDATE volumes SET status="available",'\
+                                      'attach_status="detached" WHERE id="%s";'\
+                                      % volume_id
+    cinder_db.connect(sql_update_volume_attach_status)
+                                      
 def detach_disk_on_compute_node(attached_servers, volume_id):
     for server_id in attached_servers:
         LOG.info('   Detaching disk "%s" from instance "%s".' % (volume_id, server_id))
