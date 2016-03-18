@@ -2,7 +2,10 @@
 from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import NODE_ROLE, get_controllers_hostname
 from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, ceph_check_health, get_ceph_osd_status, check_all_nodes, get_crm_resource_list, get_crm_resource_running_nodes,get_ceph_space
+from eayunstack_tools.doctor.cls_func import csv2dict
+from eayunstack_tools.utils import get_public_vip
 import logging
+import urllib
 
 from eayunstack_tools.logger import StackLOG as LOG
 
@@ -21,13 +24,15 @@ def cls(parser):
         check_pacemaker()
     if parser.CLUSTER_NAME == 'cephspace':
         check_cephspace()
+    if parser.CLUSTER_NAME == 'haproxyresource':
+        check_haproxyresource()
 
 def make(parser):
     '''Check cluster'''
     parser.add_argument(
         '-n',
         dest='CLUSTER_NAME',
-        choices=['mysql','rabbitmq','ceph','haproxy','pacemaker','cephspace'],
+        choices=['mysql','rabbitmq','ceph','haproxy','pacemaker','cephspace','haproxyresource'],
         help='Cluster Name',
     )
     common.add_common_opt(parser)
@@ -49,6 +54,7 @@ def check_all():
         check_ceph()
         check_pacemaker()
         check_cephspace()
+        check_haproxyresource()
 
 def check_rabbitmq():
     # node role check
@@ -221,4 +227,55 @@ def check_crm_resource_status():
                 LOG.info('Resource %s check successfully !' % resource)
         else:
             LOG.error('Resource %s does not running on any node !' % resource)
+
+def check_haproxyresource():
+    monitor_url = get_haproxy_monitor_url()
+    if not monitor_url:
+        LOG.error('Can not get public vip in /etc/astute.yaml!')
+        return
+    monitor_content = get_haproxy_monitor_content(monitor_url)
+    if not monitor_content:
+        return
+    resource_list = csv2dict(monitor_content)
+
+    def _print_status(log_level='debug'):
+        if check_status:
+            eval('LOG.%s' % log_level)(\
+                 '%s on %s status is %s, check_status is %s.'\
+                 % (pxname, svname, status, check_status))
+        else:
+            eval('LOG.%s' % log_level)('%s on %s status is %s.'\
+                 % (pxname, svname, status))
+
+    for resource in resource_list:
+        pxname = resource['pxname']
+        svname = resource['svname']
+        status = resource['status']
+        check_status = resource['check_status']
+        if svname == 'FRONTEND':
+            if status == 'OPEN':
+                _print_status()
+            else:
+                _print_status('error')
+        else:
+            if status == 'UP':
+                _print_status()
+            else:
+                _print_status('error')
+
+def get_haproxy_monitor_url():
+    public_vip = get_public_vip()
+    url = 'http://%s:10000/;csv;norefresh' % public_vip
+    return url
+
+def get_haproxy_monitor_content(url):
+    content = None
+    try:
+        wp = urllib.urlopen(url)
+        content = wp.read()
+    except IOError:
+        LOG.error('Can not connect to %s.' % url)
+    finally:
+        return content
+        
 

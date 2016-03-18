@@ -149,3 +149,28 @@ def get_crm_resource_running_nodes(resource):
             running_nodes.append(entry.split()[5])
     return running_nodes
 
+def csv2dict(csv):
+    """Convert result format from csv to dict:
+csv format:
+# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,comp_in,comp_out,comp_byp,comp_rsp,lastsess,last_chk,last_agt,qtime,ctime,rtime,ttime,
+Stats,FRONTEND,,,2,4,8000,85,2815007,864775742,0,0,20,,,,,OPEN,,,,,,,,,1,2,0,,,,0,1,0,4,,,,0,5319,0,20,0,0,,1,4,5340,,,0,0,0,0,,,,,,,,
+
+dict format:
+[{'status': 'OPEN', 'lastchg': '', 'weight': '', 'slim': '8000', 'pid': '1', 'comp_byp': '0', 'lastsess': '', 'rate_lim': '0', 'check_duration': '', 'rate': '1', 'req_rate': '1', 'check_status': '', 'econ': '', 'comp_out': '0', 'wredis': '', 'dresp': '0', 'ereq': '20', 'tracked': '', 'comp_in': '0', 'pxname': 'Stats', 'dreq': '0', 'hrsp_5xx': '0', 'last_chk': '', 'check_code': '', 'sid': '0', 'bout': '864775742', 'hrsp_1xx': '0', 'qlimit': '', 'hrsp_other': '0', 'bin': '2815007', 'rtime': '', 'smax': '4', 'req_tot': '5340', 'lbtot': '', 'stot': '85', 'wretr': '', 'req_rate_max': '4', 'ttime': '', 'iid': '2', 'hrsp_4xx': '20', 'chkfail': '', 'hanafail': '', 'downtime': '', 'qcur': '', 'eresp': '', 'comp_rsp': '0', 'cli_abrt': '', 'ctime': '', 'qtime': '', 'srv_abrt': '', 'throttle': '', 'last_agt': '', 'scur': '2', 'type': '0', 'bck': '', 'qmax': '', 'rate_max': '4', 'hrsp_2xx': '5319', 'act': '', 'chkdown': '', 'svname': 'FRONTEND', 'hrsp_3xx': '0'}]
+    """
+    field = csv.split('\n')[0]
+    column = field.split(',')[:-1]
+    column[0] = column[0].split(' ')[1]
+    resource_list = []
+    resources = csv.split('\n')[1:]
+    for r in resources:
+        resource = {}
+        r = r.split(',')[:-1]
+        if len(r) != len(column):
+            continue
+        index = 0
+        for index in range(len(column)):
+           resource[column[index]] = r[index]
+        resource_list.append(resource)
+    return resource_list
+
