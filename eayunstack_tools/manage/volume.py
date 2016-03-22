@@ -146,6 +146,20 @@ def get_backend_type(volume_id):
         backend_type = 'rbd'
     return backend_type
 
+def get_backend_pool(volume_id):
+    volume_info = get_volume_info(volume_id)
+    # vol_host_attr like "cinder@cinder_ceph#cinder_ceph"
+    vol_host_attr = volume_info._info['os-vol-host-attr:host']
+
+    p = re.compile(r'(.+)@(.+)#(.+)')
+    m = p.match(vol_host_attr).groups()
+    backend_name = m[1]
+
+    backend_pool = get_config(backend_name, 'rbd_pool')
+
+    return backend_pool
+
+
 def db_connect(sql, user='cinder', dbname='cinder'):
     (host, pwd) = get_db_host_pwd()
     try:
@@ -239,13 +253,17 @@ def delete_backend_snapshots_eqlx(snapshots_id, volume_id):
 
 def delete_backend_snapshots_rbd(snapshots_id, volume_id):
     success = True
-    rbd_pool = get_config('cinder_ceph', 'rbd_pool')
+    rbd_pool = get_backend_pool(volume_id)
     LOG.info('   Deleting backend(rbd) snapshots ...')
     for snapshot_id in snapshots_id:
         LOG.info('   [%s]Deleting backend snapshot ...' % snapshot_id)
-        (s, o) = commands.getstatusoutput('rbd -p volumes snap unprotect --image volume-%s --snap snapshot-%s' % (volume_id, snapshot_id))
+        (s, o) = commands.getstatusoutput(
+                 'rbd -p %s snap unprotect --image volume-%s --snap snapshot-%s'
+                 % (rbd_pool, volume_id, snapshot_id))
         if s == 0:
-            (ss, oo) = commands.getstatusoutput('rbd -p volumes snap rm --image volume-%s --snap snapshot-%s' % (volume_id, snapshot_id))
+            (ss, oo) = commands.getstatusoutput(
+                       'rbd -p %s snap rm --image volume-%s --snap snapshot-%s'
+                       % (rbd_pool, volume_id, snapshot_id))
             if ss != 0:
                 LOG.error('Can not delete backend snapshot "snapshot-%s" !' % snapshot_id)
                 success = False
@@ -319,7 +337,7 @@ def delete_backend_volume_eqlx(volume_id):
 
 def delete_backend_volume_rbd(volume_id):
     LOG.info('   Deleting backend(rbd) volume ...')
-    rbd_pool = get_config('cinder_ceph', 'rbd_pool')
+    rbd_pool = get_backend_pool(volume_id)
     (s, o) = commands.getstatusoutput('rbd -p %s info volume-%s' % (rbd_pool, volume_id))
     if s != 0:
         LOG.error('   Can not get rbd info for volume "%s" !' % volume_id)
