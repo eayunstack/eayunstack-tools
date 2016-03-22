@@ -11,9 +11,15 @@ rabbit_password =
 neutron_admin_password =
 notification_driver =
 notification_topics =
+reclaim_instance_interval =
 [database]
 connection =
 [libvirt]
 rbd_secret_uuid = 
 cpu_mode=
 virt_type=
+[cinder]
+admin_tenant_name =
+admin_auth_url =
+admin_password =
+admin_username =

@@ -19,7 +19,7 @@ notification_topics =
 notify_on_state_change =
 osapi_compute_workers=
 metadata_workers=
-
+reclaim_instance_interval=
 [database]
 connection = 
 [DATABASE]
@@ -30,3 +30,8 @@ auth_uri =
 admin_password =
 [conductor]
 workers=
+[cinder]
+admin_auth_url =
+admin_password =
+admin_username =
+admin_tenant_name =
