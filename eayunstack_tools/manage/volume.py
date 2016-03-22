@@ -146,6 +146,24 @@ def get_backend_type(volume_id):
         backend_type = 'rbd'
     return backend_type
 
+def get_volume_type_name(volume_id):
+    # NOTE: In EayunStack environment
+    # the Default volume type name is 'cinder_ceph'
+    volume_type_name = 'cinder_ceph'
+
+    db_get_volume_type_name = \
+        'select value from volumes,volume_type_extra_specs where \
+         volumes.id=\'%s\' and \
+         volumes.volume_type_id=volume_type_extra_specs.volume_type_id' \
+         % volume_id
+    db_volume_type_name = db_connect(db_get_volume_type_name)
+
+    if db_volume_type_name:
+        volume_type_name = db_volume_type_name[0]
+
+    return volume_type_name
+
+
 def db_connect(sql, user='cinder', dbname='cinder'):
     (host, pwd) = get_db_host_pwd()
     try:
@@ -319,7 +337,8 @@ def delete_backend_volume_eqlx(volume_id):
 
 def delete_backend_volume_rbd(volume_id):
     LOG.info('   Deleting backend(rbd) volume ...')
-    rbd_pool = get_config('cinder_ceph', 'rbd_pool')
+    volume_type_name = get_volume_type_name(volume_id)
+    rbd_pool = get_config(volume_type_name, 'rbd_pool')
     (s, o) = commands.getstatusoutput('rbd -p %s info volume-%s' % (rbd_pool, volume_id))
     if s != 0:
         LOG.error('   Can not get rbd info for volume "%s" !' % volume_id)
