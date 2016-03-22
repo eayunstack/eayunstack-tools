@@ -8,6 +8,7 @@ from eayunstack_tools.logger import StackLOG as LOG
 from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.sys_utils import ssh_connect, run_cmd_on_nodes
 from eayunstack_tools.utils import get_node_list
+from eayunstack_tools.sys_utils import run_command
 
 
 def make(parser):
@@ -109,18 +110,22 @@ def get_idrac_addr(node_ip):
 def update():
     '''update eayunstack-tools on all nodes'''
     node_list = get_node_list('all')
-    update_cmd = 'yum -y -d 0 update eayunstack-tools'
+    update_cmd = 'yum clean all && yum -y -d 0 update eayunstack-tools'
     results = run_cmd_on_nodes(node_list, update_cmd)
     get_current_version = \
         'rpm --queryformat "%{VERSION} %{RELEASE}" -q eayunstack-tools'
     current_version = run_cmd_on_nodes(node_list, get_current_version)
+    correct_version = run_command(
+        'rpm --queryformat "%{VERSION} %{RELEASE}" -q eayunstack-tools')
 
     for node in node_list:
         out = results[node][0]
         err = results[node][1]
         current_ver = current_version[node][0].split(' ')[0] + \
             '-' + current_version[node][0].split(' ')[1].split('.')[0]
-        if err:
+        correct_ver = correct_version[0].split(' ')[0] + \
+            '-' + correct_version[0].split(' ')[1].split('.')[0]
+        if err or current_ver != correct_ver:
             LOG.error('Update on %s failed !' % node)
             LOG.error('Current version: %s' % current_ver)
             for l in err.split('\n'):
