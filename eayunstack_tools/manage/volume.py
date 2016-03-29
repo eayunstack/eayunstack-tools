@@ -51,7 +51,7 @@ def make(parser):
     )
     parser.set_defaults(func=volume)
 
-def destroy_volume(volume_id, interactive=True):
+def destroy_volume(volume_id):
     # get volume's info
     volume_info = get_volume_info(volume_id)
     status = volume_info.status
@@ -61,16 +61,16 @@ def destroy_volume(volume_id, interactive=True):
     for attachment in attachments:
         attached_servers.append(attachment['server_id'])
 
-    if interactive and not determine_volume_status(status):
+    if not determine_volume_status(status):
         LOG.warn('User give up to destroy this volume.')
         return
     else:
         if not determine_detach_status(attachments):
-            if determine_detach_volume(attached_servers, interactive):
+            if determine_detach_volume(attached_servers):
                 if detach_volume(attached_servers, volume_id):
                     snapshots_id = get_volume_snapshots(volume_id)
                     if snapshots_id:
-                        if interactive and not determine_delete_snapshot():
+                        if not determine_delete_snapshot():
                             LOG.warn('User give up to destroy this volume.')
                             return
                         else:
@@ -85,7 +85,7 @@ def destroy_volume(volume_id, interactive=True):
         else:
             snapshots_id = get_volume_snapshots(volume_id)
             if snapshots_id:
-                if interactive and not determine_delete_snapshot():
+                if not determine_delete_snapshot():
                     LOG.warn('User give up to destroy this volume.')
                     return
                 else:
@@ -438,9 +438,7 @@ def get_snapshot_list(volume_id):
     logging.disable(logging.NOTSET)
     return snapshot_list
 
-def determine_detach_volume(attached_servers, interactive):
-    if not interactive:
-        return True
+def determine_detach_volume(attached_servers):
     while True:
         detach_volume = raw_input('This volume was attached to instance %s, do you want to detach it and destroy it? [yes/no]: ' % attached_servers)
         if detach_volume in ['yes','no']:
