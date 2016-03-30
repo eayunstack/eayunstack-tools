@@ -3,6 +3,7 @@ import logger
 import os
 import platform
 import logging
+import yaml
 
 
 def make_subcommand(parser, command):
@@ -191,3 +192,8 @@ def get_fuel_node_ip(env):
         if fuel_node_ip:
             break
     return fuel_node_ip
+
+def get_public_vip():
+    cfg = yaml.load(file('/etc/astute.yaml'))
+    public_vip = cfg['public_vip']
+    return public_vip
