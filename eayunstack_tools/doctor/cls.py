@@ -229,6 +229,10 @@ def check_crm_resource_status():
             LOG.error('Resource %s does not running on any node !' % resource)
 
 def check_haproxyresource():
+    if not NODE_ROLE.is_controller():
+        LOG.warn('This command can only run on controller node !')
+        return
+    LOG.info('%s%s Checking HAProxy resource status' %('='*5, '>'))
     monitor_url = get_haproxy_monitor_url()
     if not monitor_url:
         LOG.error('Can not get public vip in /etc/astute.yaml!')
