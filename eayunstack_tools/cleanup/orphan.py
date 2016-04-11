@@ -82,16 +82,21 @@ class BaseCleanupThread(threading.Thread):
 
     def base_delete(self, resource_name, resource_ids, delete_func):
         for resource_id in resource_ids:
-            try:
-                with log_disabled():
-                    LOG.info('Delete %s [%s]' % (resource_name, resource_id))
-                delete_func(resource_id)
-            except Conflict:
-                # TODO: retry
-                pass
-            except Exception as e:
-                LOG.error('Can not delete %s [%s]' % (resource_name, resource_id))
-                LOG.error(e)
+            with log_disabled():
+                LOG.info('Delete %s [%s]' % (resource_name, resource_id))
+            while True:
+                try:
+                    delete_func(resource_id)
+                    # delete successfully, break
+                    break
+                except Conflict:
+                    # retry: deal with conflict.
+                    continue
+                except Exception as e:
+                    LOG.error('Can not delete %s [%s]' % (resource_name, resource_id))
+                    LOG.error(e)
+                    # something else wrong, break
+                    break
 
 
 class RunNovaThread(BaseCleanupThread):
