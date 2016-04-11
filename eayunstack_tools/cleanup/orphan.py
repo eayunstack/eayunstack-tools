@@ -11,6 +11,7 @@ from eayunstack_tools.pythonclient import PythonClient
 from eayunstack_tools.manage.volume import destroy_volume
 
 from neutronclient.common.exceptions import Conflict
+from cinderclient.exceptions import NotFound
 
 
 logging.disable(logging.INFO)
@@ -92,8 +93,14 @@ class BaseCleanupThread(threading.Thread):
                 except Conflict:
                     # retry: deal with conflict.
                     continue
+                except NotFound:
+                    # when call destroy_volume(),
+                    # will delete volumes and snapshots,
+                    # if snapshots NotFound, do nothing.
+                    break
                 except Exception as e:
-                    LOG.error('Can not delete %s [%s]' % (resource_name, resource_id))
+                    LOG.warn('Can not delete %s [%s]'
+                             % (resource_name, resource_id))
                     LOG.error(e)
                     # something else wrong, break
                     break
@@ -113,11 +120,13 @@ class RunCinderThread(BaseCleanupThread):
     def orphan(self):
         self.snapshots = self.orphan_resource(
             cinderclient.volume_snapshots.list(search_opts={'all_tenants': 1}),
-            tenant_getter=lambda snapshot: pythonclient.cinder_get_tenant_id(snapshot.id))
+            tenant_getter=lambda snapshot:
+                pythonclient.cinder_get_tenant_id(snapshot.id))
 
         self.volumes = self.orphan_resource(
             cinderclient.volumes.list(search_opts={'all_tenants': 1}),
-            tenant_getter=lambda volume: volume.__dict__['os-vol-tenant-attr:tenant_id'])
+            tenant_getter=lambda volume:
+                volume.__dict__['os-vol-tenant-attr:tenant_id'])
 
     def _run(self):
         for volume_id in self.volumes:
@@ -128,11 +137,9 @@ class RunCinderThread(BaseCleanupThread):
             except Exception:
                 with log_disabled():
                     LOG.info('Destroy volume [%s]' % volume_id)
-                # destroy_volume(volume_id, interactive=True)
+                destroy_volume(volume_id, interactive=False)
         self.base_delete('snapshot', self.snapshots,
                          cinderclient.volume_snapshots.delete)
-        # self.base_delete('volume', self.volumes,
-        #                  cinderclient.volumes.delete)
 
 
 class RunGlanceThread(BaseCleanupThread):
@@ -189,17 +196,19 @@ class RunNetBaseThread(BaseCleanupThread):
                 neutronclient.delete_port(port_id)
             except Conflict as e:
                 with log_disabled():
-                    LOG.info('Deal with conflict: remove interface.')
+                    LOG.info('  Deal with conflict: remove interface...')
                 router_id = neutronclient.show_port(port_id)['port']['device_id']
-                neutronclient.remove_interface_router(router_id, {'port_id': port_id})
+                neutronclient.remove_interface_router(router_id,
+                                                      {'port_id': port_id})
             except Exception as e:
-                LOG.error('Can not delete port [%s]' % port_id)
-                LOG.warn(e)
+                LOG.warn('Can not delete port [%s]' % port_id)
+                LOG.error(e)
 
         self.base_delete('floating ip', self.floatingips,
                          neutronclient.delete_floatingip)
-        # TODO: if firewall create with target router,
+        # if firewall create with target router,
         # CAN NOT delete router before firewall is deleted.
+        # NOTE: already add retry
         self.base_delete('router', self.routers,
                          neutronclient.delete_router)
         self.base_delete('subnet', self.subnets,
@@ -232,9 +241,6 @@ class RunFirewallThread(BaseCleanupThread):
                          neutronclient.delete_firewall_policy)
         self.base_delete('firewall rule', self.firewall_rules,
                          neutronclient.delete_firewall_rule)
-        # LOG.warn('fws: %s' % self.firewalls)
-        # LOG.warn('fw_policies: %s' % self.firewall_policies)
-        # LOG.warn('fw_ruls: %s' % self.firewall_rules)
 
 
 class RunSecgroupThread(BaseCleanupThread):
@@ -248,7 +254,6 @@ class RunSecgroupThread(BaseCleanupThread):
         # delete secgroup, and rules will be deleted, too.
         self.base_delete('security group', self.secgroups,
                          neutronclient.delete_security_group)
-        # LOG.warn('secgroups: %s' % self.secgroups)
 
 
 class RunVPNThread(BaseCleanupThread):
