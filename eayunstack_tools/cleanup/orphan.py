@@ -82,13 +82,19 @@ class BaseCleanupThread(threading.Thread):
         return orphans
 
     def base_delete(self, resource_name, resource_ids, delete_func):
-        for resource_id in resource_ids:
-            with log_disabled():
-                LOG.info('Delete %s [%s]' % (resource_name, resource_id))
-            while True:
+        no_log_resources = []
+        while resource_ids:
+            for resource_id in resource_ids:
+                # avoid LOG delete info many times
+                if resource_id not in no_log_resources:
+                    with log_disabled():
+                        LOG.info('Delete %s [%s]' % (
+                            resource_name, resource_id))
+                        no_log_resources.append(resource_id)
                 try:
                     delete_func(resource_id)
                     # delete successfully, break
+                    resource_ids.remove(resource_id)
                     break
                 except Conflict:
                     # retry: deal with conflict.
@@ -97,12 +103,14 @@ class BaseCleanupThread(threading.Thread):
                     # when call destroy_volume(),
                     # will delete volumes and snapshots,
                     # if snapshots NotFound, do nothing.
+                    resource_ids.remove(resource_id)
                     break
                 except Exception as e:
                     LOG.warn('Can not delete %s [%s]'
                              % (resource_name, resource_id))
                     LOG.error(e)
-                    # something else wrong, break
+                    # something else wrong, break, won't retry
+                    resource_ids.remove(resource_id)
                     break
 
 
@@ -189,6 +197,9 @@ class RunNetBaseThread(BaseCleanupThread):
         self.ports = self.orphan_ports
 
     def _run(self):
+        self.base_delete('floating ip', self.floatingips,
+                         neutronclient.delete_floatingip)
+
         for port_id in self.ports:
             try:
                 with log_disabled():
@@ -196,16 +207,15 @@ class RunNetBaseThread(BaseCleanupThread):
                 neutronclient.delete_port(port_id)
             except Conflict as e:
                 with log_disabled():
-                    LOG.info('  Deal with conflict: remove interface...')
+                    LOG.info('  Solving conflict: remove interface...')
                 router_id = neutronclient.show_port(port_id)['port']['device_id']
-                neutronclient.remove_interface_router(router_id,
-                                                      {'port_id': port_id})
+                neutronclient.remove_interface_router(
+                    router_id,
+                    {'port_id': port_id})
             except Exception as e:
                 LOG.warn('Can not delete port [%s]' % port_id)
                 LOG.error(e)
 
-        self.base_delete('floating ip', self.floatingips,
-                         neutronclient.delete_floatingip)
         # if firewall create with target router,
         # CAN NOT delete router before firewall is deleted.
         # NOTE: already add retry
