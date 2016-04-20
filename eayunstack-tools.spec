@@ -22,6 +22,7 @@ Requires:	ipmitool
 Requires:	python-novaclient
 Requires:	python-cinderclient
 Requires:	python-neutronclient
+Requires:       python-pymongo
 Requires:	ssmtp
 
 %description
