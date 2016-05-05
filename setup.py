@@ -21,6 +21,7 @@ setup(
             'init = eayunstack_tools.init:make',
             'list = eayunstack_tools.list:make',
             'upgrade = eayunstack_tools.upgrade:make',
+            'cleanup = eayunstack_tools.cleanup:make',
         ],
         'fuel_command': [
             'backup = eayunstack_tools.fuel.backup:make',
@@ -39,10 +40,14 @@ setup(
             'volume = eayunstack_tools.manage.volume:make',
             'ami = eayunstack_tools.manage.ami:make',
             'instance = eayunstack_tools.manage.instance:make',
+            'orphan = eayunstack_tools.manage.orphan:make',
         ],
         'upgrade_command': [
             'setup = eayunstack_tools.upgrade.setup:make',
             'go = eayunstack_tools.upgrade.go:make',
+        ],
+        'cleanup_command': [
+            'orphan = eayunstack_tools.cleanup.orphan:make',
         ],
     },
 )

@@ -145,6 +145,15 @@ class NodeRole(object):
 NODE_ROLE = NodeRole()
 
 
+class log_disabled(object):
+    def __enter__(self):
+        logging.disable(logging.NOTSET)
+
+
+    def __exit__(self, e_type, e_value, traceback):
+        logging.disable(logging.INFO)
+
+
 def get_controllers_hostname():
     file_path = '/.eayunstack/node-list'
     controllers = []
