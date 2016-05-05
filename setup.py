@@ -40,7 +40,6 @@ setup(
             'volume = eayunstack_tools.manage.volume:make',
             'ami = eayunstack_tools.manage.ami:make',
             'instance = eayunstack_tools.manage.instance:make',
-            'orphan = eayunstack_tools.manage.orphan:make',
         ],
         'upgrade_command': [
             'setup = eayunstack_tools.upgrade.setup:make',

@@ -14,7 +14,6 @@ from neutronclient.common.exceptions import Conflict
 from cinderclient.exceptions import NotFound
 
 
-logging.disable(logging.INFO)
 pythonclient = PythonClient()
 keystoneclient = pythonclient.keystoneclient
 novaclient = pythonclient.novaclient
@@ -33,6 +32,7 @@ def make(parser):
 
 
 def orphan(parser):
+    logging.disable(logging.INFO)
     if not NODE_ROLE.is_controller():
         LOG.warn('This command can only run on controller node !')
         return
@@ -53,6 +53,8 @@ def orphan(parser):
         thread.start()
     for thread in threads:
         thread.join()
+
+    logging.disable(logging.NOTSET)
 
 
 class BaseCleanupThread(threading.Thread):
