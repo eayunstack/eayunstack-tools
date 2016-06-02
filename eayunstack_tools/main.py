@@ -43,7 +43,7 @@ def create_parser():
         (e.name, e.load()) for e in pkg_resources.iter_entry_points('command')
     ]
     for (name, fn) in entry_points:
-        if name == 'manage' and not NODE_ROLE.is_controller():
+        if name == ['manage', 'cleanup'] and not NODE_ROLE.is_controller():
             continue
         p = sub.add_parser(
             name,
