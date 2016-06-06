@@ -18,6 +18,7 @@ san_password =
 [database]
 connection =
 max_overflow =
+max_pool_size =
 [keystone_authtoken]
 auth_host =
 admin_password = 
