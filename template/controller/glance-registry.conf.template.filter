@@ -6,6 +6,7 @@ notification_driver =
 notification_topics =
 default_publisher_id =
 sql_max_overflow =
+sql_max_pool_size =
 [keystone_authtoken]
 auth_uri =
 auth_host =

@@ -24,6 +24,7 @@ reclaim_instance_interval=
 connection = 
 [DATABASE]
 max_overflow =
+max_pool_size =
 [keystone_authtoken]
 auth_host =
 auth_uri =

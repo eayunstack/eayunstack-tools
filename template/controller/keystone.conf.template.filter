@@ -12,6 +12,7 @@ memcache_servers =
 servers =
 [DATABASE]
 max_overflow =
+max_pool_size =
 [database]
 connection =
 [pipeline:public_api]
