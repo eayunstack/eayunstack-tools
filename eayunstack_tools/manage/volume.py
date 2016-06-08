@@ -451,52 +451,43 @@ def determine_detach_volume(attached_servers, interactive):
 
 def detach_volume(attached_servers, volume_id):
     LOG.info('Detaching volume "%s" .' % volume_id)
-    volume_bootable = get_volume_info(volume_id).bootable
-    if volume_bootable == 'false':
-        # detach volume from instance by python sdk first
-        logging.disable(logging.INFO)
-        for server_id in attached_servers:
-            pc.nova_delete_server_volume(server_id, volume_id)
-        logging.disable(logging.NOTSET)
-        t = 0
-        while t <= 14:
-            volume_status = get_volume_info(volume_id).status
-            if volume_status == 'available':
-                break
-            time.sleep(3)
-            t+=3
-        # if timeout, detach-disk by virsh on compute node & update database
-        if get_volume_info(volume_id).status != 'available':
-            if detach_disk_on_compute_node(attached_servers, volume_id):
-                # update database
-                LOG.info('   Updating database.')
-                db_set_volume_detached()
-                for server_id in attached_servers:
-                    sql_update_nova_db = 'UPDATE block_device_mapping SET deleted_at="%s",deleted=id WHERE instance_uuid="%s" and volume_id="%s" and deleted=0;' % (detach_at, server_id, volume_id)
-                    nova_db.connect(sql_update_nova_db)
-        if get_volume_info(volume_id).status == 'available':
-            return True
-    else:
-        # check instance was deleted
-        for attached_server in attached_servers:
-            sql_get_instance_deleted_status = \
-                'SELECT deleted from instances where uuid=\'%s\';' \
-                %  attached_server
-            instance_deleted_status = \
-                nova_db.connect(sql_get_instance_deleted_status)[0][0]
-            if instance_deleted_status == 1:
-                continue
-            else:
-                LOG.warn('Please delete instance "%s" first.' % attached_servers)
-                return False
+    # check instance was deleted
+    exist_servers = []
+    for attached_server in attached_servers:
+        sql_get_instance_deleted_status = \
+            'SELECT deleted from instances where uuid=\'%s\';' \
+            %  attached_server
+        instance_deleted_status = \
+            nova_db.connect(sql_get_instance_deleted_status)[0][0]
+        if instance_deleted_status != 0:
+            continue
+        else:
+            exist_servers.append(attached_server)
+    if len(exist_servers) == 0:
         # if instance was deleted, set volume attach_status to detached
         if determine_set_volume_to_detached(attached_servers):
             LOG.info('Set volume %s attach status to detached' % volume_id)
-            db_set_volume_detached()
+            db_set_volume_detached(volume_id)
             return True
         else:
-            LOG.warn('Please delete instance "%s" first.' % attached_servers)
+            LOG.warn('Please set volume attach status to "detached" first.')
             return False
+    if detach_disk_on_compute_node(exist_servers, volume_id):
+        # update database
+        LOG.info('   Updating database.')
+        db_set_volume_detached(volume_id)
+        for server_id in exist_servers:
+            detach_at = time.strftime('%Y-%m-%d %X', time.gmtime())
+            sql_update_nova_db = 'UPDATE block_device_mapping SET '\
+                                 'deleted_at="%s",deleted=id WHERE '\
+                                 'instance_uuid="%s" and volume_id="%s" '\
+                                 'and deleted=0;'\
+                                 % (detach_at, server_id, volume_id)
+            nova_db.connect(sql_update_nova_db)
+        return True
+    else:
+        LOG.warn('Please delete instance "%s" first.' % exist_servers)
+        return False
 
 def determine_set_volume_to_detached(attached_servers):
     while True:
@@ -511,16 +502,14 @@ def determine_set_volume_to_detached(attached_servers):
     else:
         return False
 
-def db_set_volume_detached():
-    # NOTE use UTC time
-    detach_at = time.strftime('%Y-%m-%d %X', time.gmtime())
+def db_set_volume_detached(volume_id):
     sql_update_volume_attach_status = 'UPDATE volumes SET status="available",'\
                                       'attach_status="detached" WHERE id="%s";'\
                                       % volume_id
     cinder_db.connect(sql_update_volume_attach_status)
                                       
-def detach_disk_on_compute_node(attached_servers, volume_id):
-    for server_id in attached_servers:
+def detach_disk_on_compute_node(servers, volume_id):
+    for server_id in servers:
         LOG.info('   Detaching disk "%s" from instance "%s".' % (volume_id, server_id))
         logging.disable(logging.INFO)
         server = pc.nova_server(server_id)
@@ -529,15 +518,33 @@ def detach_disk_on_compute_node(attached_servers, volume_id):
         server_instance_name = server._info['OS-EXT-SRV-ATTR:instance_name']
         server_device = os.path.basename(pc.nova_volume(server_id, volume_id)._info['device'])
         logging.disable(logging.NOTSET)
-        if server_status == 'ACTIVE':
-            detach_disk_cmd = 'virsh detach-disk %s %s --persistent' % (server_instance_name, server_device)
-            reval = ssh_connect(server_host, detach_disk_cmd)
-            if 'Disk detached successfully\n\n' in reval:
-                LOG.info('   Disk detached successfully.')
-                return True
-            else:
-                LOG.error('   Disk detached failed.')
-                return False
+        if disk_attached(server_host, server_instance_name, server_device):
+            if server_status == 'ACTIVE':
+                detach_disk_cmd = 'virsh detach-disk %s %s --persistent' \
+                                  % (server_instance_name, server_device)
+                reval = ssh_connect(server_host, detach_disk_cmd)
+                if 'Disk detached successfully\n\n' in reval:
+                    LOG.info('   Detach disk %s on instance %s successfully.' \
+                              % (server_device, server_instance_name))
+                    return True
+                else:
+                    LOG.error('   Detach disk %s on instance %s failed.' \
+                              % (server_device, server_instance_name))
+                    return False
+        else:
+            LOG.info('   Disk %s already detached from instance %s.' \
+                     % (server_device, server_instance_name))
+            return True
+
+def disk_attached(server_host, instance_name, server_device):
+    check_cmd = 'virsh domblklist %s | grep -q %s ; echo $?' % (instance_name,
+                                                     server_device)
+    reval = ssh_connect(server_host, check_cmd)
+    if '0\n' in reval:
+        return True
+    else:
+        return False
+
 
 def delete_image(snapshots_id):
     logging.disable(logging.DEBUG)
