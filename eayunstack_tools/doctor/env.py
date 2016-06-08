@@ -10,6 +10,7 @@ from eayunstack_tools.utils import get_node_list
 from eayunstack_tools.doctor.utils import register_decorater, userful_msg
 from eayunstack_tools.doctor.utils import run_doctor_on_nodes
 from eayunstack_tools.doctor.utils import get_cpu_processors, get_cpu_load
+from eayunstack_tools.doctor.utils import search_service
 from eayunstack_tools.sys_utils import ssh_connect2, ping
 from utils import check_service
 from eayunstack_tools.utils import NODE_ROLE
@@ -17,6 +18,8 @@ from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.logger import StackLOG as LOG
 from collections import OrderedDict
 from decimal import Decimal
+from pymongo import MongoClient
+
 register = register_decorater()
 
 
@@ -88,6 +91,36 @@ def check_ntp():
         LOG.error('Can not get ntp server, please check it.')
     else:
         LOG.debug('ntpserver is %s' % ntpserver)
+
+def _get_mongodb_stats(yaml_path):
+    configs = yaml.load(file(yaml_path))
+    mongodb_pw = configs['ceilometer']['db_password']
+    mongodb_url = 'mongodb://ceilometer:%s@127.0.0.1:27017/ceilometer' \
+                  % mongodb_pw
+    try:
+	client = MongoClient(mongodb_url)
+        db = client.ceilometer
+        result = db.command("dbstats")
+    except Exception,e:
+        result = e
+    return result
+
+@userful_msg()
+@register
+def check_mongodb():
+    if NODE_ROLE.is_mongo():
+       role = NODE_ROLE.role
+       if  search_service('mongod'):
+           LOG.error('mongod service was not found on %s node,please fix it' \
+	             % role )
+       else:
+           yaml_path = '/etc/astute.yaml'
+           check_service('mongod')
+           mongodb_stats = _get_mongodb_stats(yaml_path)            
+           if isinstance(mongodb_stats,dict):
+                LOG.debug("mongod service is ok:%s" % mongodb_stats)
+           else:
+                LOG.error('mongod service is wrong:%s' % mongodb_stats)     
 
 @userful_msg()
 @register
