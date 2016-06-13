@@ -122,6 +122,42 @@ def check_mongodb():
            else:
                 LOG.error('mongod service is wrong:%s' % mongodb_stats)     
 
+def _log_time(log_path,start_time):
+    with open(log_path,'w') as f:
+        f.write(start_time)
+
+def _get_from_ps():
+    start_time = None
+    (status,info) = commands.getstatusoutput('sudo service rabbitmq-server \
+                                             status')
+    if status == 0:
+        pid = re.search('(?<={pid,)\d+(?=})',info).group(0)
+	start_time = commands.getoutput('ps -p %s -o lstart | grep -v \
+	                                "START"' % pid )
+    return start_time
+
+def _get_from_log(log_path):
+    with open(log_path) as f:
+        log_start_time = f.read().strip()
+    return log_start_time
+
+@userful_msg()
+@register
+def check_rabbitmqrestart():
+    if NODE_ROLE.is_controller():
+        log_path = '/.eayunstack/rabbitmq_start_time'
+        start_time = _get_from_ps()
+        if os.path.exists(log_path):
+            log_start_time = _get_from_log(log_path)
+	    if log_start_time == start_time:
+	        LOG.debug('service rabbitmq has never been restart')
+	    else:
+	        LOG.warn('service rabbitmq has been restart at %s' % start_time)
+	        _log_time(log_path,start_time)
+        else:
+            LOG.debug('the log file is not found')
+	    _log_time(log_path,start_time)
+
 @userful_msg()
 @register
 def check_selinux():
