@@ -8,6 +8,7 @@ notification_workers =
 host = 
 [database]
 connection = 
+time_to_live =
 [keystone_authtoken]
 auth_uri = 
 admin_password = 

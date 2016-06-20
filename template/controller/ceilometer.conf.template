@@ -25,7 +25,6 @@ pecan_debug=False
 [compute]
 [coordination]
 [database]
-time_to_live=33200 
 [dispatcher_file]
 [event]
 definitions_cfg_file=/etc/ceilometer/event_definitions.yaml
