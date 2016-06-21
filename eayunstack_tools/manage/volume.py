@@ -67,7 +67,7 @@ def destroy_volume(volume_id, interactive=True):
     else:
         if not determine_detach_status(attachments):
             if determine_detach_volume(attached_servers, interactive):
-                if detach_volume(attached_servers, volume_id):
+                if detach_volume(attached_servers, volume_id, interactive):
                     snapshots_id = get_volume_snapshots(volume_id)
                     if snapshots_id:
                         if interactive and not determine_delete_snapshot():
@@ -449,7 +449,7 @@ def determine_detach_volume(attached_servers, interactive):
     else:
         return False
 
-def detach_volume(attached_servers, volume_id):
+def detach_volume(attached_servers, volume_id, interactive):
     LOG.info('Detaching volume "%s" .' % volume_id)
     # check instance was deleted
     exist_servers = []
@@ -465,7 +465,7 @@ def detach_volume(attached_servers, volume_id):
             exist_servers.append(attached_server)
     if len(exist_servers) == 0:
         # if instance was deleted, set volume attach_status to detached
-        if determine_set_volume_to_detached(attached_servers):
+        if determine_set_volume_to_detached(attached_servers, interactive):
             LOG.info('Set volume %s attach status to detached' % volume_id)
             db_set_volume_detached(volume_id)
             return True
@@ -489,7 +489,9 @@ def detach_volume(attached_servers, volume_id):
         LOG.warn('Please delete instance "%s" first.' % exist_servers)
         return False
 
-def determine_set_volume_to_detached(attached_servers):
+def determine_set_volume_to_detached(attached_servers, interactive):
+    if not interactive:
+        return True
     while True:
         determine = raw_input('This volume was attached to instances %s, '
                               'but these servers has been deleted, do you '
