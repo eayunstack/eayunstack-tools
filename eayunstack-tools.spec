@@ -1,6 +1,6 @@
 Name:		eayunstack-tools
 Version:	1.1
-Release:	8%{?dist}
+Release:	9%{?dist}
 Summary:	EayunStack Management tools
 
 Group:		Application
@@ -78,6 +78,9 @@ fi
 
 
 %changelog
+* Tue Jun 21 2016 pq     <19921207pq@gmail.com> 1.1-9
+- commit 7ab007764b21d94b3db7cf2770f69665950e66fa
+
 * Wed Jun 8  2016 pq     <19921207pq@gmail.com> 1.1-8
 - commit 3da26e77ff8724eb22d35fd47723ca684d3afd8c 
 
