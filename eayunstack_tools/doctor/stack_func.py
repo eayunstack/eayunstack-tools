@@ -327,13 +327,17 @@ def check_nodes(node_role, check_obj, multi_role=False):
         LOG.info(res, remote=True)
 
 def check_services_list():
+    LOG.info('Checking nova & cinder service list '
+             'and neutron agent list')
     logging.disable(logging.INFO)
     pc = PythonClient()
     nova_services_list = pc.nova_services_list()
     check_services(nova_services_list)
     cinder_services_list = pc.cinder_services_list()
     check_services(cinder_services_list)
+    neutron_agents_list = pc.neutron_agents_list()
     logging.disable(logging.NOTSET)
+    check_neutron_agents(neutron_agents_list)
 
 def check_services(services_list):
     for service in services_list:
@@ -342,3 +346,32 @@ def check_services(services_list):
         if service['state'] != 'up':
             LOG.error('Service %s on %s state is %s' % (service['binary'], service['host'], service['state']))
 
+def check_neutron_agents(agents_list):
+    dhcp_agent_alive_node_number = 0
+    dhcp_agent_not_alive_node = []
+    for agent in agents_list:
+        _msg_admin_state = ('Neutron agent %s on %s admin_state_up is %s'
+                            % (agent['binary'], agent['host'],
+                               str(agent['admin_state_up'])))
+        _msg_not_alive = ('Neutron agent %s on %s is not alive'
+                          % (agent['binary'], agent['host']))
+        if not agent['admin_state_up']:
+            LOG.warn(_msg_admin_state)
+        else:
+            LOG.debug(_msg_admin_state)
+        if not agent['alive']:
+            if agent['binary'] == 'neutron-dhcp-agent':
+                LOG.debug(_msg_not_alive)
+                dhcp_agent_not_alive_node.append(agent)
+            else:
+                LOG.error(_msg_not_alive)
+        else:
+            LOG.debug('Neutron agent %s on %s is alive'
+                      % (agent['binary'], agent['host']))
+            if agent['binary'] == 'neutron-dhcp-agent':
+                dhcp_agent_alive_node_number += 1
+    # NOTE:at least one dhcp-agent is alive is ok
+    if dhcp_agent_alive_node_number < 1:
+        for agent in dhcp_agent_not_alive_node:
+            LOG.error('Neutron agent %s on %s is not alive'
+                      % (agent['binary'], agent['host']))
