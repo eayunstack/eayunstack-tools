@@ -2,7 +2,6 @@
 debug =
 bind_host =
 sql_connection =
-notification_driver =
 notification_topics =
 default_publisher_id =
 sql_max_overflow =

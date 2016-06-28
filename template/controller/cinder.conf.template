@@ -7,6 +7,7 @@ rabbit_hosts =
 rabbit_password =
 debug=
 ##
+notification_driver=cinder.openstack.common.notifier.rpc_notifier
 amqp_durable_queues=False
 kombu_reconnect_delay=5.0
 rabbit_userid=nova

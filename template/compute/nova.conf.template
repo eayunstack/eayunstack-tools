@@ -11,6 +11,8 @@ vncserver_proxyclient_address =
 rabbit_password =
 neutron_admin_password =
 ##
+notification_driver=ceilometer.compute.nova_notifier
+notification_driver=nova.openstack.common.notifier.rpc_notifier
 amqp_durable_queues=False
 rabbit_use_ssl=False
 rabbit_userid=nova

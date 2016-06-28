@@ -17,6 +17,7 @@ neutron_metadata_proxy_shared_secret =
 osapi_compute_workers=
 metadata_workers=
 ##
+notification_driver=messaging
 amqp_durable_queues=False
 rabbit_use_ssl=False
 rabbit_userid=nova

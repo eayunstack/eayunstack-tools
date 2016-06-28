@@ -9,7 +9,6 @@ novncproxy_base_url =
 vncserver_proxyclient_address =
 rabbit_password =
 neutron_admin_password =
-notification_driver =
 notification_topics =
 reclaim_instance_interval =
 [database]
