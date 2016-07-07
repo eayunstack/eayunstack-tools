@@ -114,12 +114,14 @@ def scp_connect2(hostname, local_path, remote_path,
         return success
 
 
-def ping(peer):
+def ping(peer,hostname,network_role):
     (status, out) = commands.getstatusoutput('ping -c 1 %s' % (peer))
     if status == 0:
-        LOG.debug('%s reached' % peer)
+        LOG.debug('ping %s(%s) reached --- %s network' \
+	          % (peer,hostname,network_role))
     else:
-        LOG.error('%s can not be reached!' % peer)
+        LOG.error('ping %s(%s) can not be reached --- %s network!' \
+	          % (peer,hostname,network_role))
 
 def run_command(cmd, shell=True, cwd=None):
     try:

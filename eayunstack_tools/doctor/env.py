@@ -309,7 +309,9 @@ def _network_check_remote(remote_inf):
     def _ping(peer_inf, role):
         LOG.debug('=====> start ping %s of %s(%s):' %
                   (role, peer_inf['host'], peer_inf['role']))
-        ping(peer_inf[role])
+        network_role = role.split('_')[0]
+	hostname = peer_inf['host'].split(".")[0]
+        ping(peer_inf[role],hostname,network_role)
 
     for inf in remote_inf:
         _ping(inf, 'internal_address')
