@@ -1,4 +1,5 @@
 from eayunstack_tools.utils import get_node_list
+from eayunstack_tools.utils import bytes2human
 from eayunstack_tools.sys_utils import ssh_connect2
 import commands
 import re
@@ -174,3 +175,34 @@ dict format:
         resource_list.append(resource)
     return resource_list
 
+def get_rabbitmq_queues_list():
+    queues_list = []
+    (status, out) = commands.getstatusoutput('rabbitmqctl list_queues name '
+                                             'messages memory | '
+                                             'grep -v "Listing queues ..."'
+                                             ' | grep -v "...done."')
+    if status == 0:
+        queues = out.split('\n')
+        for queue in queues:
+            queue_info = {}
+            q = queue.split('\t')
+            queue_info['name'] = q[0]
+            queue_info['messages'] = q[1]
+            queue_info['memory'] = q[2]
+            queues_list.append(queue_info)
+
+    return queues_list
+
+def check_rabbitmq_queues(except_queues=None):
+    messages_warn_limit = 100
+    # unit: Byte
+    memory_warn_limit = 1048576
+    queues_list = get_rabbitmq_queues_list()
+    for queue in queues_list:
+        if int(queue['messages']) > messages_warn_limit \
+            or int(queue['memory']) > memory_warn_limit:
+            if except_queues and queue['name'] in except_queues:
+                continue
+            (mem_size, mem_unit) = bytes2human(int(queue['memory']))
+            LOG.warn("Queue %s has %s messages and has been used %s %s memory."
+                     % (queue['name'], queue['messages'], mem_size, mem_unit))
