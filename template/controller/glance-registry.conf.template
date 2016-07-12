@@ -4,6 +4,7 @@ bind_host =
 sql_connection =
 debug=
 ##
+notification_driver=messaging
 verbose=True
 bind_port=9191
 log_file=/var/log/glance/registry.log

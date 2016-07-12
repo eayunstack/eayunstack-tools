@@ -5,7 +5,6 @@ glance_api_servers =
 osapi_volume_listen =
 rabbit_hosts =
 rabbit_password =
-notification_driver =
 notification_topics =
 enabled_backends=
 [cinder_ceph]

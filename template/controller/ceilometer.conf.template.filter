@@ -4,6 +4,7 @@ rabbit_password =
 rabbit_hosts =
 collector_workers = 
 notification_workers = 
+notification_driver = 
 [api]
 host = 
 [database]

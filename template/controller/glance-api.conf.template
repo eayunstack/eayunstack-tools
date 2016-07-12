@@ -8,6 +8,7 @@ sql_connection =
 debug =
 workers=
 ##
+notification_driver=messaging
 verbose=True
 bind_port=9292
 log_file=/var/log/glance/api.log
