@@ -52,15 +52,9 @@ def init_node_list_file():
         fqdn = node['fqdn']
         ip = node['ip']
         ips.append(ip)
-        roles = ''
-        if len(node['roles']) > 1:
-            for n in node['roles']: 
-                if not roles:
-                    roles = roles + n
-                else:
-                    roles = roles + ',' + n
-        else:
-            roles = node['roles'][0]
+        roles = ','.join(node['roles'])
+        if not roles:
+            continue
         host = fqdn.split('.')[0]
         mac = node['mac'].replace(':', '.')
         idrac_addr = get_idrac_addr(ip)
