@@ -4,6 +4,7 @@ import commands
 import re
 from eayunstack_tools.logger import StackLOG as LOG
 from eayunstack_tools.doctor.utils import run_doctor_on_nodes
+from eayunstack_tools.doctor.utils import run_doctor_cmd_on_node
 
 
 # get node list for rabbitmq cluster
@@ -111,7 +112,8 @@ def check_all_nodes(check_obj):
         if check_obj == 'ceph':
             # only need to check one node for ceph cluster
             ceph_node = node_list[0]
-            run_doctor_cmd_on_node('controller', ceph_node, check_cmd)
+            res = run_doctor_cmd_on_node('controller', ceph_node, check_cmd)
+            LOG.info(res, remote=True)
         else:
             nodes = []
             for node in node_list:
