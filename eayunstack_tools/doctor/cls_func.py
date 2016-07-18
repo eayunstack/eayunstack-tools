@@ -50,10 +50,8 @@ def get_haproxy_nodes():
 def ceph_check_health():
     def _log(func, msg):
         func('Ceph cluster check faild !')
-        # FIXME: cause the log module issue, need to send error msg line 
-        # by line
-        for l in msg.split('\n'):
-            func(l)
+        # so much messages, just log the first line
+        func(msg.splitlines()[0])
 
     (s, o) = commands.getstatusoutput('ceph health')
     if s != 0:
@@ -64,13 +62,9 @@ def ceph_check_health():
         else:
             (ss, oo) = commands.getstatusoutput('ceph health detail')
             if o.startswith('HEALTH_WARN'):
-                count = len(oo)
-                if count > 150:
-                    _log(LOG.warn, oo.splitlines()[0])
+                _log(LOG.warn, oo)
             else:
-                count = len(oo)
-                if count > 150:
-                    _log(LOG.error, oo.splitlines()[0])
+                _log(LOG.error, oo)
 
 
 # get ceph osd status
