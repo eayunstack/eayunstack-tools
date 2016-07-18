@@ -78,6 +78,9 @@ def userful_msg():
     return decorate        
 
 def run_doctor_cmd_on_node(role, node, cmd):
+    logging.disable(logging.NOTSET)
+    LOG.info('%s%s Push check cmd to %-13s (%-10s) %s%s'
+            % ('<', '='*2, node, role, '='*2, '>'))
     out, err = ssh_connect2(node, cmd, check_all=True)
     return out + err
 
@@ -88,8 +91,6 @@ def run_doctor_on_nodes(node_list, check_cmd):
     pile = eventlet.GreenPile()
     result = []
     for node in node_list:
-        LOG.info('%s%s Push check cmd to %-13s (%-10s) %s%s'
-                % ('<', '='*2, node['name'], node['role'], '='*2, '>'))
         pile.spawn(run_doctor_cmd_on_node, node['role'], node['name'], check_cmd)
     for node, res in zip(node_list, pile):
         result.append(res)
