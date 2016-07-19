@@ -28,6 +28,10 @@ class PythonClient():
         services_list = self.cinderclient.services.list()
         return self.obj2dict(services_list)
 
+    def neutron_agents_list(self):
+        agents_list = self.neutronclient.list_agents()['agents']
+        return agents_list
+
     def obj2dict(self, services_list):
         sl = []
         for service in services_list:

@@ -206,3 +206,11 @@ def get_public_vip():
     cfg = yaml.load(file('/etc/astute.yaml'))
     public_vip = cfg['public_vip']
     return public_vip
+
+def bytes2human(size):
+    units = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB']
+    index = 0
+    while size/1024 > 0:
+        size = size/1024
+        index = index + 1
+    return (size, units[index])

@@ -3,7 +3,9 @@ from eayunstack_tools.doctor import common
 from eayunstack_tools.utils import NODE_ROLE, get_controllers_hostname
 from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, ceph_check_health, get_ceph_osd_status, check_all_nodes, get_crm_resource_list, get_crm_resource_running_nodes,get_ceph_space
 from eayunstack_tools.doctor.cls_func import csv2dict
+from eayunstack_tools.doctor.cls_func import check_rabbitmq_queues
 from eayunstack_tools.utils import get_public_vip
+from eayunstack_tools.pythonclient import PythonClient
 import logging
 import urllib
 
@@ -14,6 +16,8 @@ def cls(parser):
         check_all()
     if parser.CLUSTER_NAME == 'rabbitmq':
         check_rabbitmq()
+    if parser.CLUSTER_NAME == 'rabbitmqqueues':
+        check_rabbitmqqueues()
     if parser.CLUSTER_NAME == 'mysql':
         check_mysql()
     if parser.CLUSTER_NAME == 'haproxy':
@@ -32,7 +36,8 @@ def make(parser):
     parser.add_argument(
         '-n',
         dest='CLUSTER_NAME',
-        choices=['mysql','rabbitmq','ceph','haproxy','pacemaker','cephspace','haproxyresource'],
+        choices=['mysql','rabbitmq','rabbitmqqueues','ceph','haproxy',
+                 'pacemaker','cephspace','haproxyresource'],
         help='Cluster Name',
     )
     common.add_common_opt(parser)
@@ -49,6 +54,7 @@ def check_all():
         check_all_nodes('all')
     else:
         check_rabbitmq()
+        check_rabbitmqqueues()
         check_mysql()
         check_haproxy()
         check_ceph()
@@ -87,6 +93,31 @@ def check_rabbitmq():
         LOG.error('Rabbitmq cluster check faild !')
     else:
         LOG.info('Rabbitmq cluster check successfully !')
+
+def check_rabbitmqqueues():
+    # node role check
+    if not NODE_ROLE.is_fuel():
+        if not NODE_ROLE.is_controller():
+            LOG.warn('This command can only run on fuel or controller node !')
+            return
+    if NODE_ROLE.is_fuel():
+        check_all_nodes('rabbitmqqueues')
+        return
+    LOG.info('%s%s Checking rabbitmq queues status' %('='*5, '>'))
+
+    # NOTE:
+    # When neutron dhcp agent is dead, the queues belonging to the agent
+    # has not been removed. We need to ignore these queues.
+    except_queues = []
+    logging.disable(logging.INFO)
+    pc = PythonClient()
+    neutron_agents_list = pc.neutron_agents_list()
+    logging.disable(logging.NOTSET)
+    for agent in neutron_agents_list:
+        if agent['binary'] == 'neutron-dhcp-agent' and not agent['alive']:
+            except_queues.append('dhcp_agent.%s' % agent['host'])
+
+    check_rabbitmq_queues(except_queues)
 
 def check_mysql():
     # node role check
