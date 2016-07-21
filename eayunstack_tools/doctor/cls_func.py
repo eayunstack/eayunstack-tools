@@ -1,3 +1,4 @@
+import xmltodict
 from eayunstack_tools.utils import get_node_list
 from eayunstack_tools.utils import bytes2human
 from eayunstack_tools.sys_utils import ssh_connect2
@@ -6,7 +7,6 @@ import re
 from eayunstack_tools.logger import StackLOG as LOG
 from eayunstack_tools.doctor.utils import run_doctor_on_nodes
 from eayunstack_tools.doctor.utils import run_doctor_cmd_on_node
-
 
 # get node list for rabbitmq cluster
 def get_rabbitmq_nodes():
@@ -202,3 +202,35 @@ def check_rabbitmq_queues(except_queues=None):
             (mem_size, mem_unit) = bytes2human(int(queue['memory']))
             LOG.warn("Queue %s has %s messages and has been used %s %s memory."
                      % (queue['name'], queue['messages'], mem_size, mem_unit))
+
+def check_pcs_resource_managed_status(check_resource=None):
+    (status, out) = commands.getstatusoutput('crm_mon -X')
+
+    if status != 0:
+        LOG.error('Can not get pcs resource status by "crm_mon -X".')
+        return
+    outtodict = xmltodict.parse(out)
+    resources = outtodict['crm_mon']['resources']
+
+    for resource in resources['resource']:
+        if check_resource:
+            if resource['@id'] == check_resource:
+                _check_managed_status(resource)
+        else:
+            _check_managed_status(resource)
+
+    for clone_resource in resources['clone']:
+        for resource in clone_resource['resource']:
+            if check_resource:
+                if resource['@id'] == check_resource:
+                    _check_managed_status(resource)
+            else:
+                _check_managed_status(resource)
+
+def _check_managed_status(resource):
+    if resource['@managed'] == 'true':
+        LOG.info('Resource %s was managed on node %s' \
+                 % (resource['@id'], resource['node']['@name']))
+    else:
+        LOG.error('Resource %s was unmanaged on node %s' \
+                  % (resource['@id'], resource['node']['@name']))

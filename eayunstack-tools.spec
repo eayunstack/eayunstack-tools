@@ -24,6 +24,7 @@ Requires:	python-cinderclient
 Requires:	python-neutronclient
 Requires:       python-pymongo
 Requires:	ssmtp
+Requires:	python-xmltodict
 
 %description
 EayunStack Management Tools

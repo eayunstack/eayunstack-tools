@@ -4,6 +4,7 @@ from eayunstack_tools.utils import NODE_ROLE, get_controllers_hostname
 from eayunstack_tools.doctor.cls_func import get_rabbitmq_nodes, get_mysql_nodes, get_haproxy_nodes, ceph_check_health, get_ceph_osd_status, check_all_nodes, get_crm_resource_list, get_crm_resource_running_nodes,get_ceph_space
 from eayunstack_tools.doctor.cls_func import csv2dict
 from eayunstack_tools.doctor.cls_func import check_rabbitmq_queues
+from eayunstack_tools.doctor.cls_func import check_pcs_resource_managed_status
 from eayunstack_tools.utils import get_public_vip
 from eayunstack_tools.pythonclient import PythonClient
 import logging
@@ -93,6 +94,9 @@ def check_rabbitmq():
         LOG.error('Rabbitmq cluster check faild !')
     else:
         LOG.info('Rabbitmq cluster check successfully !')
+
+    LOG.info('%s%s Checking rabbitmq managed status' %('='*5, '>'))
+    check_pcs_resource_managed_status('p_rabbitmq-server')
 
 def check_rabbitmqqueues():
     # node role check
@@ -238,6 +242,8 @@ def check_pacemaker():
         return
     LOG.info('%s%s Checking pacemaker resource status' %('='*5, '>'))
     check_crm_resource_status()
+    LOG.info('%s%s Checking pacemaker resource managed status' %('='*5, '>'))
+    check_pcs_resource_managed_status()
 
 def check_crm_resource_status():
     controllers = get_controllers_hostname()
