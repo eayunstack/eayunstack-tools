@@ -56,12 +56,12 @@ compute_scheduler_driver=nova.scheduler.filter_scheduler.FilterScheduler
 neutron_auth_strategy=keystone
 neutron_ovs_bridge=br-int
 neutron_admin_tenant_name=services
-cinder_catalog_info=volume:cinder:internalURL
 neutron_admin_username=neutron
 connection_type=libvirt
 [baremetal]
 [cells]
 [cinder]
+catalog_info = volumev2:cinderv2:internalURL
 [conductor]
 [ephemeral_storage_encryption]
 [glance]
