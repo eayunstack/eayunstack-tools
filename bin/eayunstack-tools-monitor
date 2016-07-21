@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# exit code:
+#
+# 2 -- Run this script besides of fuel node.
+# 3 -- Didn't set MailTo param in profile.
+# 4 -- SSMTP configuration check failed.
+
+export HOME=/root
+
+PROFILE='/etc/eayunstack/eayunstack-tools-monitor.conf'
+SSMTP_PROFILE='/etc/ssmtp/ssmtp.conf'
+DEFAULT_INTERVAL=300
+
+
+# read config from profile
+function read_conf(){
+    while read line;do
+        eval "$line"
+    done < $PROFILE
+}
+
+# read ssmtp config from profile
+function read_ssmtp_conf(){
+    while read line;do
+        eval "$line"
+    done < $SSMTP_PROFILE
+    
+    if ! `grep -q fuel /.eayunstack/node-role`;then
+        echo "This daemon can only be run on Fuel node"
+        exit 2
+    fi
+}
+
+function check_tools_monitor_conf(){
+    # if MailTo has not been setted in profile, exit
+    if [ -z $MailTo ];then
+        echo "Please set MailTo in $PROFILE"
+        exit 3
+    fi
+    
+    # if Interval has not been setted in profile, use default value
+    if [ -z $Interval ];then
+        Interval=$DEFAULT_INTERVAL
+    fi
+}
+
+# check ssmtp configuration
+function check_ssmtp_conf(){
+    for key in 'mailhub' 'FromLineOverride' 'AuthUser' 'AuthPass' \
+    'FromLineOverride' 'root' 'hostname' 'rewriteDomain' 'AuthMethod';
+    do
+        if [ -z ${!key} ];then
+            echo "Please set $key in $SSMTP_PROFILE"
+            exit 4
+        fi
+    done
+}
+
+function send_test_email(){
+    DATETIME=`date -R`
+    ENV_NAME=`grep env_name /.eayunstack/.env.yaml | cut -d : -f 2 | sed 's/^ //'`
+    cat << EOF > /tmp/test_email
+"Date: ${DATETIME}
+From: eayunstack <eayunstack@163.com>
+To: ${MailTo}
+Subject: mail from: eayunstack
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 8bit
+
+Hi, maintainers:
+
+  This is a test message from "${ENV_NAME}" environment. If you receive this message, that means the monitoring service has been started.
+
+EOF
+    ssmtp -t < /tmp/test_email
+}
+
+read_conf
+read_ssmtp_conf
+check_tools_monitor_conf
+check_ssmtp_conf
+send_test_email
+
+while true
+do
+    /usr/bin/eayunstack -e $MailTo doctor all &>> /dev/null
+    sleep $Interval
+done
+
