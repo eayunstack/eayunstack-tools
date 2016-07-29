@@ -41,7 +41,13 @@ CFLAGS="$RPM_OPT_FLAGS" %{__python2} setup.py build
 rm -rf %{buildroot}
 %{__python2} setup.py install --skip-build --root %{buildroot}
 mkdir -p %{buildroot}/.eayunstack/
+mkdir -p %{buildroot}/etc/eayunstack/
+mkdir -p %{buildroot}/etc/systemd/system/
+mkdir -p %{buildroot}/usr/local/bin/
 cp -r template %{buildroot}/.eayunstack/
+install -p -D -m 755 eayunstack-tools-monitor.service %{buildroot}%{_unitdir}/eayunstack-tools-monitor.service
+cp etc/eayunstack-tools-monitor.conf %{buildroot}/etc/eayunstack/
+cp bin/eayunstack-tools-monitor %{buildroot}/usr/local/bin/
 
 %post
 if [ "$1" = "1" ]; then
@@ -74,6 +80,10 @@ fi
 %files
 %doc
 %attr(0750,root,root)/.eayunstack
+%attr(0755,root,root)/etc/eayunstack
+%{_unitdir}/eayunstack-tools-monitor.service
+%attr(0644,root,root)/etc/eayunstack/eayunstack-tools-monitor.conf
+%attr(0755,root,root)/usr/local/bin/eayunstack-tools-monitor
 /usr/bin/eayunstack
 /usr/lib/python2.7/site-packages/
 

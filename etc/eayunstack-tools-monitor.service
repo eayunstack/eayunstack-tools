@@ -1,0 +1,11 @@
+[Unit]
+Description=EayunStack Tools Monitor Service
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/eayunstack-tools-monitor
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
