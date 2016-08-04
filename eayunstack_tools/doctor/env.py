@@ -187,6 +187,35 @@ def check_selinux():
         LOG.error('SELinux configuration in profile need to be %s '
                   % correct_conf)
 
+@userful_msg()
+@register
+def check_daemon():
+    error_memory = 50.0
+    warn_memory = 30.0
+    (status,info) = commands.getstatusoutput('ps aux|sort -rn -k4|head -3')
+    if status == 0:
+        daemons = info.split("\n")
+        for daemon in daemons[:3]:
+            message = ' '.join(filter(lambda x: x, daemon.split(' ')))
+            pid = message.split(' ')[1]
+            max_memory = float(message.split(' ')[3])
+            if max_memory > warn_memory:
+                if max_memory <= error_memory:
+                    warn_info = ('the memory of %s(pid) usage %.1f%% '
+                                 'more than %.1f%% and less than %.1f%%!'
+                                 % (pid,
+                                    max_memory,
+                                    warn_memory,
+                                    error_memory))
+                    LOG.warn(warn_info)
+                else:
+                    error_info = ('the memory of %s(pid) usage %.1f%% '
+                                  'more than %.1f%%!'
+                                  % (pid, max_memory, error_memory))
+                    LOG.error(error_info)
+            else:
+                LOG.debug('the memory of %s(pid) usage %.1f%%'
+                          % (pid, max_memory))
 
 @userful_msg()
 @register
