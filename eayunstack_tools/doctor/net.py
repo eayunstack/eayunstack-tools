@@ -61,6 +61,14 @@ def vrouter_get_gw_remote(l3_host, rid):
     else:
         return None
 
+def vrouter_get_gw_interface(l3_host, rid):
+    cmd = "ip netns exec qrouter-%s ip route show | "\
+          "grep 'default' | awk '{print $5}'" % (rid)
+    out, err = ssh_connect(l3_host, cmd)
+    if not err:
+        return out.strip('\n')
+    else:
+        return None
 
 # Some fuck juno deploy doest not support json format of port-show message
 def port_result_to_json(out, fmt='json'):
@@ -115,10 +123,12 @@ def port_check_one(pid, l3_host=None):
                      % (device_owner, pid, l3_host))
 
         # 2) ping external gateway to check network status
+        #    and check external interface qos
         LOG.debug('check gateway for port on %s' % (l3_host))
         if device_owner == 'network:router_gateway':
             LOG.debug('this port is external port, check external gateway')
             gw = vrouter_get_gw_remote(l3_host, rid)
+            interface = vrouter_get_gw_interface(l3_host, rid)
             if gw:
                 LOG.debug("check external gateway %s on %s" % (gw, l3_host))
                 cmd = "ip netns exec qrouter-%s ping -c 1 %s" % (rid, gw)
@@ -126,12 +136,29 @@ def port_check_one(pid, l3_host=None):
                 if not err:
                     LOG.debug("external gateway is ok")
                 else:
-                    LOG.error("failed to connect external gateway on %s" % (l3_host))
+                    LOG.error("failed to connect external gateway on %s"
+                              % (l3_host))
+                if interface:
+                    LOG.debug("check external interface %s qos on %s"
+                              % (interface, l3_host))
+                    cmd = ("ip netns exec qrouter-%s tc qdisc show dev %s"
+                           % (rid, interface))
+                    out, err = ssh_connect(l3_host, cmd)
+                    if out:
+                        LOG.debug("qos was found on external interface"
+                                  " %s of qrouter-%s on %s"
+                                  % (interface, rid, l3_host))
+                    else:
+                        LOG.error("qos was not found on external interface"
+                                  " %s of qrouter-%s on %s"
+                                  % (interface, rid, l3_host))
+                else:
+                    LOG.error("failed to get external interface of"
+                              " qrouter-%s on %s" % (rid, l3_host))
             else:
                 LOG.error("failed to get external gateway on %s" % (l3_host))
         else:
             LOG.debug('this port is normal port, do not need to check gateway')
-
 
 def vrouter_check_one(rid):
     cmd = 'neutron router-port-list %s -f csv -F id -F name' % (rid)
