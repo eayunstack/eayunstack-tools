@@ -255,7 +255,7 @@ def get_check_cmd():
     if LOG.enable_debug:
         check_cmd = main_cmd + ' --debug ' + sub_cmd
     else:
-        check_cmd = main_cmd + sub_cmd
+        check_cmd = main_cmd + ' ' + sub_cmd
     return check_cmd
 
 
