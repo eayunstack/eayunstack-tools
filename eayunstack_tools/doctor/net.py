@@ -87,10 +87,10 @@ def port_check_one(pid, l3_host=None):
 
         # 1) check status of gateway port and interface port
         if detail['status'] != 'ACTIVE':
-            port_log(device_owner, "status of port %s[%s] on %s is down"
+            port_log(device_owner, "status of port %s(%s) on %s is down"
                      % (device_owner, pid, l3_host))
         if not detail['admin_state_up']:
-            port_log(device_owner, "admin_status of port %s[%s] on %s is down"
+            port_log(device_owner, "admin_status of port %s(%s) on %s is down"
                      % (device_owner, pid, l3_host))
 
         # 2) ping external gateway to check network status
@@ -140,9 +140,9 @@ def vrouter_check_one(rid):
     l3_host = vrouter_get_l3_host(rid)
     if l3_host:
         for port in ports:
-            LOG.debug('start checking port %s[%s]' % (port['name'], port['id']))
+            LOG.debug('start checking port %s(%s)' % (port['name'], port['id']))
             port_check_one(port['id'], l3_host)
-            LOG.debug('finish checking port %s[%s]' % (port['name'], port['id']))
+            LOG.debug('finish checking port %s(%s)' % (port['name'], port['id']))
     # TODO: check dhcp?
 
 
@@ -176,9 +176,9 @@ def _vrouter_check(parser):
         #    is done on neutron node which namespace belong to.
         # tenant ID
         for router in routers:
-            LOG.info('start checking route %s[%s]' % (router['name'], router['id']))
+            LOG.info('start checking route %s(%s)' % (router['name'], router['id']))
             vrouter_check_one(router['id'])
-            LOG.info('finish checking route %s[%s]' % (router['name'], router['id']))
+            LOG.info('finish checking route %s(%s)' % (router['name'], router['id']))
 
 
 def vrouter_check(parser):
