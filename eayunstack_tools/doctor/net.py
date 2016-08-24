@@ -4,6 +4,7 @@ from eayunstack_tools.utils import NODE_ROLE
 from eayunstack_tools.sys_utils import ssh_connect, ssh_connect2
 from eayunstack_tools.utils import get_controllers_hostname
 from eayunstack_tools.doctor.utils import run_doctor_cmd_on_node
+from eayunstack_tools.pythonclient import PythonClient
 import logging
 import commands
 import json
@@ -21,39 +22,6 @@ def run_command(cmd):
     else:
         reval = out
     return reval
-
-
-# FIXME: some neutronclient does not support json output, hack it
-def csv2dict(csv):
-    """Convert result format from csv to dict:
-csv format:
-"id","name","mac_address"
-"596afd3e-b60a-41f5-97c3-39495979e6d8","","fa:16:3e:3a:ee:97"
-"70cb55cd-d5cb-4c12-8ad2-8edf18c2fa94","","fa:16:3e:f7:e9:8c"
-
-dict format:
-[{"id": "596afd3e", "name": "", "mac_address": "fa:16:3e:3a:ee:97"},
-{"id": "70cb55cd", "name": "", "mac_address": "fa:16:3e:f7:e9:8c"}]
-    """
-    field = csv.split('\n')[0]
-    p = re.compile(r'"(.*)"')
-    column = []
-    for i in field.split(','):
-        column.append(p.match(i).groups()[0])
-    routers = []
-    out = csv.split('\n')[1:]
-    for r in out:
-        router = {}
-        r = r.split(',')
-        index = 0
-        for index in range(len(column)):
-            try:
-                router[column[index]] = p.match(r[index]).groups()[0]
-            except AttributeError:
-                router[column[index]] = r[index]
-        routers.append(router)
-    return routers
-
 
 def vrouter_get_gw_remote(l3_host, rid):
     cmd = "ip netns exec qrouter-%s ip route show | "\
@@ -164,11 +132,10 @@ def port_check_one(pid, l3_host=None):
             LOG.debug('this port is normal port, do not need to check gateway')
 
 def vrouter_check_one(rid):
-    cmd = 'neutron router-port-list %s -f csv -F id -F name' % (rid)
-    out = run_command(cmd)
-    ports = []
-    if out:
-        ports = csv2dict(out)
+    logging.disable(logging.INFO)
+    pc = PythonClient()
+    ports = pc.neutron_router_port_list(rid)
+    logging.disable(logging.NOTSET)
 
     l3_host = vrouter_get_l3_host(rid)
     if l3_host:
@@ -180,11 +147,12 @@ def vrouter_check_one(rid):
 
 
 def vrouter_get_l3_host(rid):
-    cmd = "neutron l3-agent-list-hosting-router -f csv %s" \
-          % (rid)
-    out = run_command(cmd).strip('\r\n')
-    if out:
-        hosts = csv2dict(out)
+    logging.disable(logging.INFO)
+    pc = PythonClient()
+    hosts = pc.neutron_l3_agent_list_hosting_router(rid)
+    logging.disable(logging.NOTSET)
+
+    if hosts:
         return hosts[0]['host']
     else:
         LOG.error('can not get l3 host for router %s' % (rid))
@@ -198,13 +166,11 @@ def _vrouter_check(parser):
         vrouter_check_one(parser.rid)
     else:
         # 1) Get valid routers list
-        cmd = 'neutron router-list -f csv -F id -F name'
-        if parser.tid:
-            cmd += ' --tenant-id %s' % (parser.tid)
-        out = run_command(cmd)
-        routers = []
-        if out:
-            routers = csv2dict(out)
+        tenant_id = parser.tid
+        logging.disable(logging.INFO)
+        pc = PythonClient()
+        routers = pc.neutron_router_list(tenant_id)
+        logging.disable(logging.NOTSET)
 
         # 2) Check every router one by one: .e.g. status, ip address ..., this
         #    is done on neutron node which namespace belong to.

@@ -62,6 +62,25 @@ class PythonClient():
     def neutron_delete_port(self, port_id):
         self.neutronclient.delete_port(port_id)
 
+    def neutron_router_list(self, tenant_id=None):
+        if tenant_id:
+            router_list = \
+                self.neutronclient.list_routers(tenant_id=tenant_id)['routers']
+        else:
+            router_list = self.neutronclient.list_routers()['routers']
+        return router_list
+
+    def neutron_router_port_list(self, router_id):
+        router_port_list = \
+            self.neutronclient.list_ports(device_id=router_id)['ports']
+        return router_port_list
+
+    def neutron_l3_agent_list_hosting_router(self, router_id):
+        l3_agent_list_hosting_router = \
+            self.neutronclient.list_l3_agent_hosting_routers(
+                router_id)['agents']
+        return l3_agent_list_hosting_router
+
     def nova_flavor(self, flavor_id):
         flavor = self.novaclient.flavors.get(flavor_id)
         return flavor
